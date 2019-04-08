@@ -98,7 +98,7 @@ exports = module.exports = __webpack_require__(/*! ../../node_modules/css-loader
 
 
 // module
-exports.push([module.i, ".container-panel {\n    width: 100%;\n    height: 100%;\n}\n\n#graph-panel {\n    height: 100%;\n    width: 100%;\n    position: absolute;\n    left: 0;\n    top: 0;\n}", "", {"version":3,"sources":["/Users/patrickvogel/git/dAdvisor/clock-panel/src/css/container-panel.css"],"names":[],"mappings":"AAAA;IACI,YAAY;IACZ,aAAa;CAChB;;AAED;IACI,aAAa;IACb,YAAY;IACZ,mBAAmB;IACnB,QAAQ;IACR,OAAO;CACV","file":"container-panel.css","sourcesContent":[".container-panel {\n    width: 100%;\n    height: 100%;\n}\n\n#graph-panel {\n    height: 100%;\n    width: 100%;\n    position: absolute;\n    left: 0;\n    top: 0;\n}"],"sourceRoot":""}]);
+exports.push([module.i, ".container-panel {\n    width: 100%;\n    height: 100%;\n}\n\n#graph-panel {\n    height: 100%;\n    width: 100%;\n    position: absolute;\n    left: 0;\n    top: 0;\n}", "", {"version":3,"sources":["/Users/patrickvogel/git/dAdvisor/containers-panel/src/css/container-panel.css"],"names":[],"mappings":"AAAA;IACI,YAAY;IACZ,aAAa;CAChB;;AAED;IACI,aAAa;IACb,YAAY;IACZ,mBAAmB;IACnB,QAAQ;IACR,OAAO;CACV","file":"container-panel.css","sourcesContent":[".container-panel {\n    width: 100%;\n    height: 100%;\n}\n\n#graph-panel {\n    height: 100%;\n    width: 100%;\n    position: absolute;\n    left: 0;\n    top: 0;\n}"],"sourceRoot":""}]);
 
 // exports
 
@@ -53706,96 +53706,64 @@ function (_super) {
 
   ContainerCtrl.prototype.updateGraph = function () {
     var panel = document.getElementById('graph-panel');
-    console.log(panel);
 
     if (!panel) {
       return;
     }
 
-    (0, _cytoscape2.default)({
-      container: panel,
-      style: [{
-        selector: 'node',
-        css: {
-          'content': 'data(name)',
-          'text-valign': 'center',
-          'text-halign': 'center'
-        }
-      }, {
-        selector: '$node > node',
-        css: {
-          'padding-top': '10px',
-          'padding-left': '10px',
-          'padding-bottom': '10px',
-          'padding-right': '10px',
-          'text-valign': 'top',
-          'text-halign': 'center'
-        }
-      }, {
-        selector: 'edge',
-        css: {
-          'curve-style': 'bezier',
-          'target-arrow-shape': 'triangle',
-          'width': 'data(width)',
-          'label': function label(ele) {
-            return bytesToSize(parseInt(ele.data('bytes')));
+    function add_width(data) {
+      var max_width = Math.max(data['edges'].map(function (r) {
+        return r['data']['bytes'];
+      }));
+      console.log(max_width);
+      return data;
+    }
+
+    $.getJSON('http://localhost:8800/data', function (data) {
+      (0, _cytoscape2.default)({
+        container: panel,
+        style: [{
+          selector: 'node',
+          css: {
+            'content': 'data(name)',
+            'text-valign': 'center',
+            'text-halign': 'center'
           }
+        }, {
+          selector: '$node > node',
+          css: {
+            'padding-top': '10px',
+            'padding-left': '10px',
+            'padding-bottom': '10px',
+            'padding-right': '10px',
+            'text-valign': 'top',
+            'text-halign': 'center'
+          }
+        }, {
+          selector: 'edge',
+          css: {
+            'curve-style': 'bezier',
+            'target-arrow-shape': 'triangle',
+            'width': 'data(width)',
+            'label': function label(ele) {
+              return bytesToSize(parseInt(ele.data('bytes')));
+            }
+          }
+        }],
+        elements: add_width(data),
+        layout: {
+          name: 'dagre',
+          rankDir: 'LR',
+          padding: 50,
+          nodeSep: 40,
+          rankSep: 150,
+          fit: true
         }
-      }],
-      elements: ContainerCtrl.data,
-      layout: {
-        name: 'dagre',
-        rankDir: 'LR',
-        padding: 50,
-        nodeSep: 40,
-        rankSep: 150,
-        fit: true
-      }
+      });
     });
   };
 
   ContainerCtrl.templateUrl = './partials/module.html';
-  ContainerCtrl.data = {
-    "edges": [{
-      "data": {
-        "source": 2,
-        "target": 3,
-        "bytes": 100,
-        "width": 10
-      }
-    }, {
-      "data": {
-        "source": 3,
-        "target": 2,
-        "bytes": 20,
-        "width": 2
-      }
-    }],
-    "nodes": [{
-      "data": {
-        "id": "1",
-        "name": "1"
-      }
-    }, {
-      "data": {
-        "id": "1d",
-        "name": "d",
-        "parent": "1"
-      }
-    }, {
-      "data": {
-        "id": "2",
-        "name": "2",
-        "parent": "1d"
-      }
-    }, {
-      "data": {
-        "id": "3",
-        "name": "3",
-        "parent": "1d"
-      }
-    }]
-  };
   return ContainerCtrl;
 }(_sdk.PanelCtrl);
 

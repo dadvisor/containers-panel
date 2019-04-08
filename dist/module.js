@@ -53701,7 +53701,10 @@ function (_super) {
         values: true
       },
       links: [],
-      datasource: null
+      datasource: null,
+      targets: [{}],
+      interval: null,
+      valueName: 'current'
     };
 
     _this.events.on('panel-initialized', _this.render.bind(_this));

@@ -27,6 +27,9 @@ export class ContainerCtrl extends PanelCtrl {
             },
             links: [],
             datasource: null,
+            targets: [{}],
+            interval: null,
+            valueName: 'current',
         };
 
         this.events.on('panel-initialized', this.render.bind(this));

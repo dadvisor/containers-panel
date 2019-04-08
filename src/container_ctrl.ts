@@ -43,7 +43,7 @@ export class ContainerCtrl extends PanelCtrl {
         this.updateGraph();
     }
 
-    onDataReceived(dataList){
+    onDataReceived(dataList) {
         console.log("data received" + dataList);
         this.render()
     }
@@ -66,57 +66,53 @@ export class ContainerCtrl extends PanelCtrl {
             return data;
         }
 
-        $.ajax({
-            dataType: "json",
-            crossDomain: true,
-            url: 'http://localhost:8800/data',
-            success: function (data) {
-                cytoscape({
-                    container: panel,
-                    style: [
-                        {
-                            selector: 'node',
-                            css: {
-                                'content': 'data(name)',
-                                'text-valign': 'center',
-                                'text-halign': 'center'
-                            }
-                        },
-                        {
-                            selector: '$node > node',
-                            css: {
-                                'padding-top': '10px',
-                                'padding-left': '10px',
-                                'padding-bottom': '10px',
-                                'padding-right': '10px',
-                                'text-valign': 'top',
-                                'text-halign': 'center'
-                            }
-                        },
-                        {
-                            selector: 'edge',
-                            css: {
-                                'curve-style': 'bezier',
-                                'target-arrow-shape': 'triangle',
-                                'width': 'data(width)',
-                                'label': function (ele) {
-                                    return bytesToSize(parseInt(ele.data('bytes')));
-                                }
+        var f = function (data) {
+            cytoscape({
+                container: panel,
+                style: [
+                    {
+                        selector: 'node',
+                        css: {
+                            'content': 'data(name)',
+                            'text-valign': 'center',
+                            'text-halign': 'center'
+                        }
+                    },
+                    {
+                        selector: '$node > node',
+                        css: {
+                            'padding-top': '10px',
+                            'padding-left': '10px',
+                            'padding-bottom': '10px',
+                            'padding-right': '10px',
+                            'text-valign': 'top',
+                            'text-halign': 'center'
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        css: {
+                            'curve-style': 'bezier',
+                            'target-arrow-shape': 'triangle',
+                            'width': 'data(width)',
+                            'label': function (ele) {
+                                return bytesToSize(parseInt(ele.data('bytes')));
                             }
                         }
-                    ],
-
-                    elements: add_width(data),
-                    layout: {
-                        name: 'dagre',
-                        rankDir: 'LR',
-                        padding: 50,
-                        nodeSep: 40,
-                        rankSep: 150,
-                        fit: true
                     }
-                });
-            }
-        });
+                ],
+
+                elements: add_width(data),
+                layout: {
+                    name: 'dagre',
+                    rankDir: 'LR',
+                    padding: 50,
+                    nodeSep: 40,
+                    rankSep: 150,
+                    fit: true
+                }
+            });
+        };
+        console.log(f);
     }
 }

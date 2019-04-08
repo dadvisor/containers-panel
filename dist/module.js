@@ -53803,7 +53803,7 @@ function (_super) {
 
   ContainerCtrl.templateUrl = './partials/module.html';
   return ContainerCtrl;
-}(_sdk.PanelCtrl);
+}(_sdk.MetricsPanelCtrl);
 
 exports.ContainerCtrl = ContainerCtrl;
 

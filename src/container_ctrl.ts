@@ -1,4 +1,4 @@
-import {PanelCtrl} from 'grafana/app/plugins/sdk';
+import {MetricsPanelCtrl} from 'grafana/app/plugins/sdk';
 import './css/container-panel.css';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
@@ -13,7 +13,7 @@ function bytesToSize(bytes: number) {
     return `${Math.round(bytes / Math.pow(1024, i))} ${sizes[i]}`;
 }
 
-export class ContainerCtrl extends PanelCtrl {
+export class ContainerCtrl extends MetricsPanelCtrl {
     static templateUrl = './partials/module.html';
 
     /** @ngInject */

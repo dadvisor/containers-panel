@@ -1,4 +1,4 @@
-define(["app/plugins/sdk"], function(__WEBPACK_EXTERNAL_MODULE_grafana_app_plugins_sdk__) { return /******/ (function(modules) { // webpackBootstrap
+define(["app/plugins/sdk","lodash"], function(__WEBPACK_EXTERNAL_MODULE_grafana_app_plugins_sdk__, __WEBPACK_EXTERNAL_MODULE_lodash__) { return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -53644,6 +53644,10 @@ var _cytoscapeDagre = __webpack_require__(/*! cytoscape-dagre */ "../node_module
 
 var _cytoscapeDagre2 = _interopRequireDefault(_cytoscapeDagre);
 
+var _lodash = __webpack_require__(/*! lodash */ "lodash");
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var __extends = undefined && undefined.__extends || function () {
@@ -53691,6 +53695,15 @@ function (_super) {
   function ContainerCtrl($scope, $injector) {
     var _this = _super.call(this, $scope, $injector) || this;
 
+    var panelDefaults = {
+      legend: {
+        show: true,
+        values: true
+      },
+      links: [],
+      datasource: null
+    };
+
     _this.events.on('panel-initialized', _this.render.bind(_this));
 
     _this.events.on('component-did-mount', _this.render.bind(_this));
@@ -53704,6 +53717,10 @@ function (_super) {
     _this.events.on('data-snapshot-load', _this.onDataReceived.bind(_this));
 
     _this.events.on('render', _this.updateGraph.bind(_this));
+
+    _lodash2.default.defaults(_this.panel, panelDefaults);
+
+    _lodash2.default.defaults(_this.panel.legend, panelDefaults.legend);
 
     _this.updateGraph();
 
@@ -53851,6 +53868,17 @@ exports.PanelCtrl = _container_ctrl.ContainerCtrl;
 /***/ (function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE_grafana_app_plugins_sdk__;
+
+/***/ }),
+
+/***/ "lodash":
+/*!*************************!*\
+  !*** external "lodash" ***!
+  \*************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_lodash__;
 
 /***/ })
 

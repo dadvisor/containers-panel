@@ -2,6 +2,7 @@ import {PanelCtrl} from 'grafana/app/plugins/sdk';
 import './css/container-panel.css';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
+import _ from "lodash";
 
 cytoscape.use(dagre);
 
@@ -18,6 +19,16 @@ export class ContainerCtrl extends PanelCtrl {
     /** @ngInject */
     constructor($scope, $injector) {
         super($scope, $injector);
+
+        var panelDefaults = {
+            legend: {
+                show: true, // disable/enable legend
+                values: true
+            },
+            links: [],
+            datasource: null,
+        };
+
         this.events.on('panel-initialized', this.render.bind(this));
         this.events.on('component-did-mount', this.render.bind(this));
         this.events.on('refresh', this.updateGraph.bind(this));
@@ -27,6 +38,8 @@ export class ContainerCtrl extends PanelCtrl {
 
         this.events.on('render', this.updateGraph.bind(this));
 
+        _.defaults(this.panel, panelDefaults);
+        _.defaults(this.panel.legend, panelDefaults.legend);
         this.updateGraph();
     }
 

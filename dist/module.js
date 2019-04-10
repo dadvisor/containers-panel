@@ -53772,7 +53772,6 @@ function (_super) {
       obj[key] = value;
     }
 
-    console.log(obj);
     return obj;
   };
 

@@ -55,7 +55,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
             if (dataObj.target.startsWith("container")) {
                 this.containers.push(ContainerCtrl.decode(dataObj.target));
             } else if (dataObj.target.startsWith("bytes_send")) {
-                let obj = ContainerCtrl.decode(dataObj.target)
+                let obj = ContainerCtrl.decode(dataObj.target);
                 obj['src'] = obj['src'].substr(3);
                 obj['dst'] = obj['dst'].substr(3);
                 this.edges.push()
@@ -83,7 +83,6 @@ export class ContainerCtrl extends MetricsPanelCtrl {
             value = value.substr(1, value.length - 2);
             obj[key] = value;
         }
-        console.log(obj);
         return obj;
     }
 

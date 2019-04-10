@@ -57,6 +57,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 let newObj = {};
                 newObj['source'] = obj['src'].substr(3);
                 newObj['target'] = obj['dst'].substr(3);
+                console.log(dataObj.datapoints);
                 newObj['bytes'] = dataObj.datapoints[dataObj.datapoints.length - 1];
                 console.log(newObj);
                 this.edges.push(newObj)
@@ -93,16 +94,6 @@ export class ContainerCtrl extends MetricsPanelCtrl {
         const panel = document.getElementById('graph-panel');
         if (!panel) {
             return
-        }
-
-        function add_width(data: Object) {
-            const max_width = Math.max(data['edges'].map(r => r['data']['bytes']));
-            console.log(max_width);
-            for (let i in data['edges']) {
-                let edge = data['edges'][i];
-                edge['width'] = 10;
-            }
-            return data;
         }
 
         let data = {
@@ -146,7 +137,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 }
             ],
 
-            elements: add_width(data),
+            elements: data,
             layout: {
                 name: 'dagre',
                 rankDir: 'LR',
@@ -187,7 +178,21 @@ export class ContainerCtrl extends MetricsPanelCtrl {
     }
 
     private get_edges() {
-        return this.edges.map(item => {return {data: item}});
+        let edges = ContainerCtrl.add_width(this.edges);
+        return edges.map(item => {return {data: item}});
 
+    }
+    private static add_width(edges: Object[]) {
+        // @ts-ignore
+        const max_width = Math.max(edges.map(r => r['bytes']));
+        console.log('max width: ' + max_width);
+        for (let edge of edges){
+            edge['width'] = 10;
+        }
+        // for (let i in edges]) {
+        //     let edge = edges[i];
+        //     edge['width'] = 10;
+        // }
+        return edges;
     }
 }

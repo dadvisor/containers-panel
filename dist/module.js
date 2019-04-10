@@ -53731,7 +53731,8 @@ function (_super) {
   }
 
   ContainerCtrl.prototype.onDataReceived = function (dataList) {
-    console.log("data received" + dataList);
+    console.log("data received");
+    console.log(dataList);
     this.render();
   };
 

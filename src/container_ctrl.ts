@@ -47,7 +47,8 @@ export class ContainerCtrl extends MetricsPanelCtrl {
     }
 
     onDataReceived(dataList) {
-        console.log("data received" + dataList);
+        console.log("data received");
+        console.log(dataList);
         this.render()
     }
 

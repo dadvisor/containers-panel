@@ -184,9 +184,8 @@ export class ContainerCtrl extends MetricsPanelCtrl {
     }
     private static add_width(edges: Object[]) {
 
-        console.log(edges.map(r => r['bytes']));
-        // @ts-ignore
-        const max_width = Math.max(edges.map(r => r['bytes']));
+        console.log(...edges.map(r => r['bytes']));
+        const max_width = Math.max(...edges.map(r => r['bytes']));
         console.log('max width: ' + max_width);
         for (let edge of edges){
             edge['width'] = 10;

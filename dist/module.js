@@ -53882,11 +53882,10 @@ function (_super) {
   };
 
   ContainerCtrl.add_width = function (edges) {
-    console.log(edges.map(function (r) {
+    console.log.apply(console, edges.map(function (r) {
       return r['bytes'];
-    })); // @ts-ignore
-
-    var max_width = Math.max(edges.map(function (r) {
+    }));
+    var max_width = Math.max.apply(Math, edges.map(function (r) {
       return r['bytes'];
     }));
     console.log('max width: ' + max_width);

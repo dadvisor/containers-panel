@@ -15,6 +15,8 @@ function bytesToSize(bytes: number) {
 
 export class ContainerCtrl extends MetricsPanelCtrl {
     static templateUrl = './partials/module.html';
+    private containers: Object[] = [];
+    private edges: Object[] = [];
 
     /** @ngInject */
     constructor($scope, $injector) {
@@ -48,8 +50,27 @@ export class ContainerCtrl extends MetricsPanelCtrl {
 
     onDataReceived(dataList) {
         console.log("data received");
-        console.log(dataList);
+
+        for (let dataObj of dataList){
+            if (dataObj.target.startsWith("container")){
+                this.containers.push(ContainerCtrl.decode(dataObj.target));
+            } else if (dataObj.target.startsWith("bytes_send")){
+                this.edges.push(ContainerCtrl.decode(dataObj.target))
+            } else {
+                console.log('Cannot parse object');
+                console.log(dataObj);
+            }
+        }
         this.render()
+    }
+
+    /**
+     * @param str: example string: id_1234{src="dkdkd", dst="dkdkd}
+     * @return An object with properties src and dst
+     */
+    static decode(str: string){
+        str = str.substr(str.indexOf('{') - 1);
+        return JSON.parse(str)
     }
 
     onDataError() {

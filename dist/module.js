@@ -53695,6 +53695,8 @@ function (_super) {
   function ContainerCtrl($scope, $injector) {
     var _this = _super.call(this, $scope, $injector) || this;
 
+    _this.containers = [];
+    _this.edges = [];
     var panelDefaults = {
       legend: {
         show: true,
@@ -53732,8 +53734,31 @@ function (_super) {
 
   ContainerCtrl.prototype.onDataReceived = function (dataList) {
     console.log("data received");
-    console.log(dataList);
+
+    for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
+      var dataObj = dataList_1[_i];
+
+      if (dataObj.target.startsWith("container")) {
+        this.containers.push(ContainerCtrl.decode(dataObj.target));
+      } else if (dataObj.target.startsWith("bytes_send")) {
+        this.edges.push(ContainerCtrl.decode(dataObj.target));
+      } else {
+        console.log('Cannot parse object');
+        console.log(dataObj);
+      }
+    }
+
     this.render();
+  };
+  /**
+   * @param str: example string: id_1234{src="dkdkd", dst="dkdkd}
+   * @return An object with properties src and dst
+   */
+
+
+  ContainerCtrl.decode = function (str) {
+    str = str.substr(str.indexOf('{') - 1);
+    return JSON.parse(str);
   };
 
   ContainerCtrl.prototype.onDataError = function () {

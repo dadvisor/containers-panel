@@ -55,7 +55,10 @@ export class ContainerCtrl extends MetricsPanelCtrl {
             if (dataObj.target.startsWith("container")) {
                 this.containers.push(ContainerCtrl.decode(dataObj.target));
             } else if (dataObj.target.startsWith("bytes_send")) {
-                this.edges.push(ContainerCtrl.decode(dataObj.target))
+                let obj = ContainerCtrl.decode(dataObj.target)
+                obj['src'] = obj['src'].substr(3);
+                obj['dst'] = obj['dst'].substr(3);
+                this.edges.push()
             } else {
                 console.log('Cannot parse object');
                 console.log(dataObj);
@@ -94,63 +97,87 @@ export class ContainerCtrl extends MetricsPanelCtrl {
         if (!panel) {
             return
         }
-        console.log(this.edges);
-        console.log(this.containers);
+        let nodes: Object[] = [];
+        let edges: Object[] = [];
+        let hostSet = new Set();
+        let imageSet = new Set();
+        for (let container of this.containers) {
+            hostSet.add(container['host']);
+            imageSet.add(container['host'] + '-' + container['image']);
+            nodes.push({
+                id: container['hash'],
+                name: container['names'],
+                parent: container['host'] + '-' + container['image']
+            });
+        }
+        hostSet.forEach(host => {
+            nodes.push({id: host, name: host});
+        });
+        imageSet.forEach(image => {
+            nodes.push({
+                id: image,
+                name: image.substr(image.indexOf('-')),
+                parent: image.substr(0, image.indexOf('-'))
+            });
+        });
+        
+        console.log(nodes);
 
-        function add_width(data: JSON) {
+        function add_width(data: Object) {
             const max_width = Math.max(data['edges'].map(r => r['data']['bytes']));
             console.log(max_width);
 
             return data;
         }
 
-        var f = function (data) {
-            cytoscape({
-                container: panel,
-                style: [
-                    {
-                        selector: 'node',
-                        css: {
-                            'content': 'data(name)',
-                            'text-valign': 'center',
-                            'text-halign': 'center'
-                        }
-                    },
-                    {
-                        selector: '$node > node',
-                        css: {
-                            'padding-top': '10px',
-                            'padding-left': '10px',
-                            'padding-bottom': '10px',
-                            'padding-right': '10px',
-                            'text-valign': 'top',
-                            'text-halign': 'center'
-                        }
-                    },
-                    {
-                        selector: 'edge',
-                        css: {
-                            'curve-style': 'bezier',
-                            'target-arrow-shape': 'triangle',
-                            'width': 'data(width)',
-                            'label': function (ele) {
-                                return bytesToSize(parseInt(ele.data('bytes')));
-                            }
+        let data = {
+            edges: edges,
+            nodes: nodes
+        };
+        cytoscape({
+            container: panel,
+            style: [
+                {
+                    selector: 'node',
+                    css: {
+                        'content': 'data(name)',
+                        'text-valign': 'center',
+                        'text-halign': 'center'
+                    }
+                },
+                {
+                    selector: '$node > node',
+                    css: {
+                        'padding-top': '10px',
+                        'padding-left': '10px',
+                        'padding-bottom': '10px',
+                        'padding-right': '10px',
+                        'text-valign': 'top',
+                        'text-halign': 'center'
+                    }
+                },
+                {
+                    selector: 'edge',
+                    css: {
+                        'curve-style': 'bezier',
+                        'target-arrow-shape': 'triangle',
+                        'width': 'data(width)',
+                        'label': function (ele) {
+                            return bytesToSize(parseInt(ele.data('bytes')));
                         }
                     }
-                ],
-
-                elements: add_width(data),
-                layout: {
-                    name: 'dagre',
-                    rankDir: 'LR',
-                    padding: 50,
-                    nodeSep: 40,
-                    rankSep: 150,
-                    fit: true
                 }
-            });
-        };
-        console.log(f);
-    }
+            ],
+
+            elements: add_width(data),
+            layout: {
+                name: 'dagre',
+                rankDir: 'LR',
+                padding: 50,
+                nodeSep: 40,
+                rankSep: 150,
+                fit: true
+            }
+        });
+    };
 }

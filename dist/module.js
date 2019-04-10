@@ -53741,7 +53741,10 @@ function (_super) {
       if (dataObj.target.startsWith("container")) {
         this.containers.push(ContainerCtrl.decode(dataObj.target));
       } else if (dataObj.target.startsWith("bytes_send")) {
-        this.edges.push(ContainerCtrl.decode(dataObj.target));
+        var obj = ContainerCtrl.decode(dataObj.target);
+        obj['src'] = obj['src'].substr(3);
+        obj['dst'] = obj['dst'].substr(3);
+        this.edges.push();
       } else {
         console.log('Cannot parse object');
         console.log(dataObj);
@@ -53785,8 +53788,36 @@ function (_super) {
       return;
     }
 
-    console.log(this.edges);
-    console.log(this.containers);
+    var nodes = [];
+    var edges = [];
+    var hostSet = new Set();
+    var imageSet = new Set();
+
+    for (var _i = 0, _a = this.containers; _i < _a.length; _i++) {
+      var container = _a[_i];
+      hostSet.add(container['host']);
+      imageSet.add(container['host'] + '-' + container['image']);
+      nodes.push({
+        id: container['hash'],
+        name: container['names'],
+        parent: container['host'] + '-' + container['image']
+      });
+    }
+
+    hostSet.forEach(function (host) {
+      nodes.push({
+        id: host,
+        name: host
+      });
+    });
+    imageSet.forEach(function (image) {
+      nodes.push({
+        id: image,
+        name: image.substr(image.indexOf('-')),
+        parent: image.substr(0, image.indexOf('-'))
+      });
+    });
+    console.log(nodes);
 
     function add_width(data) {
       var max_width = Math.max(data['edges'].map(function (r) {
@@ -53796,52 +53827,53 @@ function (_super) {
       return data;
     }
 
-    var f = function f(data) {
-      (0, _cytoscape2.default)({
-        container: panel,
-        style: [{
-          selector: 'node',
-          css: {
-            'content': 'data(name)',
-            'text-valign': 'center',
-            'text-halign': 'center'
-          }
-        }, {
-          selector: '$node > node',
-          css: {
-            'padding-top': '10px',
-            'padding-left': '10px',
-            'padding-bottom': '10px',
-            'padding-right': '10px',
-            'text-valign': 'top',
-            'text-halign': 'center'
-          }
-        }, {
-          selector: 'edge',
-          css: {
-            'curve-style': 'bezier',
-            'target-arrow-shape': 'triangle',
-            'width': 'data(width)',
-            'label': function label(ele) {
-              return bytesToSize(parseInt(ele.data('bytes')));
-            }
-          }
-        }],
-        elements: add_width(data),
-        layout: {
-          name: 'dagre',
-          rankDir: 'LR',
-          padding: 50,
-          nodeSep: 40,
-          rankSep: 150,
-          fit: true
-        }
-      });
+    var data = {
+      edges: edges,
+      nodes: nodes
     };
-
-    console.log(f);
+    (0, _cytoscape2.default)({
+      container: panel,
+      style: [{
+        selector: 'node',
+        css: {
+          'content': 'data(name)',
+          'text-valign': 'center',
+          'text-halign': 'center'
+        }
+      }, {
+        selector: '$node > node',
+        css: {
+          'padding-top': '10px',
+          'padding-left': '10px',
+          'padding-bottom': '10px',
+          'padding-right': '10px',
+          'text-valign': 'top',
+          'text-halign': 'center'
+        }
+      }, {
+        selector: 'edge',
+        css: {
+          'curve-style': 'bezier',
+          'target-arrow-shape': 'triangle',
+          'width': 'data(width)',
+          'label': function label(ele) {
+            return bytesToSize(parseInt(ele.data('bytes')));
+          }
+        }
+      }],
+      elements: add_width(data),
+      layout: {
+        name: 'dagre',
+        rankDir: 'LR',
+        padding: 50,
+        nodeSep: 40,
+        rankSep: 150,
+        fit: true
+      }
+    });
   };
 
+  ;
   ContainerCtrl.templateUrl = './partials/module.html';
   return ContainerCtrl;
 }(_sdk.MetricsPanelCtrl);

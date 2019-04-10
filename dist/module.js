@@ -98,7 +98,7 @@ exports = module.exports = __webpack_require__(/*! ../../node_modules/css-loader
 
 
 // module
-exports.push([module.i, ".container-panel {\n    width: 100%;\n    height: 100%;\n    background-color: white;\n}\n\n#graph-panel {\n    height: 100%;\n    width: 100%;\n    position: absolute;\n    left: 0;\n    top: 0;\n}", "", {"version":3,"sources":["/Users/patrickvogel/git/dAdvisor/containers-panel/src/css/container-panel.css"],"names":[],"mappings":"AAAA;IACI,YAAY;IACZ,aAAa;IACb,wBAAwB;CAC3B;;AAED;IACI,aAAa;IACb,YAAY;IACZ,mBAAmB;IACnB,QAAQ;IACR,OAAO;CACV","file":"container-panel.css","sourcesContent":[".container-panel {\n    width: 100%;\n    height: 100%;\n    background-color: white;\n}\n\n#graph-panel {\n    height: 100%;\n    width: 100%;\n    position: absolute;\n    left: 0;\n    top: 0;\n}"],"sourceRoot":""}]);
+exports.push([module.i, ".container-panel {\n    width: 100%;\n    height: 100%;\n}\n\n#graph-panel {\n    height: 100%;\n    width: 100%;\n    position: absolute;\n    left: 0;\n    top: 0;\n}", "", {"version":3,"sources":["/Users/patrickvogel/git/dAdvisor/containers-panel/src/css/container-panel.css"],"names":[],"mappings":"AAAA;IACI,YAAY;IACZ,aAAa;CAChB;;AAED;IACI,aAAa;IACb,YAAY;IACZ,mBAAmB;IACnB,QAAQ;IACR,OAAO;CACV","file":"container-panel.css","sourcesContent":[".container-panel {\n    width: 100%;\n    height: 100%;\n}\n\n#graph-panel {\n    height: 100%;\n    width: 100%;\n    position: absolute;\n    left: 0;\n    top: 0;\n}"],"sourceRoot":""}]);
 
 // exports
 
@@ -53810,7 +53810,8 @@ function (_super) {
         css: {
           'content': 'data(name)',
           'text-valign': 'center',
-          'text-halign': 'center'
+          'text-halign': 'center',
+          'background-color': 'magenta'
         }
       }, {
         selector: '$node > node',

@@ -54,11 +54,11 @@ export class ContainerCtrl extends MetricsPanelCtrl {
             if (dataObj.target.startsWith("container")) {
                 this.containers.push(obj);
             } else if (dataObj.target.startsWith("bytes_send_total")) {
-                console.log(dataObj);
                 let newObj = {};
                 newObj['source'] = obj['src'].substr(3);
                 newObj['target'] = obj['dst'].substr(3);
                 newObj['bytes'] = dataObj.datapoints[dataObj.datapoints.length - 1];
+                console.log(newObj);
                 this.edges.push(newObj)
             }
         }

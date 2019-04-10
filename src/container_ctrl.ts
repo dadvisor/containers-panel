@@ -49,8 +49,6 @@ export class ContainerCtrl extends MetricsPanelCtrl {
     }
 
     onDataReceived(dataList) {
-        console.log("data received");
-
         for (let dataObj of dataList) {
             if (dataObj.target.startsWith("container")) {
                 this.containers.push(ContainerCtrl.decode(dataObj.target));
@@ -103,6 +101,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
         for (let container of this.containers) {
             hostSet.add(container['host']);
             imageSet.add(container['host'] + '-' + container['image']);
+            console.log(container['host'] + '-' + container['image']);
             nodes.push({
                 id: container['hash'],
                 name: container['names'],

@@ -53733,8 +53733,6 @@ function (_super) {
   }
 
   ContainerCtrl.prototype.onDataReceived = function (dataList) {
-    console.log("data received");
-
     for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
       var dataObj = dataList_1[_i];
 
@@ -53796,6 +53794,7 @@ function (_super) {
       var container = _a[_i];
       hostSet.add(container['host']);
       imageSet.add(container['host'] + '-' + container['image']);
+      console.log(container['host'] + '-' + container['image']);
       nodes.push({
         id: container['hash'],
         name: container['names'],

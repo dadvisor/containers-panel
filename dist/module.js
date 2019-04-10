@@ -53743,7 +53743,7 @@ function (_super) {
         console.log(dataObj);
         obj['src'] = obj['src'].substr(3);
         obj['dst'] = obj['dst'].substr(3);
-        obj['value'] = 10;
+        obj['value'] = dataObj.datapoints[dataObj.datapoints.length - 1];
         this.edges.push(obj);
       }
     }
@@ -53884,8 +53884,8 @@ function (_super) {
   };
 
   ContainerCtrl.prototype.get_edges = function () {
-    var edges = [];
-    return edges;
+    // let edges: Object[] = [];
+    return this.edges;
   };
 
   ContainerCtrl.templateUrl = './partials/module.html';

@@ -57,7 +57,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 console.log(dataObj);
                 obj['src'] = obj['src'].substr(3);
                 obj['dst'] = obj['dst'].substr(3);
-                obj['value'] = 10;
+                obj['value'] = dataObj.datapoints[dataObj.datapoints.length - 1];
                 this.edges.push(obj)
             }
         }
@@ -191,10 +191,10 @@ export class ContainerCtrl extends MetricsPanelCtrl {
     }
 
     private get_edges() {
-        let edges: Object[] = [];
+        // let edges: Object[] = [];
 
 
-        return edges;
+        return this.edges;
 
     }
 }

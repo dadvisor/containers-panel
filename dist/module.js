@@ -53817,13 +53817,18 @@ function (_super) {
         parent: image.substr(0, image.indexOf('-'))
       });
     });
-    console.log(nodes);
 
     function add_width(data) {
       var max_width = Math.max(data['edges'].map(function (r) {
         return r['data']['bytes'];
       }));
       console.log(max_width);
+
+      for (var i in data['edges']) {
+        var edge = data['edges'][i];
+        edge['width'] = 10;
+      }
+
       return data;
     }
 
@@ -53831,6 +53836,7 @@ function (_super) {
       edges: edges,
       nodes: nodes
     };
+    console.log(data);
     (0, _cytoscape2.default)({
       container: panel,
       style: [{

@@ -120,12 +120,15 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 parent: image.substr(0, image.indexOf('-'))
             });
         });
-        
-        console.log(nodes);
 
         function add_width(data: Object) {
             const max_width = Math.max(data['edges'].map(r => r['data']['bytes']));
             console.log(max_width);
+            for (let i in data['edges']){
+                let edge = data['edges'][i];
+                edge['width'] = 10;
+            }
+
 
             return data;
         }
@@ -134,6 +137,8 @@ export class ContainerCtrl extends MetricsPanelCtrl {
             edges: edges,
             nodes: nodes
         };
+        console.log(data);
+
         cytoscape({
             container: panel,
             style: [

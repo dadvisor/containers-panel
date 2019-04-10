@@ -55,9 +55,9 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 this.containers.push(obj);
             } else if (dataObj.target.startsWith("bytes_send_total")) {
                 console.log(dataObj);
-                obj['src'] = obj['src'].substr(3);
-                obj['dst'] = obj['dst'].substr(3);
-                obj['value'] = dataObj.datapoints[dataObj.datapoints.length - 1];
+                obj['source'] = obj['src'].substr(3);
+                obj['target'] = obj['dst'].substr(3);
+                obj['bytes'] = dataObj.datapoints[dataObj.datapoints.length - 1];
                 this.edges.push(obj)
             }
         }
@@ -182,18 +182,11 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 parent: image.substr(0, image.indexOf('-'))
             });
         });
-        return nodes.map(node => { data: node});
+        return nodes.map(node => {return {data: node}});
     }
 
     private get_edges() {
-        let edges: Object[] = [];
-        this.edges.forEach(edge => {
-            edges.push({
-                src:
-            })
-        });
-
-        return edges;
+        return this.edges.map(item => {return {data: item}});
 
     }
 }

@@ -53706,7 +53706,8 @@ function (_super) {
       datasource: null,
       targets: [{}],
       interval: null,
-      valueName: 'current'
+      valueName: 'current',
+      colorValue: 'white'
     };
 
     _this.events.on('panel-initialized', _this.render.bind(_this));

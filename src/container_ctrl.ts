@@ -32,6 +32,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
             targets: [{}],
             interval: null,
             valueName: 'current',
+            colorValue: 'white'
         };
 
         this.events.on('panel-initialized', this.render.bind(this));

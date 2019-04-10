@@ -93,9 +93,6 @@ export class ContainerCtrl extends MetricsPanelCtrl {
         if (!panel) {
             return
         }
-        let nodes: Object[] = this.get_nodes();
-        let edges: Object[] = this.get_edges();
-
 
         function add_width(data: Object) {
             const max_width = Math.max(data['edges'].map(r => r['data']['bytes']));
@@ -104,14 +101,12 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 let edge = data['edges'][i];
                 edge['width'] = 10;
             }
-
-
             return data;
         }
 
         let data = {
-            edges: edges,
-            nodes: nodes
+            edges: this.get_edges(),
+            nodes: this.get_nodes()
         };
         console.log(data);
 
@@ -187,14 +182,18 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 parent: image.substr(0, image.indexOf('-'))
             });
         });
-        return nodes;
+        return nodes.map(node => { data: node});
     }
 
     private get_edges() {
-        // let edges: Object[] = [];
+        let edges: Object[] = [];
+        this.edges.forEach(edge => {
+            edges.push({
+                src:
+            })
+        });
 
-
-        return this.edges;
+        return edges;
 
     }
 }

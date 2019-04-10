@@ -53757,10 +53757,21 @@ function (_super) {
 
 
   ContainerCtrl.decode = function (str) {
-    str = str.substr(str.indexOf('{'));
-    str = str.replace("=", ":");
     console.log(str);
-    return JSON.parse(str);
+    str = str.substr(str.indexOf('{') + 1);
+    str = str.substr(0, str.length - 1);
+    var obj = {};
+
+    for (var _i = 0, _a = str.split(","); _i < _a.length; _i++) {
+      var keyValue = _a[_i];
+      var key = keyValue.substr(0, keyValue.indexOf('='));
+      var value = keyValue.substr(keyValue.indexOf('=') + 1);
+      value = value.substr(1, value.length - 2);
+      obj[key] = value;
+    }
+
+    console.log(obj);
+    return obj;
   };
 
   ContainerCtrl.prototype.onDataError = function () {

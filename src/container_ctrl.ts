@@ -51,10 +51,10 @@ export class ContainerCtrl extends MetricsPanelCtrl {
     onDataReceived(dataList) {
         console.log("data received");
 
-        for (let dataObj of dataList){
-            if (dataObj.target.startsWith("container")){
+        for (let dataObj of dataList) {
+            if (dataObj.target.startsWith("container")) {
                 this.containers.push(ContainerCtrl.decode(dataObj.target));
-            } else if (dataObj.target.startsWith("bytes_send")){
+            } else if (dataObj.target.startsWith("bytes_send")) {
                 this.edges.push(ContainerCtrl.decode(dataObj.target))
             } else {
                 console.log('Cannot parse object');
@@ -68,11 +68,21 @@ export class ContainerCtrl extends MetricsPanelCtrl {
      * @param str: example string: id_1234{src="dkdkd", dst="dkdkd}
      * @return An object with properties src and dst
      */
-    static decode(str: string){
-        str = str.substr(str.indexOf('{'));
-        str = str.replace("=", ":");
+    static decode(str: string) {
         console.log(str);
-        return JSON.parse(str)
+        str = str.substr(str.indexOf('{') + 1);
+        str = str.substr(0, str.length - 1);
+
+        let obj = {};
+
+        for (let keyValue of str.split(",")) {
+            let key = keyValue.substr(0, keyValue.indexOf('='));
+            let value = keyValue.substr(keyValue.indexOf('=') + 1);
+            value = value.substr(1, value.length - 2);
+            obj[key] = value;
+        }
+        console.log(obj);
+        return obj;
     }
 
     onDataError() {

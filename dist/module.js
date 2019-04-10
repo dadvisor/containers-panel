@@ -53811,7 +53811,8 @@ function (_super) {
           'content': 'data(name)',
           'text-valign': 'center',
           'text-halign': 'center',
-          'background-color': 'magenta'
+          'background-color': 'magenta',
+          'color': 'white'
         }
       }, {
         selector: '$node > node',

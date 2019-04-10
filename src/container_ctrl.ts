@@ -119,6 +119,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         'text-valign': 'center',
                         'text-halign': 'center',
                         'background-color': 'magenta',
+                        'color': 'white',
                     }
                 },
                 {

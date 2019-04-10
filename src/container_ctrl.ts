@@ -58,7 +58,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 newObj['source'] = obj['src'].substr(3);
                 newObj['target'] = obj['dst'].substr(3);
                 console.log(dataObj.datapoints);
-                newObj['bytes'] = dataObj.datapoints[dataObj.datapoints.length - 1];
+                newObj['bytes'] = dataObj.datapoints[0][dataObj.datapoints[0].length - 1];
                 console.log(newObj);
                 this.edges.push(newObj)
             }

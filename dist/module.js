@@ -53821,7 +53821,8 @@ function (_super) {
           'padding-bottom': '10px',
           'padding-right': '10px',
           'text-valign': 'top',
-          'text-halign': 'center'
+          'text-halign': 'center',
+          'background-color': 'gray'
         }
       }, {
         selector: 'edge',

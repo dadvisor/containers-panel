@@ -53811,8 +53811,7 @@ function (_super) {
           'content': 'data(name)',
           'text-valign': 'center',
           'text-halign': 'center',
-          'background-color': 'magenta',
-          'color': 'white'
+          'background-color': 'white'
         }
       }, {
         selector: '$node > node',
@@ -53833,6 +53832,11 @@ function (_super) {
           'label': function label(ele) {
             return bytesToSize(parseInt(ele.data('bytes')));
           }
+        }
+      }, {
+        selector: 'label',
+        css: {
+          'color': 'white'
         }
       }],
       elements: data,

@@ -118,8 +118,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         'content': 'data(name)',
                         'text-valign': 'center',
                         'text-halign': 'center',
-                        'background-color': 'magenta',
-                        'color': 'white',
+                        'background-color': 'white',
                     }
                 },
                 {
@@ -142,6 +141,12 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         'label': function (ele) {
                             return bytesToSize(parseInt(ele.data('bytes')));
                         }
+                    }
+                },
+                {
+                    selector: 'label',
+                    css: {
+                        'color': 'white',
                     }
                 }
             ],

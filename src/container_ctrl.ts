@@ -70,6 +70,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
      */
     static decode(str: string){
         str = str.substr(str.indexOf('{'));
+        str = str.replace("=", ":");
         console.log(str);
         return JSON.parse(str)
     }

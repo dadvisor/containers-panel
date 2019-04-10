@@ -53758,6 +53758,7 @@ function (_super) {
 
   ContainerCtrl.decode = function (str) {
     str = str.substr(str.indexOf('{'));
+    str = str.replace("=", ":");
     console.log(str);
     return JSON.parse(str);
   };

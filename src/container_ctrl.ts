@@ -69,7 +69,6 @@ export class ContainerCtrl extends MetricsPanelCtrl {
      * @return An object with properties src and dst
      */
     static decode(str: string) {
-        console.log(str);
         str = str.substr(str.indexOf('{') + 1);
         str = str.substr(0, str.length - 1);
 
@@ -95,6 +94,8 @@ export class ContainerCtrl extends MetricsPanelCtrl {
         if (!panel) {
             return
         }
+        console.log(this.edges);
+        console.log(this.containers);
 
         function add_width(data: JSON) {
             const max_width = Math.max(data['edges'].map(r => r['data']['bytes']));

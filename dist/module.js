@@ -53757,7 +53757,6 @@ function (_super) {
 
 
   ContainerCtrl.decode = function (str) {
-    console.log(str);
     str = str.substr(str.indexOf('{') + 1);
     str = str.substr(0, str.length - 1);
     var obj = {};
@@ -53785,6 +53784,9 @@ function (_super) {
     if (!panel) {
       return;
     }
+
+    console.log(this.edges);
+    console.log(this.containers);
 
     function add_width(data) {
       var max_width = Math.max(data['edges'].map(function (r) {

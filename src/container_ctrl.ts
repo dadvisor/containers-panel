@@ -48,24 +48,6 @@ export class ContainerCtrl extends MetricsPanelCtrl {
         this.updateGraph();
     }
 
-    onDataReceived(dataList) {
-        for (let dataObj of dataList) {
-            let obj = ContainerCtrl.decode(dataObj.target);
-            if (dataObj.target.startsWith("container")) {
-                this.containers.push(obj);
-            } else if (dataObj.target.startsWith("bytes_send_total")) {
-                let newObj = {};
-                newObj['source'] = obj['src'].substr(3);
-                newObj['target'] = obj['dst'].substr(3);
-                console.log(dataObj.datapoints);
-                newObj['bytes'] = dataObj.datapoints[0][0];
-                console.log(newObj);
-                this.edges.push(newObj)
-            }
-        }
-        this.render()
-    }
-
     /**
      * @param str: example string: id_1234{src="dkdkd", dst="dkdkd}
      * @return An object with properties src and dst
@@ -85,6 +67,30 @@ export class ContainerCtrl extends MetricsPanelCtrl {
         return obj;
     }
 
+    private static add_width(edges: Object[]) {
+        const max_width = Math.max(...edges.map(r => r['bytes']));
+        for (let edge of edges) {
+            edge['width'] = 10.0 * edge['bytes'] / max_width;
+        }
+        return edges;
+    }
+
+    onDataReceived(dataList) {
+        for (let dataObj of dataList) {
+            let obj = ContainerCtrl.decode(dataObj.target);
+            if (dataObj.target.startsWith("container")) {
+                this.containers.push(obj);
+            } else if (dataObj.target.startsWith("bytes_send_total")) {
+                let newObj = {};
+                newObj['source'] = obj['src'].substr(3);
+                newObj['target'] = obj['dst'].substr(3);
+                newObj['bytes'] = dataObj.datapoints[0][0];
+                this.edges.push(newObj)
+            }
+        }
+        this.render()
+    }
+
     onDataError() {
         console.log("onDataError");
         this.render();
@@ -100,7 +106,6 @@ export class ContainerCtrl extends MetricsPanelCtrl {
             edges: this.get_edges(),
             nodes: this.get_nodes()
         };
-        console.log(data);
 
         cytoscape({
             container: panel,
@@ -157,7 +162,6 @@ export class ContainerCtrl extends MetricsPanelCtrl {
         for (let container of this.containers) {
             hostSet.add(container['host']);
             imageSet.add(container['host'] + '-' + container['image']);
-            console.log(container['host'] + '-' + container['image']);
             nodes.push({
                 id: container['hash'],
                 name: container['names'],
@@ -174,26 +178,16 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 parent: image.substr(0, image.indexOf('-'))
             });
         });
-        return nodes.map(node => {return {data: node}});
+        return nodes.map(item => {
+            return {data: item}
+        });
     }
 
     private get_edges() {
         let edges = ContainerCtrl.add_width(this.edges);
-        return edges.map(item => {return {data: item}});
+        return edges.map(item => {
+            return {data: item}
+        });
 
-    }
-    private static add_width(edges: Object[]) {
-
-        console.log(...edges.map(r => r['bytes']));
-        const max_width = Math.max(...edges.map(r => r['bytes']));
-        console.log('max width: ' + max_width);
-        for (let edge of edges){
-            edge['width'] = 10;
-        }
-        // for (let i in edges]) {
-        //     let edge = edges[i];
-        //     edge['width'] = 10;
-        // }
-        return edges;
     }
 }

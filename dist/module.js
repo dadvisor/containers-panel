@@ -53731,27 +53731,6 @@ function (_super) {
 
     return _this;
   }
-
-  ContainerCtrl.prototype.onDataReceived = function (dataList) {
-    for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
-      var dataObj = dataList_1[_i];
-      var obj = ContainerCtrl.decode(dataObj.target);
-
-      if (dataObj.target.startsWith("container")) {
-        this.containers.push(obj);
-      } else if (dataObj.target.startsWith("bytes_send_total")) {
-        var newObj = {};
-        newObj['source'] = obj['src'].substr(3);
-        newObj['target'] = obj['dst'].substr(3);
-        console.log(dataObj.datapoints);
-        newObj['bytes'] = dataObj.datapoints[0][0];
-        console.log(newObj);
-        this.edges.push(newObj);
-      }
-    }
-
-    this.render();
-  };
   /**
    * @param str: example string: id_1234{src="dkdkd", dst="dkdkd}
    * @return An object with properties src and dst
@@ -53774,6 +53753,38 @@ function (_super) {
     return obj;
   };
 
+  ContainerCtrl.add_width = function (edges) {
+    var max_width = Math.max.apply(Math, edges.map(function (r) {
+      return r['bytes'];
+    }));
+
+    for (var _i = 0, edges_1 = edges; _i < edges_1.length; _i++) {
+      var edge = edges_1[_i];
+      edge['width'] = 10.0 * edge['bytes'] / max_width;
+    }
+
+    return edges;
+  };
+
+  ContainerCtrl.prototype.onDataReceived = function (dataList) {
+    for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
+      var dataObj = dataList_1[_i];
+      var obj = ContainerCtrl.decode(dataObj.target);
+
+      if (dataObj.target.startsWith("container")) {
+        this.containers.push(obj);
+      } else if (dataObj.target.startsWith("bytes_send_total")) {
+        var newObj = {};
+        newObj['source'] = obj['src'].substr(3);
+        newObj['target'] = obj['dst'].substr(3);
+        newObj['bytes'] = dataObj.datapoints[0][0];
+        this.edges.push(newObj);
+      }
+    }
+
+    this.render();
+  };
+
   ContainerCtrl.prototype.onDataError = function () {
     console.log("onDataError");
     this.render();
@@ -53790,7 +53801,6 @@ function (_super) {
       edges: this.get_edges(),
       nodes: this.get_nodes()
     };
-    console.log(data);
     (0, _cytoscape2.default)({
       container: panel,
       style: [{
@@ -53844,7 +53854,6 @@ function (_super) {
       var container = _a[_i];
       hostSet.add(container['host']);
       imageSet.add(container['host'] + '-' + container['image']);
-      console.log(container['host'] + '-' + container['image']);
       nodes.push({
         id: container['hash'],
         name: container['names'],
@@ -53865,9 +53874,9 @@ function (_super) {
         parent: image.substr(0, image.indexOf('-'))
       });
     });
-    return nodes.map(function (node) {
+    return nodes.map(function (item) {
       return {
-        data: node
+        data: item
       };
     });
   };
@@ -53879,27 +53888,6 @@ function (_super) {
         data: item
       };
     });
-  };
-
-  ContainerCtrl.add_width = function (edges) {
-    console.log.apply(console, edges.map(function (r) {
-      return r['bytes'];
-    }));
-    var max_width = Math.max.apply(Math, edges.map(function (r) {
-      return r['bytes'];
-    }));
-    console.log('max width: ' + max_width);
-
-    for (var _i = 0, edges_1 = edges; _i < edges_1.length; _i++) {
-      var edge = edges_1[_i];
-      edge['width'] = 10;
-    } // for (let i in edges]) {
-    //     let edge = edges[i];
-    //     edge['width'] = 10;
-    // }
-
-
-    return edges;
   };
 
   ContainerCtrl.templateUrl = './partials/module.html';

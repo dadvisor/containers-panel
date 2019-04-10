@@ -53735,17 +53735,16 @@ function (_super) {
   ContainerCtrl.prototype.onDataReceived = function (dataList) {
     for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
       var dataObj = dataList_1[_i];
+      var obj = ContainerCtrl.decode(dataObj.target);
 
       if (dataObj.target.startsWith("container")) {
-        this.containers.push(ContainerCtrl.decode(dataObj.target));
-      } else if (dataObj.target.startsWith("bytes_send")) {
-        var obj = ContainerCtrl.decode(dataObj.target);
+        this.containers.push(obj);
+      } else if (dataObj.target.startsWith("bytes_send_total")) {
+        console.log(dataObj);
         obj['src'] = obj['src'].substr(3);
         obj['dst'] = obj['dst'].substr(3);
-        this.edges.push();
-      } else {
-        console.log('Cannot parse object');
-        console.log(dataObj);
+        obj['value'] = 10;
+        this.edges.push(obj);
       }
     }
 
@@ -53785,36 +53784,8 @@ function (_super) {
       return;
     }
 
-    var nodes = [];
-    var edges = [];
-    var hostSet = new Set();
-    var imageSet = new Set();
-
-    for (var _i = 0, _a = this.containers; _i < _a.length; _i++) {
-      var container = _a[_i];
-      hostSet.add(container['host']);
-      imageSet.add(container['host'] + '-' + container['image']);
-      console.log(container['host'] + '-' + container['image']);
-      nodes.push({
-        id: container['hash'],
-        name: container['names'],
-        parent: container['host'] + '-' + container['image']
-      });
-    }
-
-    hostSet.forEach(function (host) {
-      nodes.push({
-        id: host,
-        name: host
-      });
-    });
-    imageSet.forEach(function (image) {
-      nodes.push({
-        id: image,
-        name: image.substr(image.indexOf('-')),
-        parent: image.substr(0, image.indexOf('-'))
-      });
-    });
+    var nodes = this.get_nodes();
+    var edges = this.get_edges();
 
     function add_width(data) {
       var max_width = Math.max(data['edges'].map(function (r) {
@@ -53878,6 +53849,45 @@ function (_super) {
   };
 
   ;
+
+  ContainerCtrl.prototype.get_nodes = function () {
+    var nodes = [];
+    var hostSet = new Set();
+    var imageSet = new Set();
+
+    for (var _i = 0, _a = this.containers; _i < _a.length; _i++) {
+      var container = _a[_i];
+      hostSet.add(container['host']);
+      imageSet.add(container['host'] + '-' + container['image']);
+      console.log(container['host'] + '-' + container['image']);
+      nodes.push({
+        id: container['hash'],
+        name: container['names'],
+        parent: container['host'] + '-' + container['image']
+      });
+    }
+
+    hostSet.forEach(function (host) {
+      nodes.push({
+        id: host,
+        name: host
+      });
+    });
+    imageSet.forEach(function (image) {
+      nodes.push({
+        id: image,
+        name: image.substr(image.indexOf('-')),
+        parent: image.substr(0, image.indexOf('-'))
+      });
+    });
+    return nodes;
+  };
+
+  ContainerCtrl.prototype.get_edges = function () {
+    var edges = [];
+    return edges;
+  };
+
   ContainerCtrl.templateUrl = './partials/module.html';
   return ContainerCtrl;
 }(_sdk.MetricsPanelCtrl);

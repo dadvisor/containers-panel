@@ -50,16 +50,15 @@ export class ContainerCtrl extends MetricsPanelCtrl {
 
     onDataReceived(dataList) {
         for (let dataObj of dataList) {
+            let obj = ContainerCtrl.decode(dataObj.target);
             if (dataObj.target.startsWith("container")) {
-                this.containers.push(ContainerCtrl.decode(dataObj.target));
-            } else if (dataObj.target.startsWith("bytes_send")) {
-                let obj = ContainerCtrl.decode(dataObj.target);
+                this.containers.push(obj);
+            } else if (dataObj.target.startsWith("bytes_send_total")) {
+                console.log(dataObj);
                 obj['src'] = obj['src'].substr(3);
                 obj['dst'] = obj['dst'].substr(3);
-                this.edges.push()
-            } else {
-                console.log('Cannot parse object');
-                console.log(dataObj);
+                obj['value'] = 10;
+                this.edges.push(obj)
             }
         }
         this.render()
@@ -94,35 +93,14 @@ export class ContainerCtrl extends MetricsPanelCtrl {
         if (!panel) {
             return
         }
-        let nodes: Object[] = [];
-        let edges: Object[] = [];
-        let hostSet = new Set();
-        let imageSet = new Set();
-        for (let container of this.containers) {
-            hostSet.add(container['host']);
-            imageSet.add(container['host'] + '-' + container['image']);
-            console.log(container['host'] + '-' + container['image']);
-            nodes.push({
-                id: container['hash'],
-                name: container['names'],
-                parent: container['host'] + '-' + container['image']
-            });
-        }
-        hostSet.forEach(host => {
-            nodes.push({id: host, name: host});
-        });
-        imageSet.forEach(image => {
-            nodes.push({
-                id: image,
-                name: image.substr(image.indexOf('-')),
-                parent: image.substr(0, image.indexOf('-'))
-            });
-        });
+        let nodes: Object[] = this.get_nodes();
+        let edges: Object[] = this.get_edges();
+
 
         function add_width(data: Object) {
             const max_width = Math.max(data['edges'].map(r => r['data']['bytes']));
             console.log(max_width);
-            for (let i in data['edges']){
+            for (let i in data['edges']) {
                 let edge = data['edges'][i];
                 edge['width'] = 10;
             }
@@ -183,4 +161,40 @@ export class ContainerCtrl extends MetricsPanelCtrl {
             }
         });
     };
+
+    private get_nodes() {
+        let nodes: Object[] = [];
+
+        let hostSet = new Set();
+        let imageSet = new Set();
+        for (let container of this.containers) {
+            hostSet.add(container['host']);
+            imageSet.add(container['host'] + '-' + container['image']);
+            console.log(container['host'] + '-' + container['image']);
+            nodes.push({
+                id: container['hash'],
+                name: container['names'],
+                parent: container['host'] + '-' + container['image']
+            });
+        }
+        hostSet.forEach(host => {
+            nodes.push({id: host, name: host});
+        });
+        imageSet.forEach(image => {
+            nodes.push({
+                id: image,
+                name: image.substr(image.indexOf('-')),
+                parent: image.substr(0, image.indexOf('-'))
+            });
+        });
+        return nodes;
+    }
+
+    private get_edges() {
+        let edges: Object[] = [];
+
+
+        return edges;
+
+    }
 }

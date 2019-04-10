@@ -53707,6 +53707,7 @@ function (_super) {
       targets: [{}],
       interval: null,
       valueName: 'current',
+      colorBackground: 'white',
       colorValue: 'white'
     };
 

@@ -109,7 +109,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
             nodes: this.get_nodes()
         };
 
-        cytoscape({
+        var cy = cytoscape({
             container: panel,
             style: [
                 {
@@ -118,7 +118,6 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         'content': 'data(name)',
                         'text-valign': 'center',
                         'text-halign': 'center',
-                        'background-color': 'white',
                     }
                 },
                 {
@@ -130,7 +129,6 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         'padding-right': '10px',
                         'text-valign': 'top',
                         'text-halign': 'center',
-                        'background-color': 'gray',
                     }
                 },
                 {
@@ -162,6 +160,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 fit: true
             }
         });
+        console.log(cy.style());
     };
 
     private get_nodes() {

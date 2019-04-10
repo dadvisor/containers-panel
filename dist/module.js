@@ -53803,15 +53803,14 @@ function (_super) {
       edges: this.get_edges(),
       nodes: this.get_nodes()
     };
-    (0, _cytoscape2.default)({
+    var cy = (0, _cytoscape2.default)({
       container: panel,
       style: [{
         selector: 'node',
         css: {
           'content': 'data(name)',
           'text-valign': 'center',
-          'text-halign': 'center',
-          'background-color': 'white'
+          'text-halign': 'center'
         }
       }, {
         selector: '$node > node',
@@ -53821,8 +53820,7 @@ function (_super) {
           'padding-bottom': '10px',
           'padding-right': '10px',
           'text-valign': 'top',
-          'text-halign': 'center',
-          'background-color': 'gray'
+          'text-halign': 'center'
         }
       }, {
         selector: 'edge',
@@ -53850,6 +53848,7 @@ function (_super) {
         fit: true
       }
     });
+    console.log(cy.style());
   };
 
   ;

@@ -53861,7 +53861,7 @@ function (_super) {
     imageSet.forEach(function (image) {
       nodes.push({
         id: image,
-        name: image.substr(image.indexOf('-')),
+        name: image.substr(image.indexOf('-') + 1),
         parent: image.substr(0, image.indexOf('-'))
       });
     });
@@ -53882,7 +53882,10 @@ function (_super) {
   };
 
   ContainerCtrl.add_width = function (edges) {
-    // @ts-ignore
+    console.log(edges.map(function (r) {
+      return r['bytes'];
+    })); // @ts-ignore
+
     var max_width = Math.max(edges.map(function (r) {
       return r['bytes'];
     }));

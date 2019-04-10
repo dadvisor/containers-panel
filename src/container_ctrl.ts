@@ -170,7 +170,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
         imageSet.forEach(image => {
             nodes.push({
                 id: image,
-                name: image.substr(image.indexOf('-')),
+                name: image.substr(image.indexOf('-') + 1),
                 parent: image.substr(0, image.indexOf('-'))
             });
         });
@@ -183,6 +183,8 @@ export class ContainerCtrl extends MetricsPanelCtrl {
 
     }
     private static add_width(edges: Object[]) {
+
+        console.log(edges.map(r => r['bytes']));
         // @ts-ignore
         const max_width = Math.max(edges.map(r => r['bytes']));
         console.log('max width: ' + max_width);

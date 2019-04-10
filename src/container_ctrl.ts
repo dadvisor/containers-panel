@@ -69,7 +69,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
      * @return An object with properties src and dst
      */
     static decode(str: string){
-        str = str.substr(str.indexOf('{') - 1);
+        str = str.substr(str.indexOf('{'));
         console.log(str);
         return JSON.parse(str)
     }

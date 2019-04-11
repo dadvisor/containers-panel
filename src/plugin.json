@@ -1,7 +1,7 @@
 {
   "type": "panel",
   "name": "Container",
-  "id": "grafana-contianer-panel",
+  "id": "grafana-container-panel",
 
   "info": {
     "description": "Container panel for grafana",
@@ -9,7 +9,7 @@
       "name": "Patrick Vogel",
       "url": "https://grafana.com"
     },
-    "keywords": ["clock", "panel"],
+    "keywords": ["container", "panel"],
     "links": [
       {"name": "Project site", "url": "https://github.com/dAdvisor/container-panel"},
       {"name": "MIT License", "url": "https://github.com/dAdvisor/container-panel/blob/master/LICENSE"}

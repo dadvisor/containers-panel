@@ -109,7 +109,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
             nodes: this.get_nodes()
         };
 
-        var cy = cytoscape({
+        cytoscape({
             container: panel,
             style: [
                 {
@@ -175,7 +175,6 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 fit: true
             }
         });
-        console.log(JSON.stringify(cy.style().json()));
     };
 
     private get_nodes() {

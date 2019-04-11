@@ -53803,7 +53803,7 @@ function (_super) {
       edges: this.get_edges(),
       nodes: this.get_nodes()
     };
-    var cy = (0, _cytoscape2.default)({
+    (0, _cytoscape2.default)({
       container: panel,
       style: [{
         selector: 'node',
@@ -53864,7 +53864,6 @@ function (_super) {
         fit: true
       }
     });
-    console.log(JSON.stringify(cy.style().json()));
   };
 
   ;

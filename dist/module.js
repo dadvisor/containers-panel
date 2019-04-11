@@ -53811,9 +53811,11 @@ function (_super) {
           'content': 'data(name)',
           'text-valign': 'center',
           'text-halign': 'center',
-          'border': '4px solid #e6e6e6',
+          'border-width': '4px',
+          'border-color': '#e6e6e6',
           'border-radius': '10px',
-          'background-color': '#a6a6a6'
+          'background-color': '#a6a6a6',
+          'background-opacity': '20%'
         }
       }, {
         selector: '$node > node',

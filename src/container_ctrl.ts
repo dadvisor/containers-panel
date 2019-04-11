@@ -138,7 +138,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         'padding-left': '10px',
                         'padding-bottom': '10px',
                         'padding-right': '10px',
-                        'text-valign': 'top',
+                        'text-valign': 'center',
                         'text-halign': 'center',
                     }
                 },

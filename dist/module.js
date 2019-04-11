@@ -53812,10 +53812,10 @@ function (_super) {
           'text-valign': 'center',
           'text-halign': 'center',
           'border-width': '2px',
-          'border-color': '#595959',
+          'border-color': '#808080',
           'border-radius': '10px',
           'background-color': 'white',
-          'background-opacity': '0.4'
+          'background-opacity': '0.3'
         }
       }, {
         selector: '$node > node',

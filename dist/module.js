@@ -53836,7 +53836,7 @@ function (_super) {
       }, {
         selector: 'label',
         css: {
-          'color': 'white'
+          'color': '#f2f2f2'
         }
       }],
       elements: data,

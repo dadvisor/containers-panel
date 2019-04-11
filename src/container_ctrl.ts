@@ -146,7 +146,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 {
                     selector: 'label',
                     css: {
-                        'color': 'white',
+                        'color': '#f2f2f2',
                     }
                 }
             ],

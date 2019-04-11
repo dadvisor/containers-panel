@@ -118,9 +118,9 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         'content': 'data(name)',
                         'text-valign': 'center',
                         'text-halign': 'center',
+                        'shape': 'rectangle',
                         'border-width': '2px',
                         'border-color': '#808080',
-                        'border-radius': '10px',
                         'background-color': 'white',
                         'background-opacity': '0.3'
                     }
@@ -142,7 +142,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         'curve-style': 'bezier',
                         'target-arrow-shape': 'triangle',
                         'width': 'data(width)',
-                        'line-color': '#000099',
+                        'line-color': '#9fbfdf',
                         'label': function (ele) {
                             return bytesToSize(parseInt(ele.data('bytes')));
                         }

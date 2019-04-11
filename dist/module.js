@@ -53840,6 +53840,7 @@ function (_super) {
           'target-arrow-shape': 'triangle',
           'width': 'data(width)',
           'line-color': '#9fbfdf',
+          'target-arrow-color': '#9fbfdf',
           'label': function label(ele) {
             return bytesToSize(parseInt(ele.data('bytes')));
           }

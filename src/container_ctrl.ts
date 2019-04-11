@@ -149,6 +149,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         'target-arrow-shape': 'triangle',
                         'width': 'data(width)',
                         'line-color': '#9fbfdf',
+                        'target-arrow-color': '#9fbfdf',
                         'label': function (ele) {
                             return bytesToSize(parseInt(ele.data('bytes')));
                         }

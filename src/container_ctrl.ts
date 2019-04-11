@@ -142,7 +142,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         'curve-style': 'bezier',
                         'target-arrow-shape': 'triangle',
                         'width': 'data(width)',
-                        'background-color': '#000099',
+                        'line-color': '#000099',
                         'label': function (ele) {
                             return bytesToSize(parseInt(ele.data('bytes')));
                         }
@@ -155,7 +155,6 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                     }
                 }
             ],
-
             elements: data,
             layout: {
                 name: 'dagre',

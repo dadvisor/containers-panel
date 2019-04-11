@@ -53833,7 +53833,7 @@ function (_super) {
           'curve-style': 'bezier',
           'target-arrow-shape': 'triangle',
           'width': 'data(width)',
-          'background-color': '#000099',
+          'line-color': '#000099',
           'label': function label(ele) {
             return bytesToSize(parseInt(ele.data('bytes')));
           }

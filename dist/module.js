@@ -53811,7 +53811,8 @@ function (_super) {
           'content': 'data(name)',
           'text-valign': 'center',
           'text-halign': 'center',
-          'border': '2px solid #e6e6e6',
+          'border': '4px solid #e6e6e6',
+          'border-radius': '10px',
           'background-color': '#a6a6a6'
         }
       }, {
@@ -53830,7 +53831,7 @@ function (_super) {
           'curve-style': 'bezier',
           'target-arrow-shape': 'triangle',
           'width': 'data(width)',
-          'background-color': '#4d4d4d',
+          'background-color': '#000099',
           'label': function label(ele) {
             return bytesToSize(parseInt(ele.data('bytes')));
           }

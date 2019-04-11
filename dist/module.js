@@ -53810,7 +53810,8 @@ function (_super) {
         css: {
           'content': 'data(name)',
           'text-valign': 'center',
-          'text-halign': 'center'
+          'text-halign': 'center',
+          'background-color': '#a6a6a6'
         }
       }, {
         selector: '$node > node',

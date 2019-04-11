@@ -118,6 +118,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         'content': 'data(name)',
                         'text-valign': 'center',
                         'text-halign': 'center',
+                        'background-color': '#a6a6a6',
                     }
                 },
                 {

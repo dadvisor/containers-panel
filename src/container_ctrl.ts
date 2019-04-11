@@ -122,7 +122,8 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         'border-width': '2px',
                         'border-color': '#808080',
                         'background-color': 'white',
-                        'background-opacity': '0.3'
+                        'background-opacity': '0.3',
+                        'compound-sizing-wrt-labels': 'include',
                     }
                 },
                 {
@@ -148,12 +149,12 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                         }
                     }
                 },
-                {
-                    selector: 'label',
-                    css: {
-                        'color': '#d9d9d9',
-                    }
-                }
+                // {
+                //     selector: 'label',
+                //     css: {
+                //         'color': '#d9d9d9',
+                //     }
+                // }
             ],
             elements: data,
             layout: {

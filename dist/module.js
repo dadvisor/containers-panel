@@ -53815,7 +53815,8 @@ function (_super) {
           'border-width': '2px',
           'border-color': '#808080',
           'background-color': 'white',
-          'background-opacity': '0.3'
+          'background-opacity': '0.3',
+          'compound-sizing-wrt-labels': 'include'
         }
       }, {
         selector: '$node > node',
@@ -53837,11 +53838,6 @@ function (_super) {
           'label': function label(ele) {
             return bytesToSize(parseInt(ele.data('bytes')));
           }
-        }
-      }, {
-        selector: 'label',
-        css: {
-          'color': '#d9d9d9'
         }
       }],
       elements: data,

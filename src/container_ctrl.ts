@@ -164,7 +164,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
                 fit: true
             }
         });
-        console.log(cy.style());
+        console.log(JSON.stringify(cy.style().json()));
     };
 
     private get_nodes() {

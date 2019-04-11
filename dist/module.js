@@ -53852,7 +53852,7 @@ function (_super) {
         fit: true
       }
     });
-    console.log(cy.style());
+    console.log(JSON.stringify(cy.style().json()));
   };
 
   ;

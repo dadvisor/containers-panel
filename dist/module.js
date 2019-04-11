@@ -53816,6 +53816,10 @@ function (_super) {
           'border-color': '#808080',
           'background-color': 'white',
           'background-opacity': '0.3',
+          'padding-top': '10px',
+          'padding-left': '10px',
+          'padding-bottom': '10px',
+          'padding-right': '10px',
           'compound-sizing-wrt-labels': 'include',
           'width': 'label'
         }

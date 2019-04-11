@@ -53826,11 +53826,12 @@ function (_super) {
       }, {
         selector: '$node > node',
         css: {
+          'compound-sizing-wrt-labels': 'include',
           'padding-top': '10px',
           'padding-left': '10px',
           'padding-bottom': '10px',
           'padding-right': '10px',
-          'text-valign': 'center',
+          'text-valign': 'top',
           'text-halign': 'center'
         }
       }, {

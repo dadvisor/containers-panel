@@ -108,6 +108,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
             edges: this.get_edges(),
             nodes: this.get_nodes()
         };
+        console.log(data);
 
         cytoscape({
             container: panel,

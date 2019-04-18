@@ -53803,6 +53803,7 @@ function (_super) {
       edges: this.get_edges(),
       nodes: this.get_nodes()
     };
+    console.log(data);
     (0, _cytoscape2.default)({
       container: panel,
       style: [{

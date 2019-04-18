@@ -80,7 +80,7 @@ export class ContainerCtrl extends MetricsPanelCtrl {
     onDataReceived(dataList) {
         for (let dataObj of dataList) {
             let obj = ContainerCtrl.decode(dataObj.target);
-            if (dataObj.target.startsWith("container")) {
+            if (dataObj.target.startsWith("docker_container")) {
                 this.containers.push(obj);
             } else if (dataObj.target.startsWith("bytes_send_total")) {
                 let newObj = {};

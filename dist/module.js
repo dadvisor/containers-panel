@@ -53773,7 +53773,7 @@ function (_super) {
       var dataObj = dataList_1[_i];
       var obj = ContainerCtrl.decode(dataObj.target);
 
-      if (dataObj.target.startsWith("container")) {
+      if (dataObj.target.startsWith("docker_container")) {
         this.containers.push(obj);
       } else if (dataObj.target.startsWith("bytes_send_total")) {
         var newObj = {};

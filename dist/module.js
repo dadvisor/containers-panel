@@ -53769,6 +53769,9 @@ function (_super) {
   };
 
   ContainerCtrl.prototype.onDataReceived = function (dataList) {
+    this.containers = [];
+    this.edges = [];
+
     for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
       var dataObj = dataList_1[_i];
       var obj = ContainerCtrl.decode(dataObj.target);

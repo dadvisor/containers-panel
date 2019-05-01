@@ -1,7 +1,7 @@
 {
-  "name": "clock-panel",
+  "name": "container-panel",
   "version": "1.0.0",
-  "description": "Clock Panel Plugin for Grafana",
+  "description": "Container-Panel Plugin for Grafana",
   "main": "src/module.js",
   "scripts": {
     "build": "node --max-old-space-size=8192 ./node_modules/.bin/webpack --config webpack.config.prod.js",
@@ -10,7 +10,6 @@
     "test": "jest --config jest.config.js"
   },
   "keywords": [
-    "clock",
     "grafana",
     "plugin",
     "panel"
@@ -44,6 +43,7 @@
   },
   "dependencies": {
     "cytoscape": "^3.5.2",
+    "cytoscape-cola": "^2.3.0",
     "cytoscape-dagre": "^2.2.2",
     "dagre": "^0.8.4",
     "lodash": "^4.17.11",

@@ -1,191 +1,48 @@
-import {MetricsPanelCtrl} from 'grafana/app/plugins/sdk';
-import './css/container-panel.css';
-import cytoscape from 'cytoscape';
-import dagre from 'cytoscape-dagre';
-import _ from "lodash";
 
-cytoscape.use(dagre);
+export class ContainerCtrl {
+    private containers: Object[] = [
+        {
+            "created": "1556619810",
+            "hash": "0",
+            "host": "35.204.105.69",
+            "image": "dadvisor/web:latest",
+            "instance": "localhost:14100",
+            "ip": "172.17.0.2",
+            "job": "dadvisor",
+            "names": "/web",
+            "group": "/web"
+        },
+        {
+            "created": "1556619810",
+            "hash": "1",
+            "host": "35.204.105.69",
+            "image": "dadvisor/web:latest",
+            "instance": "localhost:14100",
+            "ip": "172.17.0.2",
+            "job": "dadvisor",
+            "names": "/req",
+            "group": "/req"
+        },
+    ];
 
-function bytesToSize(bytes: number) {
-    let sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    if (bytes === 0) return '0 Byte';
-    let i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return `${Math.round(bytes / Math.pow(1024, i))} ${sizes[i]}`;
-}
-
-export class ContainerCtrl extends MetricsPanelCtrl {
-    static templateUrl = './partials/module.html';
-    private containers: Object[] = [];
-    private edges: Object[] = [];
-
-    /** @ngInject */
-    constructor($scope, $injector) {
-        super($scope, $injector);
-
-        var panelDefaults = {
-            legend: {
-                show: true, // disable/enable legend
-                values: true
-            },
-            links: [],
-            datasource: null,
-            targets: [{}],
-            interval: null,
-            valueName: 'current',
-            colorBackground: 'white',
-            colorValue: 'white',
-        };
-
-        this.events.on('panel-initialized', this.render.bind(this));
-        this.events.on('component-did-mount', this.render.bind(this));
-        this.events.on('refresh', this.updateGraph.bind(this));
-        this.events.on('data-received', this.onDataReceived.bind(this));
-        this.events.on('data-error', this.onDataError.bind(this));
-        this.events.on('data-snapshot-load', this.onDataReceived.bind(this));
-
-        this.events.on('render', this.updateGraph.bind(this));
-
-        _.defaults(this.panel, panelDefaults);
-        _.defaults(this.panel.legend, panelDefaults.legend);
-        this.updateGraph();
+    public clear() {
+        // this.containers = [];
     }
 
-    /**
-     * @param str: example string: id_1234{src="dkdkd", dst="dkdkd}
-     * @return An object with properties src and dst
-     */
-    static decode(str: string) {
-        str = str.substr(str.indexOf('{') + 1);
-        str = str.substr(0, str.length - 1);
-
-        let obj = {};
-
-        for (let keyValue of str.split(",")) {
-            let key = keyValue.substr(0, keyValue.indexOf('='));
-            let value = keyValue.substr(keyValue.indexOf('=') + 1);
-            value = value.substr(1, value.length - 2);
-            obj[key] = value;
-        }
-        return obj;
+    public add(obj: Object) {
+        // this.containers.push(obj);
     }
 
-    private static add_width(edges: Object[]) {
-        const max_width = Math.max(...edges.map(r => r['bytes']));
-        for (let edge of edges) {
-            edge['width'] = 10.0 * edge['bytes'] / max_width;
-        }
-        return edges;
+    public getList() {
+        return this.containers;
     }
 
-    onDataReceived(dataList) {
-        this.containers = [];
-        this.edges = [];
-        for (let dataObj of dataList) {
-            let obj = ContainerCtrl.decode(dataObj.target);
-            if (dataObj.target.startsWith("docker_container")) {
-                this.containers.push(obj);
-            } else if (dataObj.target.startsWith("bytes_send_total")) {
-                let newObj = {};
-                newObj['source'] = obj['src'].substr(3);
-                newObj['target'] = obj['dst'].substr(3);
-                newObj['bytes'] = dataObj.datapoints[0][0];
-                this.edges.push(newObj)
-            }
-        }
-        this.render()
-    }
-
-    onDataError() {
-        console.log("onDataError");
-        this.render();
-    }
-
-    updateGraph() {
-        const panel = document.getElementById('graph-panel');
-        if (!panel) {
-            return
-        }
-
-        let data = {
-            edges: this.get_edges(),
-            nodes: this.get_nodes()
-        };
-        console.log(data);
-
-        cytoscape({
-            container: panel,
-            style: [
-                {
-                    selector: 'node',
-                    css: {
-                        'content': 'data(name)',
-                        'text-valign': 'center',
-                        'text-halign': 'center',
-                        'shape': 'rectangle',
-                        'border-width': '2px',
-                        'border-color': '#808080',
-                        'background-color': 'white',
-                        'background-opacity': '0.3',
-                        'padding-top': '10px',
-                        'padding-left': '10px',
-                        'padding-bottom': '10px',
-                        'padding-right': '10px',
-                        'compound-sizing-wrt-labels': 'include',
-                        'width': 'label',
-                    }
-                },
-                {
-                    selector: '$node > node',
-                    css: {
-                        'compound-sizing-wrt-labels': 'include',
-                        'padding-top': '10px',
-                        'padding-left': '10px',
-                        'padding-bottom': '10px',
-                        'padding-right': '10px',
-                        'text-valign': 'top',
-                        'text-halign': 'center',
-                    }
-                },
-                {
-                    selector: 'edge',
-                    css: {
-                        'curve-style': 'bezier',
-                        'target-arrow-shape': 'triangle',
-                        'width': 'data(width)',
-                        'line-color': '#9fbfdf',
-                        'target-arrow-color': '#9fbfdf',
-                        "text-background-shape": "rectangle",
-                        "text-background-color": "#888",
-                        'label': function (ele) {
-                            return bytesToSize(parseInt(ele.data('bytes')));
-                        }
-                    }
-                },
-                {
-                    selector: 'label',
-                    css: {
-                        'color': '#d9d9d9',
-                    }
-                }
-            ],
-            elements: data,
-            layout: {
-                name: 'dagre',
-                rankDir: 'LR',
-                padding: 50,
-                nodeSep: 40,
-                rankSep: 150,
-                fit: true
-            }
-        });
-    };
-
-    private get_nodes() {
+    public getNodes(){
         let nodes: Object[] = [];
 
         let hostSet = new Set();
         let imageSet = new Set();
-        for (let container of this.containers) {
+        for (let container of this.getList()) {
             hostSet.add(container['host']);
             imageSet.add(container['host'] + '-' + container['image']);
             nodes.push({
@@ -207,13 +64,5 @@ export class ContainerCtrl extends MetricsPanelCtrl {
         return nodes.map(item => {
             return {data: item}
         });
-    }
-
-    private get_edges() {
-        let edges = ContainerCtrl.add_width(this.edges);
-        return edges.map(item => {
-            return {data: item}
-        });
-
     }
 }

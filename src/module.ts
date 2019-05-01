@@ -1,5 +1,5 @@
-import {ContainerCtrl} from './container_ctrl';
+import {PanelCtrl} from './panel_ctrl';
 
 export {
-  ContainerCtrl as PanelCtrl
+  PanelCtrl
 };

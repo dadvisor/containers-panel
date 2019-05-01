@@ -1,0 +1,65 @@
+<div class="editor-row">
+    <div class="section gf-form-group">
+        <div class="gf-form">
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>ID</th>
+                    <th>Group</th>
+                </tr>
+                <tr ng-repeat="cont in ctrl.containerCtrl.getList()">
+                    <td>{{cont.names}}</td>
+                    <td>{{cont.hash}}</td>
+                    <td><input type="text" class="input-small gf-form-input width-9" ng-model="cont.group"/></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="editor-row">
+    <div class="section gf-form-group">
+        <h3 class="section-heading">Create a mapping for automatically grouping</h3>
+        <p>In order to automatically map the container to a certain group, you can create a mapping that performs a
+            regular expression mapping based on the container name, or the container ID. </p>
+        <button class="btn navbar-button">
+            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions"
+               target="_blank">Need more help?
+            </a>
+        </button>
+        <br/>
+        <div class="gf-form">
+            <table>
+                <tr>
+                    <td>Regular expression</td>
+                    <td>Group name</td>
+                    <td>Name or ID</td>
+                    <td>Delete</td>
+                </tr>
+                <tr ng-repeat="row in ctrl.mapping.getList()">
+                    <td><input type="text" class="input-small gf-form-input width-20" ng-model="row.regex"/></td>
+                    <td><input type="text" class="input-small gf-form-input width-20" ng-model="row.group"/></td>
+                    <td>
+                        <select class="input-medium gf-form-input" ng-model="row.match"
+                                ng-options="t for t in ctrl.getNameID()"></select>
+                    </td>
+                    <td>
+                        <button class="btn gf-form-input"
+                                ng-click="ctrl.mapping.remove(row);"><i
+                                class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="gf-form-group">
+        <div class="gf-form">
+            <button class="input-small gf-form-input width-12" ng-click="ctrl.mapping.add_row()">Add row</button>
+        </div>
+    </div>
+    <div class="gf-form-group">
+        <div class="gf-form">
+            <button class="input-small gf-form-input width-12" ng-click="ctrl.mapping.apply()">Apply mapping</button>
+        </div>
+    </div>
+</div>

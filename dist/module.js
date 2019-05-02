@@ -38200,6 +38200,8 @@ function () {
   };
 
   Mapping.prototype.apply = function () {
+    this.panelCtrl.dataChanged = true;
+
     for (var _i = 0, _a = this.rule_mappings; _i < _a.length; _i++) {
       var mapping = _a[_i];
 

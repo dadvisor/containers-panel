@@ -5,9 +5,9 @@
             <select class="input-medium gf-form-input" ng-model="ctrl.panel.mode"
                     ng-options="t for t in ctrl.get_modes()" ng-change="ctrl.render()"></select>
         </div>
-    </div>
-    <div class="gf-form">
-        <button class="input-small gf-form-input width-12" ng-click="ctrl.events.emit('refresh')">Refresh</button>
+        <button style="padding-left: 10px" class="input-small gf-form-input width-12"
+                ng-click="ctrl.events.emit('refresh')">Refresh
+        </button>
     </div>
     <div class="container-panel" ng-style="{height: ctrl.graph_height}">
         <div id="graph-panel"></div>

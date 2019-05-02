@@ -38432,7 +38432,7 @@ function (_super) {
     }
 
     if (this.firstRendering == 0) {
-      this.events.emit('render');
+      this.render();
     }
   };
   /**

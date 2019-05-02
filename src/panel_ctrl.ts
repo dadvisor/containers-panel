@@ -90,7 +90,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             }
         }
         if (this.firstRendering == 0){
-            this.events.emit('render');
+            this.render();
         }
     }
 

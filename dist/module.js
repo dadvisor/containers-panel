@@ -37932,38 +37932,18 @@ function () {
     this.containers = [];
   }
 
-  ContainerCtrl.prototype.startUpdate = function () {
-    for (var _i = 0, _a = this.containers; _i < _a.length; _i++) {
-      var container = _a[_i];
-      container['updated'] = false;
-    }
-  };
-
-  ContainerCtrl.prototype.endUpdate = function () {
-    for (var _i = 0, _a = this.containers; _i < _a.length; _i++) {
-      var container = _a[_i];
-
-      if (!container['updated']) {
-        console.log('Deleting ' + container);
-        this.containers.splice(this.containers.indexOf(container), 1);
-      }
-    }
-  };
-
   ContainerCtrl.prototype.addOrUpdate = function (obj) {
     for (var _i = 0, _a = this.containers; _i < _a.length; _i++) {
       var container = _a[_i];
 
       if (container['hash'] === obj['hash']) {
         container = _lodash2.default.defaults(obj, container);
-        container['updated'] = true;
         console.log(container);
         return;
       }
     }
 
     obj['group'] = obj['names'];
-    obj['updated'] = true;
     this.containers.push(obj);
   };
 
@@ -38427,7 +38407,6 @@ function (_super) {
   };
 
   PanelCtrl.prototype.onDataReceived = function (dataList) {
-    this.containerCtrl.startUpdate();
     this.edgesCtrl.clear();
 
     for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
@@ -38444,8 +38423,6 @@ function (_super) {
         this.edgesCtrl.add(newObj);
       }
     }
-
-    this.containerCtrl.endUpdate();
   };
 
   PanelCtrl.prototype.onDataError = function () {

@@ -62,7 +62,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
     }
 
     onDataReceived(dataList) {
-        this.containerCtrl.startUpdate();
         this.edgesCtrl.clear();
         for (let dataObj of dataList) {
             let obj = decode(dataObj.target);
@@ -76,7 +75,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 this.edgesCtrl.add(newObj);
             }
         }
-        this.containerCtrl.endUpdate();
     }
 
     onDataError() {

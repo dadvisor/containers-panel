@@ -4,35 +4,17 @@ import _ from "lodash";
 export class ContainerCtrl {
     private containers: Object[] = [];
 
-    public startUpdate() {
-        for (let container of this.containers) {
-            container['updated'] = false;
-        }
-    }
-
-    public endUpdate() {
-        for (let container of this.containers) {
-            if (!container['updated']) {
-                console.log('Deleting ' + container);
-                this.containers.splice(this.containers.indexOf(container), 1);
-            }
-        }
-    }
-
     public addOrUpdate(obj: Object) {
         for (let container of this.containers) {
             if (container['hash'] === obj['hash']) {
                 container = _.defaults(obj, container);
-                container['updated'] = true;
                 console.log(container);
                 return;
             }
         }
 
         obj['group'] = obj['names'];
-        obj['updated'] = true;
         this.containers.push(obj);
-
     }
 
     public getList() {

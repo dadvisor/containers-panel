@@ -38200,8 +38200,6 @@ function () {
   };
 
   Mapping.prototype.apply = function () {
-    this.panelCtrl.dataChanged = true;
-
     for (var _i = 0, _a = this.rule_mappings; _i < _a.length; _i++) {
       var mapping = _a[_i];
 
@@ -38359,8 +38357,6 @@ function (_super) {
 
     _this.edgesCtrl = new _edges_ctrl.EdgesCtrl();
     _this.containerCtrl = new _container_ctrl.ContainerCtrl();
-    _this.dataChanged = false;
-    _this.previous_graph_height = _this.height;
     _this.mapping = new _mapping2.default(_this);
     _this.graph_height = _this.height;
     var panelDefaults = {
@@ -38416,31 +38412,22 @@ function (_super) {
   };
 
   PanelCtrl.prototype.onDataReceived = function (dataList) {
-    if (this.containerCtrl.getList().length == 0) {
-      this.edgesCtrl.clear();
+    this.edgesCtrl.clear();
 
-      for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
-        var dataObj = dataList_1[_i];
-        var obj = (0, _util.decode)(dataObj.target);
+    for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
+      var dataObj = dataList_1[_i];
+      var obj = (0, _util.decode)(dataObj.target);
 
-        if (dataObj.target.startsWith("docker_container")) {
-          this.containerCtrl.addOrUpdate(obj);
-        } else if (dataObj.target.startsWith("bytes_send_total")) {
-          var newObj = {};
-          newObj['source'] = obj['src'].substr(3);
-          newObj['target'] = obj['dst'].substr(3);
-          newObj['bytes'] = dataObj.datapoints[0][0];
-          this.edgesCtrl.add(newObj);
-        }
+      if (dataObj.target.startsWith("docker_container")) {
+        this.containerCtrl.addOrUpdate(obj);
+      } else if (dataObj.target.startsWith("bytes_send_total")) {
+        var newObj = {};
+        newObj['source'] = obj['src'].substr(3);
+        newObj['target'] = obj['dst'].substr(3);
+        newObj['bytes'] = dataObj.datapoints[0][0];
+        this.edgesCtrl.add(newObj);
       }
-
-      this.dataChanged = true;
     }
-  };
-
-  PanelCtrl.prototype.onDataError = function () {
-    console.log("onDataError");
-    this.render();
   };
   /**
    * Main method for the panel controller. This updates the graph with the new data.
@@ -38460,26 +38447,18 @@ function (_super) {
     console.log(data);
 
     if (this.cy !== undefined) {
-      if (this.dataChanged) {
-        this.dataChanged = false;
-        this.cy.elements().remove();
-        this.cy.add(data);
-        this.cy.layout({
-          name: 'cola',
-          animate: false,
-          nodeSpacing: function nodeSpacing(node) {
-            return 40;
-          },
-          avoidOverlap: true,
-          fit: true
-        }).run();
-      }
-
-      if (this.previous_graph_height !== this.graph_height) {
-        this.previous_graph_height = this.graph_height;
-        this.cy.resize();
-      }
-
+      this.cy.elements().remove();
+      this.cy.add(data);
+      this.cy.layout({
+        name: 'cola',
+        animate: false,
+        nodeSpacing: function nodeSpacing(node) {
+          return 40;
+        },
+        avoidOverlap: true,
+        fit: true
+      }).run();
+      this.cy.resize();
       this.cy.style((0, _util.getStyle)(this.panel));
     } else {
       this.cy = (0, _cytoscape2.default)({
@@ -38512,11 +38491,6 @@ function (_super) {
   };
 
   PanelCtrl.prototype.getData = function () {
-    if (this.previous_mode !== this.panel.mode) {
-      this.previous_mode = this.panel.mode;
-      this.dataChanged = true;
-    }
-
     switch (this.panel.mode) {
       case _util.Modes.CONTAINERS:
         return {

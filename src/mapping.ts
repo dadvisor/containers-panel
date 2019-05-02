@@ -30,7 +30,6 @@ export default class Mapping {
     }
 
     public apply() {
-        this.panelCtrl.dataChanged = true;
         for (let mapping of this.rule_mappings) {
             if (mapping.regex === "") {
                 continue;

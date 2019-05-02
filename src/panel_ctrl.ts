@@ -15,11 +15,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
 
     public edgesCtrl = new EdgesCtrl();
     public containerCtrl = new ContainerCtrl();
-    private previous_mode;
     private cy;
-
-    public dataChanged = false;
-    public previous_graph_height = this.height;
 
     public mapping = new Mapping(this);
     public graph_height = this.height;
@@ -78,27 +74,19 @@ export class PanelCtrl extends MetricsPanelCtrl {
     }
 
     onDataReceived(dataList) {
-        if (this.containerCtrl.getList().length == 0){
-            this.edgesCtrl.clear();
-            for (let dataObj of dataList) {
-                let obj = decode(dataObj.target);
-                if (dataObj.target.startsWith("docker_container")) {
-                    this.containerCtrl.addOrUpdate(obj);
-                } else if (dataObj.target.startsWith("bytes_send_total")) {
-                    let newObj = {};
-                    newObj['source'] = obj['src'].substr(3);
-                    newObj['target'] = obj['dst'].substr(3);
-                    newObj['bytes'] = dataObj.datapoints[0][0];
-                    this.edgesCtrl.add(newObj);
-                }
+        this.edgesCtrl.clear();
+        for (let dataObj of dataList) {
+            let obj = decode(dataObj.target);
+            if (dataObj.target.startsWith("docker_container")) {
+                this.containerCtrl.addOrUpdate(obj);
+            } else if (dataObj.target.startsWith("bytes_send_total")) {
+                let newObj = {};
+                newObj['source'] = obj['src'].substr(3);
+                newObj['target'] = obj['dst'].substr(3);
+                newObj['bytes'] = dataObj.datapoints[0][0];
+                this.edgesCtrl.add(newObj);
             }
-            this.dataChanged = true;
         }
-    }
-
-    onDataError() {
-        console.log("onDataError");
-        this.render();
     }
 
     /**
@@ -117,25 +105,18 @@ export class PanelCtrl extends MetricsPanelCtrl {
         console.log(data);
 
         if (this.cy !== undefined) {
-            if (this.dataChanged) {
-                this.dataChanged = false;
-                this.cy.elements().remove();
-                this.cy.add(data);
-                this.cy.layout({
-                    name: 'cola',
-                    animate: false,
-                    nodeSpacing: function (node) {
-                        return 40;
-                    },
-                    avoidOverlap: true,
-                    fit: true
-                }).run();
-            }
-
-            if (this.previous_graph_height !== this.graph_height){
-                this.previous_graph_height = this.graph_height;
-                this.cy.resize();
-            }
+            this.cy.elements().remove();
+            this.cy.add(data);
+            this.cy.layout({
+                name: 'cola',
+                animate: false,
+                nodeSpacing: function (node) {
+                    return 40;
+                },
+                avoidOverlap: true,
+                fit: true
+            }).run();
+            this.cy.resize();
             this.cy.style(getStyle(this.panel));
         } else {
             this.cy = cytoscape({
@@ -165,11 +146,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
     }
 
     private getData() {
-        if (this.previous_mode !== this.panel.mode){
-            this.previous_mode = this.panel.mode;
-            this.dataChanged = true;
-        }
-
         switch (this.panel.mode) {
             case Modes.CONTAINERS:
                 return {

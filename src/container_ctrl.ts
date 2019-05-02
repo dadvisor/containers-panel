@@ -1,37 +1,34 @@
 import {add_width} from "./util";
+import _ from "lodash";
 
 export class ContainerCtrl {
     private containers: Object[] = [];
 
     public startUpdate() {
-        for (let container of this.containers){
+        for (let container of this.containers) {
             container['updated'] = false;
         }
     }
 
-    public endUpdate(){
-        for (let container of this.containers){
-            if (!container['updated']){
+    public endUpdate() {
+        for (let container of this.containers) {
+            if (!container['updated']) {
                 this.containers.splice(this.containers.indexOf(container), 1);
             }
         }
     }
 
     public addOrUpdate(obj: Object) {
-        let exists = false;
-        for (let container of this.containers){
-            if (container['hash'] === obj['hash']){
-                exists = true;
-                obj['group'] = obj['names'];
-
+        for (let container of this.containers) {
+            if (container['hash'] === obj['hash']) {
+                container = _.defaults(obj, container);
                 return;
             }
         }
 
-        if (!exists){
-            obj['group'] = obj['names'];
-            this.containers.push(obj);
-        }
+        obj['group'] = obj['names'];
+        this.containers.push(obj);
+
     }
 
     public getList() {
@@ -83,9 +80,9 @@ export class ContainerCtrl {
         });
     }
 
-    public getGroupedEdges(edgesCtrl){
+    public getGroupedEdges(edgesCtrl) {
         let edges: Object[] = [];
-        for (let edge of edgesCtrl.getList()){
+        for (let edge of edgesCtrl.getList()) {
             let data_edge = edge['data'];
             data_edge['source'] = this.getGroupFromContainerHash(data_edge['source']);
             data_edge['target'] = this.getGroupFromContainerHash(data_edge['target']);
@@ -94,9 +91,9 @@ export class ContainerCtrl {
         return this.mergeItemsInList(edges);
     }
 
-    private getGroupFromContainerHash(hash){
-        for (let container of this.containers){
-            if (container['hash'] === hash){
+    private getGroupFromContainerHash(hash) {
+        for (let container of this.containers) {
+            if (container['hash'] === hash) {
                 return container['group'];
             }
         }
@@ -107,16 +104,16 @@ export class ContainerCtrl {
      * sum up the bytes-value if both the target and destination from two nodes are the same.
      * @param list a list with objects, encoded as: {data: {source: '', target: '', bytes: 0}}
      */
-    private mergeItemsInList(list){
+    private mergeItemsInList(list) {
         let separator = '-';
         let map = new Map<string, number>();
         let newList: Object[] = [];
 
-        for (let item of list){
+        for (let item of list) {
             let data = item['data'];
             let key = data['source'] + separator + data['target'];
             let value = data['bytes'];
-            if (map.has(key)){
+            if (map.has(key)) {
                 value += map.get(key);
             }
             map.set(key, value);

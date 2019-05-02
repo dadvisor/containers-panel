@@ -37919,6 +37919,12 @@ exports.ContainerCtrl = undefined;
 
 var _util = __webpack_require__(/*! ./util */ "./util.ts");
 
+var _lodash = __webpack_require__(/*! lodash */ "lodash");
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var ContainerCtrl =
 /** @class */
 function () {
@@ -37944,22 +37950,17 @@ function () {
   };
 
   ContainerCtrl.prototype.addOrUpdate = function (obj) {
-    var exists = false;
-
     for (var _i = 0, _a = this.containers; _i < _a.length; _i++) {
       var container = _a[_i];
 
       if (container['hash'] === obj['hash']) {
-        exists = true;
-        obj['group'] = obj['names'];
+        container = _lodash2.default.defaults(obj, container);
         return;
       }
     }
 
-    if (!exists) {
-      obj['group'] = obj['names'];
-      this.containers.push(obj);
-    }
+    obj['group'] = obj['names'];
+    this.containers.push(obj);
   };
 
   ContainerCtrl.prototype.getList = function () {

@@ -38474,20 +38474,20 @@ function (_super) {
       }
 
       this.cy.style((0, _util.getStyle)(this.panel));
-      this.cy.layout({
-        name: 'cola',
-        animate: false,
-        nodeSpacing: function nodeSpacing(node) {
-          return 40;
-        },
-        avoidOverlap: true,
-        fit: true
-      }).run();
     } else {
       this.cy = (0, _cytoscape2.default)({
         container: panel,
         style: (0, _util.getStyle)(this.panel),
-        elements: data
+        elements: data,
+        layout: {
+          name: 'cola',
+          animate: false,
+          nodeSpacing: function nodeSpacing(node) {
+            return 40;
+          },
+          avoidOverlap: true,
+          fit: true
+        }
       });
     }
   };

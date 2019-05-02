@@ -130,20 +130,20 @@ export class PanelCtrl extends MetricsPanelCtrl {
             }
 
             this.cy.style(getStyle(this.panel));
-            this.cy.layout({
-                name: 'cola',
-                animate: false,
-                nodeSpacing: function (node) {
-                    return 40;
-                },
-                avoidOverlap: true,
-                fit: true
-            }).run();
         } else {
             this.cy = cytoscape({
                 container: panel,
                 style: getStyle(this.panel),
                 elements: data,
+                layout: {
+                    name: 'cola',
+                    animate: false,
+                    nodeSpacing: function (node) {
+                        return 40;
+                    },
+                    avoidOverlap: true,
+                    fit: true
+                }
             });
         }
     };

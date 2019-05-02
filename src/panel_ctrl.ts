@@ -77,7 +77,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 this.edgesCtrl.add(newObj);
             }
         }
-        this.render()
     }
 
     onDataError() {

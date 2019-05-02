@@ -38411,8 +38411,6 @@ function (_super) {
         this.edgesCtrl.add(newObj);
       }
     }
-
-    this.render();
   };
 
   PanelCtrl.prototype.onDataError = function () {

@@ -38420,24 +38420,26 @@ function (_super) {
   };
 
   PanelCtrl.prototype.onDataReceived = function (dataList) {
-    this.edgesCtrl.clear();
+    if (this.containerCtrl.getList().length == 0) {
+      this.edgesCtrl.clear();
 
-    for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
-      var dataObj = dataList_1[_i];
-      var obj = (0, _util.decode)(dataObj.target);
+      for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
+        var dataObj = dataList_1[_i];
+        var obj = (0, _util.decode)(dataObj.target);
 
-      if (dataObj.target.startsWith("docker_container")) {
-        this.containerCtrl.addOrUpdate(obj);
-      } else if (dataObj.target.startsWith("bytes_send_total")) {
-        var newObj = {};
-        newObj['source'] = obj['src'].substr(3);
-        newObj['target'] = obj['dst'].substr(3);
-        newObj['bytes'] = dataObj.datapoints[0][0];
-        this.edgesCtrl.add(newObj);
+        if (dataObj.target.startsWith("docker_container")) {
+          this.containerCtrl.addOrUpdate(obj);
+        } else if (dataObj.target.startsWith("bytes_send_total")) {
+          var newObj = {};
+          newObj['source'] = obj['src'].substr(3);
+          newObj['target'] = obj['dst'].substr(3);
+          newObj['bytes'] = dataObj.datapoints[0][0];
+          this.edgesCtrl.add(newObj);
+        }
       }
-    }
 
-    this.dataChanged = true;
+      this.dataChanged = true;
+    }
   };
 
   PanelCtrl.prototype.onDataError = function () {

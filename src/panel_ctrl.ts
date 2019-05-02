@@ -81,20 +81,22 @@ export class PanelCtrl extends MetricsPanelCtrl {
     }
 
     onDataReceived(dataList) {
-        this.edgesCtrl.clear();
-        for (let dataObj of dataList) {
-            let obj = decode(dataObj.target);
-            if (dataObj.target.startsWith("docker_container")) {
-                this.containerCtrl.addOrUpdate(obj);
-            } else if (dataObj.target.startsWith("bytes_send_total")) {
-                let newObj = {};
-                newObj['source'] = obj['src'].substr(3);
-                newObj['target'] = obj['dst'].substr(3);
-                newObj['bytes'] = dataObj.datapoints[0][0];
-                this.edgesCtrl.add(newObj);
+        if (this.containerCtrl.getList().length == 0){
+            this.edgesCtrl.clear();
+            for (let dataObj of dataList) {
+                let obj = decode(dataObj.target);
+                if (dataObj.target.startsWith("docker_container")) {
+                    this.containerCtrl.addOrUpdate(obj);
+                } else if (dataObj.target.startsWith("bytes_send_total")) {
+                    let newObj = {};
+                    newObj['source'] = obj['src'].substr(3);
+                    newObj['target'] = obj['dst'].substr(3);
+                    newObj['bytes'] = dataObj.datapoints[0][0];
+                    this.edgesCtrl.add(newObj);
+                }
             }
+            this.dataChanged = true;
         }
-        this.dataChanged = true;
     }
 
     onDataError() {

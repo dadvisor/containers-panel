@@ -38391,13 +38391,7 @@ function (_super) {
 
     _this.events.on('panel-initialized', _this.render.bind(_this));
 
-    _this.events.on('refresh', _this.updateGraph.bind(_this));
-
     _this.events.on('data-received', _this.onDataReceived.bind(_this));
-
-    _this.events.on('data-error', _this.onDataError.bind(_this));
-
-    _this.events.on('data-snapshot-load', _this.onDataReceived.bind(_this));
 
     _this.events.on('render', _this.updateGraph.bind(_this));
 

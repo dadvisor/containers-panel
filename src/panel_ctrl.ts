@@ -57,11 +57,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
 
         this.events.on('init-edit-mode', this.onInitEditMode.bind(this));
         this.events.on('panel-initialized', this.render.bind(this));
-        this.events.on('refresh', this.updateGraph.bind(this));
         this.events.on('data-received', this.onDataReceived.bind(this));
-        this.events.on('data-error', this.onDataError.bind(this));
-        this.events.on('data-snapshot-load', this.onDataReceived.bind(this));
-
         this.events.on('render', this.updateGraph.bind(this));
 
         _.defaults(this.panel, panelDefaults);

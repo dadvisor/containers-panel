@@ -2,7 +2,7 @@ import {add_width} from "./util";
 
 export class ContainerCtrl {
     private containers: Object[] = [];
-    private groupNames = new Map<string, string>();
+    private groupNames = {}; // dictionary with key: hash and value, the group map.
 
     public clear() {
         this.containers = [];
@@ -10,7 +10,7 @@ export class ContainerCtrl {
 
     public add(obj: Object) {
         this.containers.push(obj);
-        this.groupNames.set(obj['hash'], obj['names']);
+        this.groupNames[obj['hash']] = obj['names'];
     }
 
     public getList() {
@@ -74,10 +74,10 @@ export class ContainerCtrl {
     }
 
     private getGroupFromContainerHash(hash){
-        if (!this.groupNames.has(hash)){
+        if ( hash !in this.groupNames){
             return '';
         }
-        return this.groupNames.get(hash);
+        return this.groupNames[hash];
     }
 
     /**

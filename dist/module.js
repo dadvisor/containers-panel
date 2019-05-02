@@ -37924,7 +37924,7 @@ var ContainerCtrl =
 function () {
   function ContainerCtrl() {
     this.containers = [];
-    this.groupNames = new Map();
+    this.groupNames = {}; // dictionary with key: hash and value, the group map.
   }
 
   ContainerCtrl.prototype.clear = function () {
@@ -37933,7 +37933,7 @@ function () {
 
   ContainerCtrl.prototype.add = function (obj) {
     this.containers.push(obj);
-    this.groupNames.set(obj['hash'], obj['names']);
+    this.groupNames[obj['hash']] = obj['names'];
   };
 
   ContainerCtrl.prototype.getList = function () {
@@ -38012,11 +38012,11 @@ function () {
   };
 
   ContainerCtrl.prototype.getGroupFromContainerHash = function (hash) {
-    if (!this.groupNames.has(hash)) {
+    if (hash in this.groupNames) {
       return '';
     }
 
-    return this.groupNames.get(hash);
+    return this.groupNames[hash];
   };
   /**
    * sum up the bytes-value if both the target and destination from two nodes are the same.

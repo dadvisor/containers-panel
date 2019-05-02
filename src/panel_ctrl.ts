@@ -18,6 +18,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     private cy;
 
     public dataChanged = false;
+    public previous_graph_height = this.height;
 
     public mapping = new Mapping(this);
     public graph_height = this.height;
@@ -48,7 +49,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
             valueName: 'current',
             mode: Modes.CONTAINERS,
             colorNodeBackground: '#ffffff',
-            colorBackground: '#ffffff',
             colorEdge: '#9fbfdf',
             colorText: '#d9d9d9',
             colorNodeBorder: '#808080',
@@ -124,7 +124,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 this.cy.add(data);
             }
 
-            this.cy.resize();
+            if (this.previous_graph_height !== this.graph_height){
+                this.previous_graph_height = this.graph_height;
+                this.cy.resize();
+            }
+
             this.cy.style(getStyle(this.panel));
             this.cy.layout({
                 name: 'cola',
@@ -146,7 +150,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
 
     private adjustGraphHeight() {
         const header = $('#graph-header');
-
         this.graph_height = this.height;
         if (header !== undefined && header.height() !== undefined) {
             // @ts-ignore

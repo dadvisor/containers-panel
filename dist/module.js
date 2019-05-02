@@ -38358,6 +38358,7 @@ function (_super) {
     _this.edgesCtrl = new _edges_ctrl.EdgesCtrl();
     _this.containerCtrl = new _container_ctrl.ContainerCtrl();
     _this.dataChanged = false;
+    _this.previous_graph_height = _this.height;
     _this.mapping = new _mapping2.default(_this);
     _this.graph_height = _this.height;
     var panelDefaults = {
@@ -38379,7 +38380,6 @@ function (_super) {
       valueName: 'current',
       mode: _util.Modes.CONTAINERS,
       colorNodeBackground: '#ffffff',
-      colorBackground: '#ffffff',
       colorEdge: '#9fbfdf',
       colorText: '#d9d9d9',
       colorNodeBorder: '#808080'
@@ -38468,7 +38468,11 @@ function (_super) {
         this.cy.add(data);
       }
 
-      this.cy.resize();
+      if (this.previous_graph_height !== this.graph_height) {
+        this.previous_graph_height = this.graph_height;
+        this.cy.resize();
+      }
+
       this.cy.style((0, _util.getStyle)(this.panel));
       this.cy.layout({
         name: 'cola',

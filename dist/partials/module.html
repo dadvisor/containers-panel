@@ -5,7 +5,7 @@
             <select class="input-medium gf-form-input" ng-model="ctrl.panel.mode"
                     ng-options="t for t in ctrl.get_modes()" ng-change="ctrl.render()"></select>
         </div>
-        <button style="float: right;" class="input-small gf-form-input width-12"
+        <button style="float: right;" class="input-small"
                 ng-click="ctrl.events.emit('render')"><i class="fa fa-refresh"></i>
         </button>
     </div>

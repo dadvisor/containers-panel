@@ -13,6 +13,7 @@ export class ContainerCtrl {
     public endUpdate() {
         for (let container of this.containers) {
             if (!container['updated']) {
+                console.log('Deleting ' + container);
                 this.containers.splice(this.containers.indexOf(container), 1);
             }
         }

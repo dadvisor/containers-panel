@@ -37944,6 +37944,7 @@ function () {
       var container = _a[_i];
 
       if (!container['updated']) {
+        console.log('Deleting ' + container);
         this.containers.splice(this.containers.indexOf(container), 1);
       }
     }

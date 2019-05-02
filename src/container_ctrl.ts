@@ -22,11 +22,13 @@ export class ContainerCtrl {
         for (let container of this.containers) {
             if (container['hash'] === obj['hash']) {
                 container = _.defaults(obj, container);
+                container['updated'] = true;
                 return;
             }
         }
 
         obj['group'] = obj['names'];
+        obj['updated'] = true;
         this.containers.push(obj);
 
     }

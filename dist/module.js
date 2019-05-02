@@ -37955,11 +37955,13 @@ function () {
 
       if (container['hash'] === obj['hash']) {
         container = _lodash2.default.defaults(obj, container);
+        container['updated'] = true;
         return;
       }
     }
 
     obj['group'] = obj['names'];
+    obj['updated'] = true;
     this.containers.push(obj);
   };
 

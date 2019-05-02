@@ -38361,14 +38361,28 @@ function (_super) {
     _this.mapping = new _mapping2.default(_this);
     _this.graph_height = _this.height;
     var panelDefaults = {
-      datasource: null,
-      targets: [{}],
-      interval: null,
+      datasource: 'Prometheus',
+      targets: [{
+        "expr": "{__name__=~\"docker_container_.*\"}",
+        "format": "time_series",
+        "instant": true,
+        "intervalFactor": 1,
+        "refId": "A"
+      }, {
+        "expr": "{__name__=\"bytes_send_total\"}",
+        "format": "time_series",
+        "instant": true,
+        "intervalFactor": 1,
+        "refId": "B"
+      }],
+      interval: '15s',
       valueName: 'current',
       mode: _util.Modes.CONTAINERS,
       colorNodeBackground: '#ffffff',
+      colorBackground: '#ffffff',
       colorEdge: '#9fbfdf',
-      colorText: '#d9d9d9'
+      colorText: '#d9d9d9',
+      colorNodeBorder: '#808080'
     };
 
     _this.events.on('init-edit-mode', _this.onInitEditMode.bind(_this));
@@ -38595,7 +38609,7 @@ function getStyle(panel) {
       'text-halign': 'center',
       'shape': 'rectangle',
       'border-width': '2px',
-      'border-color': '#808080',
+      'border-color': panel.colorNodeBorder,
       'background-color': panel.colorNodeBackground,
       'background-opacity': '0.3',
       'padding-top': '10px',

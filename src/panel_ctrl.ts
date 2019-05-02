@@ -26,15 +26,32 @@ export class PanelCtrl extends MetricsPanelCtrl {
     constructor($scope, $injector) {
         super($scope, $injector);
 
-        var panelDefaults = {
-            datasource: null,
-            targets: [{}],
-            interval: null,
+        let panelDefaults = {
+            datasource: 'Prometheus',
+            targets: [
+                {
+                    "expr": "{__name__=~\"docker_container_.*\"}",
+                    "format": "time_series",
+                    "instant": true,
+                    "intervalFactor": 1,
+                    "refId": "A"
+                },
+                {
+                    "expr": "{__name__=\"bytes_send_total\"}",
+                    "format": "time_series",
+                    "instant": true,
+                    "intervalFactor": 1,
+                    "refId": "B"
+                }
+            ],
+            interval: '15s',
             valueName: 'current',
             mode: Modes.CONTAINERS,
             colorNodeBackground: '#ffffff',
+            colorBackground: '#ffffff',
             colorEdge: '#9fbfdf',
             colorText: '#d9d9d9',
+            colorNodeBorder: '#808080',
         };
 
         this.events.on('init-edit-mode', this.onInitEditMode.bind(this));
@@ -101,7 +118,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
         console.log(data);
 
         if (this.cy !== undefined) {
-            if (this.dataChanged){
+            if (this.dataChanged) {
                 this.dataChanged = false;
                 this.cy.elements().remove();
                 this.cy.add(data);

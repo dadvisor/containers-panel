@@ -53,7 +53,7 @@ export function getStyle(panel) {
                 'text-halign': 'center',
                 'shape': 'rectangle',
                 'border-width': '2px',
-                'border-color': '#808080',
+                'border-color': panel.colorNodeBorder,
                 'background-color': panel.colorNodeBackground,
                 'background-opacity': '0.3',
                 'padding-top': '10px',

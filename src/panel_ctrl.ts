@@ -15,6 +15,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
 
     public edgesCtrl = new EdgesCtrl();
     public containerCtrl = new ContainerCtrl();
+    private previous_mode;
     private cy;
 
     public dataChanged = false;
@@ -168,6 +169,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
     }
 
     private getData() {
+        if (this.previous_mode !== this.panel.mode){
+            this.previous_mode = this.panel.mode;
+            this.dataChanged = true;
+        }
+
         switch (this.panel.mode) {
             case Modes.CONTAINERS:
                 return {

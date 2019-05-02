@@ -38516,6 +38516,11 @@ function (_super) {
   };
 
   PanelCtrl.prototype.getData = function () {
+    if (this.previous_mode !== this.panel.mode) {
+      this.previous_mode = this.panel.mode;
+      this.dataChanged = true;
+    }
+
     switch (this.panel.mode) {
       case _util.Modes.CONTAINERS:
         return {

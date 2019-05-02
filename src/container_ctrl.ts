@@ -24,6 +24,7 @@ export class ContainerCtrl {
             if (container['hash'] === obj['hash']) {
                 container = _.defaults(obj, container);
                 container['updated'] = true;
+                console.log(container);
                 return;
             }
         }

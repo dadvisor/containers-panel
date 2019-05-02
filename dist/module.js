@@ -37957,6 +37957,7 @@ function () {
       if (container['hash'] === obj['hash']) {
         container = _lodash2.default.defaults(obj, container);
         container['updated'] = true;
+        console.log(container);
         return;
       }
     }

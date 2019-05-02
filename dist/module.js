@@ -38376,7 +38376,7 @@ function (_super) {
         "intervalFactor": 1,
         "refId": "B"
       }],
-      interval: '15s',
+      interval: 'null',
       valueName: 'current',
       mode: _util.Modes.CONTAINERS,
       colorNodeBackground: '#ffffff',
@@ -38466,6 +38466,15 @@ function (_super) {
         this.dataChanged = false;
         this.cy.elements().remove();
         this.cy.add(data);
+        this.cy.layout({
+          name: 'cola',
+          animate: false,
+          nodeSpacing: function nodeSpacing(node) {
+            return 40;
+          },
+          avoidOverlap: true,
+          fit: true
+        }).run();
       }
 
       if (this.previous_graph_height !== this.graph_height) {

@@ -45,7 +45,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "refId": "B"
                 }
             ],
-            interval: '15s',
+            interval: 'null',
             valueName: 'current',
             mode: Modes.CONTAINERS,
             colorNodeBackground: '#ffffff',
@@ -122,13 +122,21 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 this.dataChanged = false;
                 this.cy.elements().remove();
                 this.cy.add(data);
+                this.cy.layout({
+                    name: 'cola',
+                    animate: false,
+                    nodeSpacing: function (node) {
+                        return 40;
+                    },
+                    avoidOverlap: true,
+                    fit: true
+                }).run();
             }
 
             if (this.previous_graph_height !== this.graph_height){
                 this.previous_graph_height = this.graph_height;
                 this.cy.resize();
             }
-
             this.cy.style(getStyle(this.panel));
         } else {
             this.cy = cytoscape({

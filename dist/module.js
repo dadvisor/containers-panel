@@ -37924,6 +37924,7 @@ var ContainerCtrl =
 function () {
   function ContainerCtrl() {
     this.containers = [];
+    this.groupNames = new Map();
   }
 
   ContainerCtrl.prototype.clear = function () {
@@ -37932,6 +37933,7 @@ function () {
 
   ContainerCtrl.prototype.add = function (obj) {
     this.containers.push(obj);
+    this.groupNames.set(obj['hash'], obj['names']);
   };
 
   ContainerCtrl.prototype.getList = function () {
@@ -37980,10 +37982,11 @@ function () {
 
     for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
       var container = _a[_i];
-      hostSet.add(container['group']);
+      var group = this.getGroupFromContainerHash(container['hash']);
+      hostSet.add(group);
       nodes.push({
-        id: container['group'],
-        name: container['group']
+        id: group,
+        name: group
       });
     }
 
@@ -38009,15 +38012,11 @@ function () {
   };
 
   ContainerCtrl.prototype.getGroupFromContainerHash = function (hash) {
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-
-      if (container['hash'] === hash) {
-        return container['group'];
-      }
+    if (!this.groupNames.has(hash)) {
+      return '';
     }
 
-    return '';
+    return this.groupNames.get(hash);
   };
   /**
    * sum up the bytes-value if both the target and destination from two nodes are the same.
@@ -38401,7 +38400,6 @@ function (_super) {
       var obj = (0, _util.decode)(dataObj.target);
 
       if (dataObj.target.startsWith("docker_container")) {
-        obj['group'] = obj['names'];
         this.containerCtrl.add(obj);
       } else if (dataObj.target.startsWith("bytes_send_total")) {
         var newObj = {};

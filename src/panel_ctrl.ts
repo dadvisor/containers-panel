@@ -67,7 +67,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
         for (let dataObj of dataList) {
             let obj = decode(dataObj.target);
             if (dataObj.target.startsWith("docker_container")) {
-                obj['group'] = obj['names'];
                 this.containerCtrl.add(obj);
             } else if (dataObj.target.startsWith("bytes_send_total")) {
                 let newObj = {};

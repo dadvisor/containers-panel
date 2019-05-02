@@ -2,6 +2,7 @@ import {add_width} from "./util";
 
 export class ContainerCtrl {
     private containers: Object[] = [];
+    private groupNames = new Map<string, string>();
 
     public clear() {
         this.containers = [];
@@ -9,6 +10,7 @@ export class ContainerCtrl {
 
     public add(obj: Object) {
         this.containers.push(obj);
+        this.groupNames.set(obj['hash'], obj['names']);
     }
 
     public getList() {
@@ -48,10 +50,11 @@ export class ContainerCtrl {
         let nodes: Object[] = [];
         let hostSet = new Set();
         for (let container of this.getList()) {
-            hostSet.add(container['group']);
+            let group = this.getGroupFromContainerHash(container['hash']);
+            hostSet.add(group);
             nodes.push({
-                id: container['group'],
-                name: container['group']
+                id: group,
+                name: group
             });
         }
         return nodes.map(item => {
@@ -71,12 +74,10 @@ export class ContainerCtrl {
     }
 
     private getGroupFromContainerHash(hash){
-        for (let container of this.getList()){
-            if (container['hash'] === hash){
-                return container['group'];
-            }
+        if (!this.groupNames.has(hash)){
+            return '';
         }
-        return '';
+        return this.groupNames.get(hash);
     }
 
     /**
@@ -84,7 +85,7 @@ export class ContainerCtrl {
      * @param list a list with objects, encoded as: {data: {source: '', target: '', bytes: 0}}
      */
     private mergeItemsInList(list){
-        let separator = '-'
+        let separator = '-';
         let map = new Map<string, number>();
         let newList: Object[] = [];
 

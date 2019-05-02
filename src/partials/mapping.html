@@ -10,7 +10,8 @@
                 <tr ng-repeat="cont in ctrl.containerCtrl.getList()">
                     <td>{{cont.names}}</td>
                     <td>{{cont.hash}}</td>
-                    <td><input type="text" class="input-small gf-form-input width-9" ng-model="cont.group"
+                    <td><input type="text" class="input-small gf-form-input width-9"
+                               ng-model="ctrl.containerCtrl.getGroupFromContainerHash(cont.hash)"
                                ng-change="ctrl.render()"/></td>
                 </tr>
             </table>

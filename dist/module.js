@@ -38412,6 +38412,7 @@ function (_super) {
   };
 
   PanelCtrl.prototype.onDataReceived = function (dataList) {
+    console.log('On data received');
     this.edgesCtrl.clear();
 
     for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {

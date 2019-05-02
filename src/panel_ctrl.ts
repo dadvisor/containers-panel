@@ -74,6 +74,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     }
 
     onDataReceived(dataList) {
+        console.log('On data received');
         this.edgesCtrl.clear();
         for (let dataObj of dataList) {
             let obj = decode(dataObj.target);

@@ -6,7 +6,7 @@
                     ng-options="t for t in ctrl.get_modes()" ng-change="ctrl.render()"></select>
         </div>
         <button style="padding-left: 10px" class="input-small gf-form-input width-12"
-                ng-click="ctrl.events.emit('refresh')">Refresh
+                ng-click="ctrl.events.emit('render')">Refresh
         </button>
     </div>
     <div class="container-panel" ng-style="{height: ctrl.graph_height}">

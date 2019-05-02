@@ -17,6 +17,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
     public containerCtrl = new ContainerCtrl();
     private cy;
 
+    public dataChanged = false;
+
     public mapping = new Mapping(this);
     public graph_height = this.height;
 
@@ -75,6 +77,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 this.edgesCtrl.add(newObj);
             }
         }
+        this.dataChanged = true;
     }
 
     onDataError() {
@@ -98,12 +101,12 @@ export class PanelCtrl extends MetricsPanelCtrl {
         console.log(data);
 
         if (this.cy !== undefined) {
-            // TODO: if height changed
+            if (this.dataChanged){
+                this.dataChanged = false;
+                this.cy.elements().remove();
+                this.cy.add(data);
+            }
 
-            // TODO: if data changed
-
-            this.cy.elements().remove();
-            this.cy.add(data);
             this.cy.resize();
             this.cy.style(getStyle(this.panel));
             this.cy.layout({

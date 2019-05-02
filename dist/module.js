@@ -38357,6 +38357,7 @@ function (_super) {
 
     _this.edgesCtrl = new _edges_ctrl.EdgesCtrl();
     _this.containerCtrl = new _container_ctrl.ContainerCtrl();
+    _this.dataChanged = false;
     _this.mapping = new _mapping2.default(_this);
     _this.graph_height = _this.height;
     var panelDefaults = {
@@ -38421,6 +38422,8 @@ function (_super) {
         this.edgesCtrl.add(newObj);
       }
     }
+
+    this.dataChanged = true;
   };
 
   PanelCtrl.prototype.onDataError = function () {
@@ -38445,10 +38448,12 @@ function (_super) {
     console.log(data);
 
     if (this.cy !== undefined) {
-      // TODO: if height changed
-      // TODO: if data changed
-      this.cy.elements().remove();
-      this.cy.add(data);
+      if (this.dataChanged) {
+        this.dataChanged = false;
+        this.cy.elements().remove();
+        this.cy.add(data);
+      }
+
       this.cy.resize();
       this.cy.style((0, _util.getStyle)(this.panel));
       this.cy.layout({

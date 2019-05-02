@@ -107,6 +107,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
         if (this.cy !== undefined) {
             this.cy.elements().remove();
             this.cy.add(data);
+            this.cy.resize();
             this.cy.layout({
                 name: 'cola',
                 animate: false,
@@ -116,7 +117,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 avoidOverlap: true,
                 fit: true
             }).run();
-            this.cy.resize();
+
             this.cy.style(getStyle(this.panel));
         } else {
             this.cy = cytoscape({

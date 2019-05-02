@@ -38449,6 +38449,7 @@ function (_super) {
     if (this.cy !== undefined) {
       this.cy.elements().remove();
       this.cy.add(data);
+      this.cy.resize();
       this.cy.layout({
         name: 'cola',
         animate: false,
@@ -38458,7 +38459,6 @@ function (_super) {
         avoidOverlap: true,
         fit: true
       }).run();
-      this.cy.resize();
       this.cy.style((0, _util.getStyle)(this.panel));
     } else {
       this.cy = (0, _cytoscape2.default)({

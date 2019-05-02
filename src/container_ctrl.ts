@@ -1,43 +1,21 @@
+import {add_width} from "./util";
 
 export class ContainerCtrl {
-    private containers: Object[] = [
-        {
-            "created": "1556619810",
-            "hash": "0",
-            "host": "35.204.105.69",
-            "image": "dadvisor/web:latest",
-            "instance": "localhost:14100",
-            "ip": "172.17.0.2",
-            "job": "dadvisor",
-            "names": "/web",
-            "group": "/web"
-        },
-        {
-            "created": "1556619810",
-            "hash": "1",
-            "host": "35.204.105.69",
-            "image": "dadvisor/web:latest",
-            "instance": "localhost:14100",
-            "ip": "172.17.0.2",
-            "job": "dadvisor",
-            "names": "/req",
-            "group": "/req"
-        },
-    ];
+    private containers: Object[] = [];
 
     public clear() {
-        // this.containers = [];
+        this.containers = [];
     }
 
     public add(obj: Object) {
-        // this.containers.push(obj);
+        this.containers.push(obj);
     }
 
     public getList() {
         return this.containers;
     }
 
-    public getNodes(){
+    public getNodes() {
         let nodes: Object[] = [];
 
         let hostSet = new Set();
@@ -62,6 +40,76 @@ export class ContainerCtrl {
             });
         });
         return nodes.map(item => {
+            return {data: item}
+        });
+    }
+
+    public getGroupedNodes() {
+        let nodes: Object[] = [];
+        let hostSet = new Set();
+        for (let container of this.getList()) {
+            hostSet.add(container['group']);
+            nodes.push({
+                id: container['group'],
+                name: container['group']
+            });
+        }
+        return nodes.map(item => {
+            return {data: item}
+        });
+    }
+
+    public getGroupedEdges(edgesCtrl){
+        let edges: Object[] = [];
+        for (let edge of edgesCtrl.getList()){
+            let data_edge = edge['data'];
+            data_edge['source'] = this.getGroupFromContainerHash(data_edge['source']);
+            data_edge['target'] = this.getGroupFromContainerHash(data_edge['target']);
+            edges.push(edge);
+        }
+        return this.mergeItemsInList(edges);
+    }
+
+    private getGroupFromContainerHash(hash){
+        for (let container of this.getList()){
+            if (container['hash'] === hash){
+                return container['group'];
+            }
+        }
+        return '';
+    }
+
+    /**
+     * sum up the bytes-value if both the target and destination from two nodes are the same.
+     * @param list a list with objects, encoded as: {data: {source: '', target: '', bytes: 0}}
+     */
+    private mergeItemsInList(list){
+        let separator = '-'
+        let map = new Map<string, number>();
+        let newList: Object[] = [];
+
+        for (let item of list){
+            let data = item['data'];
+            let key = data['source'] + separator + data['target'];
+            let value = data['bytes'];
+            if (map.has(key)){
+                value += map.get(key);
+            }
+            map.set(key, value);
+        }
+
+        map.forEach((value: number, key: string) => {
+            console.log(key);
+            let source_target = key.split(separator);
+            newList.push({
+                'source': source_target[0],
+                'target': source_target[1],
+                'bytes': value,
+            });
+        });
+
+        newList = add_width(newList);
+        return newList.map(item => {
             return {data: item}
         });
     }

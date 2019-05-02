@@ -37915,38 +37915,23 @@ module.exports = g;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.ContainerCtrl = undefined;
+
+var _util = __webpack_require__(/*! ./util */ "./util.ts");
 
 var ContainerCtrl =
 /** @class */
 function () {
   function ContainerCtrl() {
-    this.containers = [{
-      "created": "1556619810",
-      "hash": "0",
-      "host": "35.204.105.69",
-      "image": "dadvisor/web:latest",
-      "instance": "localhost:14100",
-      "ip": "172.17.0.2",
-      "job": "dadvisor",
-      "names": "/web",
-      "group": "/web"
-    }, {
-      "created": "1556619810",
-      "hash": "1",
-      "host": "35.204.105.69",
-      "image": "dadvisor/web:latest",
-      "instance": "localhost:14100",
-      "ip": "172.17.0.2",
-      "job": "dadvisor",
-      "names": "/req",
-      "group": "/req"
-    }];
+    this.containers = [];
   }
 
-  ContainerCtrl.prototype.clear = function () {// this.containers = [];
+  ContainerCtrl.prototype.clear = function () {
+    this.containers = [];
   };
 
-  ContainerCtrl.prototype.add = function (obj) {// this.containers.push(obj);
+  ContainerCtrl.prototype.add = function (obj) {
+    this.containers.push(obj);
   };
 
   ContainerCtrl.prototype.getList = function () {
@@ -37983,6 +37968,92 @@ function () {
       });
     });
     return nodes.map(function (item) {
+      return {
+        data: item
+      };
+    });
+  };
+
+  ContainerCtrl.prototype.getGroupedNodes = function () {
+    var nodes = [];
+    var hostSet = new Set();
+
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+      hostSet.add(container['group']);
+      nodes.push({
+        id: container['group'],
+        name: container['group']
+      });
+    }
+
+    return nodes.map(function (item) {
+      return {
+        data: item
+      };
+    });
+  };
+
+  ContainerCtrl.prototype.getGroupedEdges = function (edgesCtrl) {
+    var edges = [];
+
+    for (var _i = 0, _a = edgesCtrl.getList(); _i < _a.length; _i++) {
+      var edge = _a[_i];
+      var data_edge = edge['data'];
+      data_edge['source'] = this.getGroupFromContainerHash(data_edge['source']);
+      data_edge['target'] = this.getGroupFromContainerHash(data_edge['target']);
+      edges.push(edge);
+    }
+
+    return this.mergeItemsInList(edges);
+  };
+
+  ContainerCtrl.prototype.getGroupFromContainerHash = function (hash) {
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+
+      if (container['hash'] === hash) {
+        return container['group'];
+      }
+    }
+
+    return '';
+  };
+  /**
+   * sum up the bytes-value if both the target and destination from two nodes are the same.
+   * @param list a list with objects, encoded as: {data: {source: '', target: '', bytes: 0}}
+   */
+
+
+  ContainerCtrl.prototype.mergeItemsInList = function (list) {
+    var separator = '-';
+    var map = new Map();
+    var newList = [];
+
+    for (var _i = 0, list_1 = list; _i < list_1.length; _i++) {
+      var item = list_1[_i];
+      var data = item['data'];
+      var key = data['source'] + separator + data['target'];
+      var value = data['bytes'];
+
+      if (map.has(key)) {
+        value += map.get(key);
+      }
+
+      map.set(key, value);
+    }
+
+    map.forEach(function (value, key) {
+      console.log(key);
+      var source_target = key.split(separator);
+      newList.push({
+        'source': source_target[0],
+        'target': source_target[1],
+        'bytes': value
+      });
+    });
+    newList = (0, _util.add_width)(newList);
+    return newList.map(function (item) {
       return {
         data: item
       };
@@ -38059,18 +38130,6 @@ function () {
   };
 
   EdgesCtrl.prototype.getList = function () {
-    // TODO: Remove statement below
-    this.edges = [{
-      "target": "0",
-      "job": "dadvisor",
-      "bytes": 2480,
-      "source": "1"
-    }, {
-      "target": "1",
-      "job": "dadvisor",
-      "bytes": 2480,
-      "source": "0"
-    }];
     var edges = (0, _util.add_width)(this.edges);
     return edges.map(function (item) {
       return {
@@ -38117,11 +38176,11 @@ function () {
 var Mapping =
 /** @class */
 function () {
-  function Mapping(containerCtrl) {
+  function Mapping(panelCtrl) {
     /** Variables */
     this.rule_mappings = [];
     this.add_row();
-    this.containerCtrl = containerCtrl;
+    this.panelCtrl = panelCtrl;
   }
 
   Mapping.prototype.add_row = function () {
@@ -38138,7 +38197,7 @@ function () {
 
       var re = new RegExp(mapping.regex);
 
-      for (var _b = 0, _c = this.containerCtrl.getList(); _b < _c.length; _b++) {
+      for (var _b = 0, _c = this.panelCtrl.containerCtrl.getList(); _b < _c.length; _b++) {
         var container = _c[_b];
 
         switch (mapping.match) {
@@ -38163,6 +38222,8 @@ function () {
         container['group'].replace(re, container['group']);
       }
     }
+
+    this.panelCtrl.updateGraph();
   };
 
   Mapping.prototype.remove = function (row) {
@@ -38284,7 +38345,7 @@ function (_super) {
 
     _this.edgesCtrl = new _edges_ctrl.EdgesCtrl();
     _this.containerCtrl = new _container_ctrl.ContainerCtrl();
-    _this.mapping = new _mapping2.default(_this.containerCtrl);
+    _this.mapping = new _mapping2.default(_this);
     _this.graph_height = _this.height;
     var panelDefaults = {
       datasource: null,
@@ -38292,7 +38353,9 @@ function (_super) {
       interval: null,
       valueName: 'current',
       mode: _util.Modes.CONTAINERS,
-      colorBackground: null
+      colorNodeBackground: '#ffffff',
+      colorEdge: '#9fbfdf',
+      colorText: '#d9d9d9'
     };
 
     _this.events.on('init-edit-mode', _this.onInitEditMode.bind(_this));
@@ -38356,29 +38419,22 @@ function (_super) {
     console.log("onDataError");
     this.render();
   };
+  /**
+   * Main method for the panel controller. This updates the graph with the new data.
+   */
+
 
   PanelCtrl.prototype.updateGraph = function () {
     // Adjust graph height
-    var header = $('#graph-header');
-    this.graph_height = this.height;
-
-    if (header !== undefined) {
-      if (header.height() !== undefined) {
-        // @ts-ignore
-        this.graph_height = this.height - header.height();
-      }
-    }
-
+    this.adjustGraphHeight();
     var panel = document.getElementById('graph-panel');
 
     if (!panel) {
       return;
     }
 
-    var data = {
-      edges: this.edgesCtrl.getList(),
-      nodes: this.containerCtrl.getNodes()
-    };
+    var data = this.getData();
+    console.log(data);
 
     if (this.cy !== undefined) {
       // TODO: if height changed
@@ -38386,6 +38442,7 @@ function (_super) {
       this.cy.elements().remove();
       this.cy.add(data);
       this.cy.resize();
+      this.cy.style((0, _util.getStyle)(this.panel));
       this.cy.layout({
         name: 'cola',
         animate: false,
@@ -38405,6 +38462,37 @@ function (_super) {
   };
 
   ;
+
+  PanelCtrl.prototype.adjustGraphHeight = function () {
+    var header = $('#graph-header');
+    this.graph_height = this.height;
+
+    if (header !== undefined && header.height() !== undefined) {
+      // @ts-ignore
+      this.graph_height = this.height - header.height();
+    }
+  };
+
+  PanelCtrl.prototype.getData = function () {
+    switch (this.panel.mode) {
+      case _util.Modes.CONTAINERS:
+        return {
+          edges: this.edgesCtrl.getList(),
+          nodes: this.containerCtrl.getNodes()
+        };
+
+      case _util.Modes.GROUPED:
+        return {
+          edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
+          nodes: this.containerCtrl.getGroupedNodes()
+        };
+
+      default:
+        console.log('Something went wrong');
+        return {};
+    }
+  };
+
   PanelCtrl.templateUrl = './partials/module.html';
   return PanelCtrl;
 }(_sdk.MetricsPanelCtrl);
@@ -38442,8 +38530,6 @@ var Modes = exports.Modes = undefined;
 (function (Modes) {
   Modes["CONTAINERS"] = "Containers";
   Modes["GROUPED"] = "Grouped";
-  Modes["COST"] = "Cost";
-  Modes["WASTE"] = "Waste";
 })(Modes || (exports.Modes = Modes = {}));
 
 function add_width(edges) {
@@ -38497,7 +38583,7 @@ function getStyle(panel) {
       'shape': 'rectangle',
       'border-width': '2px',
       'border-color': '#808080',
-      'background-color': 'white',
+      'background-color': panel.colorNodeBackground,
       'background-opacity': '0.3',
       'padding-top': '10px',
       'padding-left': '10px',
@@ -38523,8 +38609,8 @@ function getStyle(panel) {
       'curve-style': 'bezier',
       'target-arrow-shape': 'triangle',
       'width': 'data(width)',
-      'line-color': '#9fbfdf',
-      'target-arrow-color': '#9fbfdf',
+      'line-color': panel.colorEdge,
+      'target-arrow-color': panel.colorEdge,
       "text-background-shape": "rectangle",
       "text-background-color": "#888",
       'label': function label(ele) {
@@ -38534,7 +38620,7 @@ function getStyle(panel) {
   }, {
     selector: 'label',
     css: {
-      'color': '#d9d9d9'
+      'color': panel.colorText
     }
   }];
 }

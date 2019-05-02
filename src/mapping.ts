@@ -1,5 +1,5 @@
 import {NameID} from "./util";
-import {ContainerCtrl} from "./container_ctrl";
+import {PanelCtrl} from "./panel_ctrl";
 
 class RuleMapping {
     regex: string;
@@ -18,11 +18,11 @@ export default class Mapping {
     /** Variables */
 
     private rule_mappings: RuleMapping[] = [];
-    private containerCtrl: ContainerCtrl;
+    private panelCtrl: PanelCtrl;
 
-    constructor(containerCtrl: ContainerCtrl) {
+    constructor(panelCtrl: PanelCtrl) {
         this.add_row();
-        this.containerCtrl = containerCtrl;
+        this.panelCtrl = panelCtrl;
     }
 
     public add_row() {
@@ -35,7 +35,7 @@ export default class Mapping {
                 continue;
             }
             let re = new RegExp(mapping.regex);
-            for (let container of this.containerCtrl.getList()) {
+            for (let container of this.panelCtrl.containerCtrl.getList()) {
                 switch (mapping.match) {
                     case NameID.NAME:
                         if (re.test(container['names'])) {
@@ -53,6 +53,7 @@ export default class Mapping {
                 container['group'].replace(re, container['group']);
             }
         }
+        this.panelCtrl.updateGraph();
     }
 
     public remove(row) {

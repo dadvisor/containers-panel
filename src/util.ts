@@ -1,4 +1,3 @@
-
 export enum NameID {
     NAME = 'Name',
     ID = 'ID'
@@ -7,8 +6,6 @@ export enum NameID {
 export enum Modes {
     CONTAINERS = 'Containers',
     GROUPED = 'Grouped',
-    COST = 'Cost',
-    WASTE = 'Waste'
 }
 
 
@@ -46,7 +43,7 @@ export function bytesToSize(bytes: number) {
     return `${Math.round(bytes / Math.pow(1024, i))} ${sizes[i]}`;
 }
 
-export function getStyle(panel){
+export function getStyle(panel) {
     return [
         {
             selector: 'node',
@@ -57,7 +54,7 @@ export function getStyle(panel){
                 'shape': 'rectangle',
                 'border-width': '2px',
                 'border-color': '#808080',
-                'background-color': 'white',
+                'background-color': panel.colorNodeBackground,
                 'background-opacity': '0.3',
                 'padding-top': '10px',
                 'padding-left': '10px',
@@ -85,19 +82,19 @@ export function getStyle(panel){
                 'curve-style': 'bezier',
                 'target-arrow-shape': 'triangle',
                 'width': 'data(width)',
-                'line-color': '#9fbfdf',
-                'target-arrow-color': '#9fbfdf',
+                'line-color': panel.colorEdge,
+                'target-arrow-color': panel.colorEdge,
                 "text-background-shape": "rectangle",
                 "text-background-color": "#888",
                 'label': function (ele) {
                     return bytesToSize(parseInt(ele.data('bytes')));
-                }
+                },
             }
         },
         {
             selector: 'label',
             css: {
-                'color': '#d9d9d9',
+                'color': panel.colorText,
             }
         }
     ];

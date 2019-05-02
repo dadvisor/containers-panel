@@ -17,7 +17,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     public containerCtrl = new ContainerCtrl();
     private cy;
 
-    public mapping = new Mapping(this.containerCtrl);
+    public mapping = new Mapping(this);
     public graph_height = this.height;
 
     /** @ngInject */
@@ -30,7 +30,9 @@ export class PanelCtrl extends MetricsPanelCtrl {
             interval: null,
             valueName: 'current',
             mode: Modes.CONTAINERS,
-            colorBackground: null,
+            colorNodeBackground: '#ffffff',
+            colorEdge: '#9fbfdf',
+            colorText: '#d9d9d9',
         };
 
         this.events.on('init-edit-mode', this.onInitEditMode.bind(this));
@@ -83,27 +85,20 @@ export class PanelCtrl extends MetricsPanelCtrl {
         this.render();
     }
 
-    updateGraph() {
+    /**
+     * Main method for the panel controller. This updates the graph with the new data.
+     */
+    public updateGraph() {
         // Adjust graph height
-        let header = $('#graph-header');
-
-        this.graph_height = this.height;
-        if (header !== undefined) {
-            if (header.height() !== undefined) {
-                // @ts-ignore
-                this.graph_height = this.height - header.height();
-            }
-        }
+        this.adjustGraphHeight();
 
         const panel = document.getElementById('graph-panel');
         if (!panel) {
             return
         }
 
-        let data = {
-            edges: this.edgesCtrl.getList(),
-            nodes: this.containerCtrl.getNodes()
-        };
+        let data = this.getData();
+        console.log(data);
 
         if (this.cy !== undefined) {
             // TODO: if height changed
@@ -113,6 +108,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             this.cy.elements().remove();
             this.cy.add(data);
             this.cy.resize();
+            this.cy.style(getStyle(this.panel));
             this.cy.layout({
                 name: 'cola',
                 animate: false,
@@ -130,4 +126,32 @@ export class PanelCtrl extends MetricsPanelCtrl {
             });
         }
     };
+
+    private adjustGraphHeight() {
+        const header = $('#graph-header');
+
+        this.graph_height = this.height;
+        if (header !== undefined && header.height() !== undefined) {
+            // @ts-ignore
+            this.graph_height = this.height - header.height();
+        }
+    }
+
+    private getData() {
+        switch (this.panel.mode) {
+            case Modes.CONTAINERS:
+                return {
+                    edges: this.edgesCtrl.getList(),
+                    nodes: this.containerCtrl.getNodes()
+                };
+            case Modes.GROUPED:
+                return {
+                    edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
+                    nodes: this.containerCtrl.getGroupedNodes()
+                };
+            default:
+                console.log('Something went wrong');
+                return {};
+        }
+    }
 }

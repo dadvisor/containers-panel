@@ -2,15 +2,36 @@ import {add_width} from "./util";
 
 export class ContainerCtrl {
     private containers: Object[] = [];
-    private groupNames = {}; // dictionary with key: hash and value, the group map.
 
-    public clear() {
-        this.containers = [];
+    public startUpdate() {
+        for (let container of this.containers){
+            container['updated'] = false;
+        }
     }
 
-    public add(obj: Object) {
-        this.containers.push(obj);
-        this.groupNames[obj['hash']] = obj['names'];
+    public endUpdate(){
+        for (let container of this.containers){
+            if (!container['updated']){
+                this.containers.splice(this.containers.indexOf(container), 1);
+            }
+        }
+    }
+
+    public addOrUpdate(obj: Object) {
+        let exists = false;
+        for (let container of this.containers){
+            if (container['hash'] === obj['hash']){
+                exists = true;
+                obj['group'] = obj['names'];
+
+                return;
+            }
+        }
+
+        if (!exists){
+            obj['group'] = obj['names'];
+            this.containers.push(obj);
+        }
     }
 
     public getList() {
@@ -74,10 +95,12 @@ export class ContainerCtrl {
     }
 
     private getGroupFromContainerHash(hash){
-        if ( hash !in this.groupNames){
-            return '';
+        for (let container of this.containers){
+            if (container['hash'] === hash){
+                return container['group'];
+            }
         }
-        return this.groupNames[hash];
+        return '';
     }
 
     /**

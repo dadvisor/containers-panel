@@ -37924,16 +37924,42 @@ var ContainerCtrl =
 function () {
   function ContainerCtrl() {
     this.containers = [];
-    this.groupNames = {}; // dictionary with key: hash and value, the group map.
   }
 
-  ContainerCtrl.prototype.clear = function () {
-    this.containers = [];
+  ContainerCtrl.prototype.startUpdate = function () {
+    for (var _i = 0, _a = this.containers; _i < _a.length; _i++) {
+      var container = _a[_i];
+      container['updated'] = false;
+    }
   };
 
-  ContainerCtrl.prototype.add = function (obj) {
-    this.containers.push(obj);
-    this.groupNames[obj['hash']] = obj['names'];
+  ContainerCtrl.prototype.endUpdate = function () {
+    for (var _i = 0, _a = this.containers; _i < _a.length; _i++) {
+      var container = _a[_i];
+
+      if (!container['updated']) {
+        this.containers.splice(this.containers.indexOf(container), 1);
+      }
+    }
+  };
+
+  ContainerCtrl.prototype.addOrUpdate = function (obj) {
+    var exists = false;
+
+    for (var _i = 0, _a = this.containers; _i < _a.length; _i++) {
+      var container = _a[_i];
+
+      if (container['hash'] === obj['hash']) {
+        exists = true;
+        obj['group'] = obj['names'];
+        return;
+      }
+    }
+
+    if (!exists) {
+      obj['group'] = obj['names'];
+      this.containers.push(obj);
+    }
   };
 
   ContainerCtrl.prototype.getList = function () {
@@ -38012,11 +38038,15 @@ function () {
   };
 
   ContainerCtrl.prototype.getGroupFromContainerHash = function (hash) {
-    if (hash in this.groupNames) {
-      return '';
+    for (var _i = 0, _a = this.containers; _i < _a.length; _i++) {
+      var container = _a[_i];
+
+      if (container['hash'] === hash) {
+        return container['group'];
+      }
     }
 
-    return this.groupNames[hash];
+    return '';
   };
   /**
    * sum up the bytes-value if both the target and destination from two nodes are the same.
@@ -38392,7 +38422,7 @@ function (_super) {
   };
 
   PanelCtrl.prototype.onDataReceived = function (dataList) {
-    this.containerCtrl.clear();
+    this.containerCtrl.startUpdate();
     this.edgesCtrl.clear();
 
     for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
@@ -38400,7 +38430,7 @@ function (_super) {
       var obj = (0, _util.decode)(dataObj.target);
 
       if (dataObj.target.startsWith("docker_container")) {
-        this.containerCtrl.add(obj);
+        this.containerCtrl.addOrUpdate(obj);
       } else if (dataObj.target.startsWith("bytes_send_total")) {
         var newObj = {};
         newObj['source'] = obj['src'].substr(3);
@@ -38409,6 +38439,8 @@ function (_super) {
         this.edgesCtrl.add(newObj);
       }
     }
+
+    this.containerCtrl.endUpdate();
   };
 
   PanelCtrl.prototype.onDataError = function () {

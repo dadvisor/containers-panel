@@ -8,7 +8,6 @@ export class ContainerCtrl {
         for (let container of this.containers) {
             if (container['hash'] === obj['hash']) {
                 container = _.defaults(obj, container);
-                console.log(container);
                 return;
             }
         }
@@ -106,7 +105,6 @@ export class ContainerCtrl {
         }
 
         map.forEach((value: number, key: string) => {
-            console.log(key);
             let source_target = key.split(separator);
             newList.push({
                 'source': source_target[0],

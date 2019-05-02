@@ -37938,7 +37938,6 @@ function () {
 
       if (container['hash'] === obj['hash']) {
         container = _lodash2.default.defaults(obj, container);
-        console.log(container);
         return;
       }
     }
@@ -38058,7 +38057,6 @@ function () {
     }
 
     map.forEach(function (value, key) {
-      console.log(key);
       var source_target = key.split(separator);
       newList.push({
         'source': source_target[0],

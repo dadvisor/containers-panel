@@ -38357,6 +38357,7 @@ function (_super) {
 
     _this.edgesCtrl = new _edges_ctrl.EdgesCtrl();
     _this.containerCtrl = new _container_ctrl.ContainerCtrl();
+    _this.firstRendering = 0;
     _this.mapping = new _mapping2.default(_this);
     _this.graph_height = _this.height;
     var panelDefaults = {
@@ -38428,6 +38429,10 @@ function (_super) {
         newObj['bytes'] = dataObj.datapoints[0][0];
         this.edgesCtrl.add(newObj);
       }
+    }
+
+    if (this.firstRendering == 0) {
+      this.events.emit('render');
     }
   };
   /**

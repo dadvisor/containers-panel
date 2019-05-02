@@ -16,6 +16,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     public edgesCtrl = new EdgesCtrl();
     public containerCtrl = new ContainerCtrl();
     private cy;
+    private firstRendering = 0;
 
     public mapping = new Mapping(this);
     public graph_height = this.height;
@@ -87,6 +88,9 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 newObj['bytes'] = dataObj.datapoints[0][0];
                 this.edgesCtrl.add(newObj);
             }
+        }
+        if (this.firstRendering == 0){
+            this.events.emit('render');
         }
     }
 

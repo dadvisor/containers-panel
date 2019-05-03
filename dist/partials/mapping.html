@@ -4,12 +4,12 @@
             <table>
                 <tr>
                     <th>Name</th>
-                    <th>ID</th>
+                    <th>Image</th>
                     <th>Group</th>
                 </tr>
                 <tr ng-repeat="cont in ctrl.containerCtrl.getList()">
                     <td>{{cont.names}}</td>
-                    <td>{{cont.hash}}</td>
+                    <td>{{cont.image}}</td>
                     <td><input type="text" class="input-small gf-form-input width-9" ng-model="cont.group"
                                ng-change="ctrl.render()"/></td>
                 </tr>
@@ -33,7 +33,7 @@
                 <tr>
                     <td>Regular expression</td>
                     <td>Group name</td>
-                    <td>Name or ID</td>
+                    <td>Name or image</td>
                     <td>Delete</td>
                 </tr>
                 <tr ng-repeat="row in ctrl.mapping.getList()">
@@ -41,7 +41,7 @@
                     <td><input type="text" class="input-small gf-form-input width-20" ng-model="row.group"/></td>
                     <td>
                         <select class="input-medium gf-form-input" ng-model="row.match"
-                                ng-options="t for t in ctrl.getNameID()"></select>
+                                ng-options="t for t in ctrl.getNameImage()"></select>
                     </td>
                     <td>
                         <button class="btn gf-form-input"

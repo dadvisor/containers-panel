@@ -4,7 +4,7 @@ import cytoscape from 'cytoscape';
 import cola from 'cytoscape-cola';
 import _ from "lodash";
 import Mapping from "./mapping";
-import {decode, getStyle, Modes, NameID} from "./util";
+import {decode, getStyle, Modes, NameImage} from "./util";
 import {EdgesCtrl} from "./edges_ctrl";
 import {ContainerCtrl} from "./container_ctrl";
 
@@ -65,8 +65,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
         return Modes;
     }
 
-    public getNameID() {
-        return NameID;
+    public getNameImage() {
+        return NameImage;
     }
 
     onInitEditMode() {

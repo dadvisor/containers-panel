@@ -1,6 +1,6 @@
-export enum NameID {
+export enum NameImage {
     NAME = 'Name',
-    ID = 'ID'
+    IMAGE = 'Image'
 }
 
 export enum Modes {

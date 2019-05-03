@@ -1,10 +1,10 @@
-import {NameID} from "./util";
+import {NameImage} from "./util";
 import {PanelCtrl} from "./panel_ctrl";
 
 class RuleMapping {
     regex: string;
     group: string;
-    match: NameID;
+    match: NameImage;
 
     constructor(regex, group, match) {
         this.regex = regex;
@@ -26,7 +26,7 @@ export default class Mapping {
     }
 
     public add_row() {
-        this.rule_mappings.push(new RuleMapping('', '', NameID.NAME));
+        this.rule_mappings.push(new RuleMapping('', '', NameImage.NAME));
     }
 
     public apply() {
@@ -37,13 +37,13 @@ export default class Mapping {
             let re = new RegExp(mapping.regex);
             for (let container of this.panelCtrl.containerCtrl.getList()) {
                 switch (mapping.match) {
-                    case NameID.NAME:
+                    case NameImage.NAME:
                         if (re.test(container['names'])) {
                             container['group'] = mapping.group;
                         }
                         break;
-                    case NameID.ID:
-                        if (re.test(container['hash'])) {
+                    case NameImage.IMAGE:
+                        if (re.test(container['image'])) {
                             container['group'] = mapping.group;
                         }
                         break;

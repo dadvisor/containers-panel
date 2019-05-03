@@ -38196,7 +38196,7 @@ function () {
   }
 
   Mapping.prototype.add_row = function () {
-    this.rule_mappings.push(new RuleMapping('', '', _util.NameID.NAME));
+    this.rule_mappings.push(new RuleMapping('', '', _util.NameImage.NAME));
   };
 
   Mapping.prototype.apply = function () {
@@ -38213,15 +38213,15 @@ function () {
         var container = _c[_b];
 
         switch (mapping.match) {
-          case _util.NameID.NAME:
+          case _util.NameImage.NAME:
             if (re.test(container['names'])) {
               container['group'] = mapping.group;
             }
 
             break;
 
-          case _util.NameID.ID:
-            if (re.test(container['hash'])) {
+          case _util.NameImage.IMAGE:
+            if (re.test(container['image'])) {
               container['group'] = mapping.group;
             }
 
@@ -38403,8 +38403,8 @@ function (_super) {
     return _util.Modes;
   };
 
-  PanelCtrl.prototype.getNameID = function () {
-    return _util.NameID;
+  PanelCtrl.prototype.getNameImage = function () {
+    return _util.NameImage;
   };
 
   PanelCtrl.prototype.onInitEditMode = function () {
@@ -38542,12 +38542,12 @@ exports.add_width = add_width;
 exports.decode = decode;
 exports.bytesToSize = bytesToSize;
 exports.getStyle = getStyle;
-var NameID = exports.NameID = undefined;
+var NameImage = exports.NameImage = undefined;
 
-(function (NameID) {
-  NameID["NAME"] = "Name";
-  NameID["ID"] = "ID";
-})(NameID || (exports.NameID = NameID = {}));
+(function (NameImage) {
+  NameImage["NAME"] = "Name";
+  NameImage["IMAGE"] = "Image";
+})(NameImage || (exports.NameImage = NameImage = {}));
 
 var Modes = exports.Modes = undefined;
 

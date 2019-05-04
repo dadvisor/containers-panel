@@ -38450,6 +38450,7 @@ function (_super) {
     }
 
     var data = this.getData();
+    PanelCtrl.validateData(data);
     console.log(data);
 
     if (this.cy !== undefined) {
@@ -38495,6 +38496,33 @@ function (_super) {
       // @ts-ignore
       this.graph_height = this.height - header.height();
     }
+  };
+
+  PanelCtrl.validateData = function (data) {
+    // Remove an edge if the corresponding node is not found.
+    for (var _i = 0, _a = data.edges; _i < _a.length; _i++) {
+      var edge = _a[_i];
+      var sourceIncluded = false;
+      var targetIncluded = false;
+
+      for (var _b = 0, _c = data.nodes; _b < _c.length; _b++) {
+        var node = _c[_b];
+
+        if (edge['data']['source'] === node['data']['id']) {
+          sourceIncluded = true;
+        }
+
+        if (edge['data']['target'] === node['data']['id']) {
+          targetIncluded = true;
+        }
+      }
+
+      if (!sourceIncluded || !targetIncluded) {
+        data.edges.splice(data.edges.indexOf(edge), 1);
+      }
+    }
+
+    return undefined;
   };
 
   PanelCtrl.prototype.getData = function () {

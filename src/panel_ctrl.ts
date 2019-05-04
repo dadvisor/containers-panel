@@ -107,6 +107,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
         }
 
         let data = this.getData();
+
+        PanelCtrl.validateData(data);
         console.log(data);
 
         if (this.cy !== undefined) {
@@ -150,6 +152,26 @@ export class PanelCtrl extends MetricsPanelCtrl {
             // @ts-ignore
             this.graph_height = this.height - header.height();
         }
+    }
+
+    private static validateData(data) {
+        // Remove an edge if the corresponding node is not found.
+        for (let edge of data.edges){
+            let sourceIncluded = false;
+            let targetIncluded = false;
+            for (let node of data.nodes){
+                if (edge['data']['source'] === node['data']['id']){
+                    sourceIncluded = true;
+                }
+                if (edge['data']['target'] === node['data']['id']){
+                    targetIncluded = true;
+                }
+            }
+            if (!sourceIncluded || !targetIncluded){
+                data.edges.splice(data.edges.indexOf(edge), 1);
+            }
+        }
+        return undefined;
     }
 
     private getData() {

@@ -112,6 +112,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
             } else if (dataObj.target === 'default_host_price_total'){
                 console.log(dataObj);
                 this.hostCtrl.addOrUpdate(getHost(obj));
+            } else {
+                console.log(dataObj);
             }
         }
         if (this.firstRendering == 0) {

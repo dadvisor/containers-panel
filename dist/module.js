@@ -38556,6 +38556,8 @@ function (_super) {
       } else if (dataObj.target === 'default_host_price_total') {
         console.log(dataObj);
         this.hostCtrl.addOrUpdate((0, _host_ctrl.getHost)(obj));
+      } else {
+        console.log(dataObj);
       }
     }
 

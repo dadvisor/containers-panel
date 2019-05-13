@@ -38263,7 +38263,7 @@ function () {
 exports.HostCtrl = HostCtrl;
 
 function getHost(obj) {
-  return new Host(obj['ip'], obj['numCores'], obj['memory']);
+  return new Host(obj['host'], obj['num_cores'], obj['memory']);
 }
 
 /***/ }),

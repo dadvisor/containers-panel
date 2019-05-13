@@ -45,5 +45,5 @@ export class HostCtrl {
 }
 
 export function getHost(obj: Object): Host {
-    return new Host(obj['ip'], obj['numCores'], obj['memory']);
+    return new Host(obj['host'], obj['num_cores'], obj['memory']);
 }

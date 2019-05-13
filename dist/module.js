@@ -37986,16 +37986,17 @@ function () {
     });
   };
 
-  ContainerCtrl.prototype.getNodesWithUtilization = function () {
+  ContainerCtrl.prototype.getNodesWithUtilization = function (utilCtrl) {
     var nodes = [];
     var hostSet = new Set();
 
     for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
       var container = _a[_i];
       hostSet.add(container['host']);
+      var percentage = (utilCtrl.getValue(container['hash']) * 100).toFixed(1) + '%';
       nodes.push({
         id: container['hash'],
-        name: container['names'] + '\n' + '0%',
+        name: container['names'] + '\n' + percentage,
         parent: container['host']
       });
     }
@@ -38752,7 +38753,11 @@ function () {
   };
 
   UtilizationCtrl.prototype.getValue = function (id) {
-    return this.data[id];
+    if (this.data[id] !== undefined) {
+      return this.data[id];
+    }
+
+    return 0;
   };
 
   UtilizationCtrl.prototype.reset = function () {

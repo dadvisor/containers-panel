@@ -1,5 +1,6 @@
 import {add_width} from "./util";
 import _ from "lodash";
+import {UtilizationCtrl} from "./utilization_ctrl";
 
 export class ContainerCtrl {
     private containers: Object[] = [];
@@ -49,14 +50,15 @@ export class ContainerCtrl {
         });
     }
 
-    public getNodesWithUtilization(){
+    public getNodesWithUtilization(utilCtrl: UtilizationCtrl){
         let nodes: Object[] = [];
         let hostSet = new Set();
         for (let container of this.getList()) {
             hostSet.add(container['host']);
+            let percentage =  (utilCtrl.getValue(container['hash']) * 100).toFixed(1) + '%';
             nodes.push({
                 id: container['hash'],
-                name: container['names'] + '\n' + '0%',
+                name: container['names'] + '\n' + percentage,
                 parent: container['host']
             });
         }

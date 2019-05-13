@@ -5,8 +5,11 @@ export class UtilizationCtrl {
         this.data[id] = value;
     }
 
-    public getValue(id: string) {
-        return this.data[id];
+    public getValue(id: string): number {
+        if (this.data[id] !== undefined){
+            return this.data[id];
+        }
+        return 0;
     }
 
     public reset() {

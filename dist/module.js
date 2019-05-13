@@ -38215,10 +38215,10 @@ function () {
     this.ip = ip;
     this.numCores = numCores;
     this.memory = memory;
-    this.price = this.getDefaultPrice(hostCtrl);
+    this.price = this.setDefaultPrice(hostCtrl);
   }
 
-  Host.prototype.getDefaultPrice = function (hostCtrl) {
+  Host.prototype.setDefaultPrice = function (hostCtrl) {
     return this.numCores * hostCtrl.cpuPriceHour + this.memory / Math.pow(2, 30) * hostCtrl.gbPriceHour;
   };
 
@@ -38255,6 +38255,13 @@ function () {
 
   HostCtrl.prototype.getList = function () {
     return this.hosts;
+  };
+
+  HostCtrl.prototype.updatePrices = function () {
+    for (var _i = 0, _a = this.hosts; _i < _a.length; _i++) {
+      var host = _a[_i];
+      host.setDefaultPrice(this);
+    }
   };
 
   return HostCtrl;

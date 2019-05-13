@@ -1,7 +1,5 @@
 <div class="editor-row">
     <div class="section gf-form-group">
-        <h5 class="section-heading">Cost per host</h5>
-
         <div class="gf-form">
             <label class="gf-form-label width-20">CPU price (in USD) per hour</label>
             <span class="max-width-15">
@@ -13,6 +11,9 @@
             <span class="max-width-15">
 				<input type="text" class="input-small gf-form-input width-15" ng-model="ctrl.hostCtrl.gbPriceHour" />
             </span>
+        </div>
+        <div class="gf-form">
+            <button class="input-small gf-form-input width-20" ng-click="ctrl.hostCtrol.updatePrices()">Update all prices</button>
         </div>
     </div>
     <div class="section gf-form-group">

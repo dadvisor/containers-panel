@@ -11,10 +11,10 @@ class Host {
         this.ip = ip;
         this.numCores = numCores;
         this.memory = memory;
-        this.price = this.getDefaultPrice(hostCtrl);
+        this.price = this.setDefaultPrice(hostCtrl);
     }
 
-    private getDefaultPrice(hostCtrl: HostCtrl) {
+    setDefaultPrice(hostCtrl: HostCtrl) {
         return this.numCores * hostCtrl.cpuPriceHour + this.memory / Math.pow(2, 30) * hostCtrl.gbPriceHour;
     }
 
@@ -41,5 +41,11 @@ export class HostCtrl {
 
     public getList() {
         return this.hosts;
+    }
+
+    public updatePrices(){
+        for (let host of this.hosts){
+            host.setDefaultPrice(this);
+        }
     }
 }

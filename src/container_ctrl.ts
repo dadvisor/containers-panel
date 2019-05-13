@@ -76,7 +76,7 @@ export class ContainerCtrl {
         let hostSet = new Set();
         for (let container of this.getList()) {
             hostSet.add(container['host']);
-            let price = (utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host'])).toFixed(2);
+            let price = (utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host'])).toFixed(4);
             nodes.push({
                 id: container['hash'],
                 name: container['names'] + '\n$' + price,
@@ -92,18 +92,36 @@ export class ContainerCtrl {
     }
 
     public getGroupedNodes() {
-        let nodes: Object[] = [];
-        let hostSet = new Set();
+        let groups: { [key: string]: Object } = {};
         for (let container of this.getList()) {
             let group = this.getGroupFromContainerHash(container['hash']);
-            hostSet.add(group);
-            nodes.push({
-                id: group,
-                name: group
-            });
+            if (groups[group] === undefined) {
+                groups[group] = {id: group, name: group};
+            }
         }
-        return nodes.map(item => {
-            return {data: item}
+        return Object.keys(groups).map(key => {
+            return {data: groups[key]}
+        });
+    }
+
+    getGroupedNodesCost(utilCtrl: UtilizationCtrl, hostCtrl: HostCtrl) {
+        let groups: { [key: string]: number } = {};
+
+        for (let container of this.getList()) {
+            let group = this.getGroupFromContainerHash(container['hash']);
+            if (groups[group] === undefined) {
+                groups[group] = 0;
+            }
+            groups[group] += utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
+        }
+
+        return Object.keys(groups).map(key => {
+            return {
+                data: {
+                    id: key,
+                    name: key + '\n$' + groups[key].toFixed(4),
+                }
+            }
         });
     }
 

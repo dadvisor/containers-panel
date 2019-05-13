@@ -8,6 +8,7 @@ export enum Modes {
     GROUPED = 'Grouped',
     UTILIZATION = 'Utilization (last hour average)',
     COST_PREDICTION = 'Cost prediction (based on last hour average)',
+    COST_PREDICTION_GROUPED = 'Cost prediction grouped',
 }
 
 

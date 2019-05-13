@@ -224,6 +224,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     edges: this.edgesCtrl.getList(),
                     nodes: this.containerCtrl.getNodesWithCost(this.utilizationCtrl, this.hostCtrl)
                 };
+            case Modes.COST_PREDICTION_GROUPED:
+                return {
+                    edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
+                    nodes: this.containerCtrl.getGroupedNodesCost(this.utilizationCtrl, this.hostCtrl)
+                };
             default:
                 console.log('Something went wrong');
                 return {};
@@ -254,6 +259,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     'grouped per host (based on its external IP). Each node shows the container name, and a cost ' +
                     'prediction based on the utilization and the host price. The cost prediction is represented per ' +
                     'hour, and formatted in USD.';
+            case Modes.COST_PREDICTION_GROUPED:
+                return 'The graph presented below groups related containers together. The groups are defined in the ' +
+                    'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' +
+                    'estimation of the cost per group is presented. This graph is based on the previous graph (cost ' +
+                    'prediction).';
             default:
                 console.log('Something went wrong');
                 return '';

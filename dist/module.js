@@ -38021,7 +38021,7 @@ function () {
     for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
       var container = _a[_i];
       hostSet.add(container['host']);
-      var price = (utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host'])).toFixed(2);
+      var price = (utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host'])).toFixed(4);
       nodes.push({
         id: container['hash'],
         name: container['names'] + '\n$' + price,
@@ -38043,22 +38043,47 @@ function () {
   };
 
   ContainerCtrl.prototype.getGroupedNodes = function () {
-    var nodes = [];
-    var hostSet = new Set();
+    var groups = {};
 
     for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
       var container = _a[_i];
       var group = this.getGroupFromContainerHash(container['hash']);
-      hostSet.add(group);
-      nodes.push({
-        id: group,
-        name: group
-      });
+
+      if (groups[group] === undefined) {
+        groups[group] = {
+          id: group,
+          name: group
+        };
+      }
     }
 
-    return nodes.map(function (item) {
+    return Object.keys(groups).map(function (key) {
       return {
-        data: item
+        data: groups[key]
+      };
+    });
+  };
+
+  ContainerCtrl.prototype.getGroupedNodesCost = function (utilCtrl, hostCtrl) {
+    var groups = {};
+
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+      var group = this.getGroupFromContainerHash(container['hash']);
+
+      if (groups[group] === undefined) {
+        groups[group] = 0;
+      }
+
+      groups[group] += utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
+    }
+
+    return Object.keys(groups).map(function (key) {
+      return {
+        data: {
+          id: key,
+          name: key + '\n$' + groups[key].toFixed(4)
+        }
       };
     });
   };
@@ -38734,6 +38759,12 @@ function (_super) {
           nodes: this.containerCtrl.getNodesWithCost(this.utilizationCtrl, this.hostCtrl)
         };
 
+      case _util.Modes.COST_PREDICTION_GROUPED:
+        return {
+          edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
+          nodes: this.containerCtrl.getGroupedNodesCost(this.utilizationCtrl, this.hostCtrl)
+        };
+
       default:
         console.log('Something went wrong');
         return {};
@@ -38757,6 +38788,9 @@ function (_super) {
 
       case _util.Modes.COST_PREDICTION:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and a cost ' + 'prediction based on the utilization and the host price. The cost prediction is represented per ' + 'hour, and formatted in USD.';
+
+      case _util.Modes.COST_PREDICTION_GROUPED:
+        return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' + 'estimation of the cost per group is presented. This graph is based on the previous graph (cost ' + 'prediction).';
 
       default:
         console.log('Something went wrong');
@@ -38803,6 +38837,7 @@ var Modes = exports.Modes = undefined;
   Modes["GROUPED"] = "Grouped";
   Modes["UTILIZATION"] = "Utilization (last hour average)";
   Modes["COST_PREDICTION"] = "Cost prediction (based on last hour average)";
+  Modes["COST_PREDICTION_GROUPED"] = "Cost prediction grouped";
 })(Modes || (exports.Modes = Modes = {}));
 
 function add_width(edges) {

@@ -90,7 +90,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
 
     onInitEditMode() {
         this.addEditorTab('Container Mapping', 'public/plugins/grafana-container-panel/partials/mapping.html', 2);
-        this.addEditorTab('Cost prediction', 'public/plugins/grafana/container-panel/partials/cost.html', 2);
+        this.addEditorTab('Cost prediction',   'public/plugins/grafana-container-panel/partials/cost.html', 2);
         this.addEditorTab('Layout Options', 'public/plugins/grafana-container-panel/partials/layout.html', 2);
     }
 

@@ -6,6 +6,7 @@ export enum NameImage {
 export enum Modes {
     CONTAINERS = 'Containers',
     GROUPED = 'Grouped',
+    UTILIZATION = 'Utilization'
 }
 
 

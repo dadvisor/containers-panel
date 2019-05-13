@@ -37986,6 +37986,33 @@ function () {
     });
   };
 
+  ContainerCtrl.prototype.getNodesWithUtilization = function () {
+    var nodes = [];
+    var hostSet = new Set();
+
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+      hostSet.add(container['host']);
+      nodes.push({
+        id: container['hash'],
+        name: container['names'] + '/n' + '0%',
+        parent: container['host']
+      });
+    }
+
+    hostSet.forEach(function (host) {
+      nodes.push({
+        id: host,
+        name: host
+      });
+    });
+    return nodes.map(function (item) {
+      return {
+        data: item
+      };
+    });
+  };
+
   ContainerCtrl.prototype.getGroupedNodes = function () {
     var nodes = [];
     var hostSet = new Set();
@@ -38539,6 +38566,12 @@ function (_super) {
           nodes: this.containerCtrl.getGroupedNodes()
         };
 
+      case _util.Modes.UTILIZATION:
+        return {
+          edges: this.edgesCtrl.getList(),
+          nodes: this.containerCtrl.getNodesWithUtilization()
+        };
+
       default:
         console.log('Something went wrong');
         return {};
@@ -38582,6 +38615,7 @@ var Modes = exports.Modes = undefined;
 (function (Modes) {
   Modes["CONTAINERS"] = "Containers";
   Modes["GROUPED"] = "Grouped";
+  Modes["UTILIZATION"] = "Utilization";
 })(Modes || (exports.Modes = Modes = {}));
 
 function add_width(edges) {

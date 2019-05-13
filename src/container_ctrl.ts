@@ -49,6 +49,25 @@ export class ContainerCtrl {
         });
     }
 
+    public getNodesWithUtilization(){
+        let nodes: Object[] = [];
+        let hostSet = new Set();
+        for (let container of this.getList()) {
+            hostSet.add(container['host']);
+            nodes.push({
+                id: container['hash'],
+                name: container['names'] + '/n' + '0%',
+                parent: container['host']
+            });
+        }
+        hostSet.forEach(host => {
+            nodes.push({id: host, name: host});
+        });
+        return nodes.map(item => {
+            return {data: item}
+        });
+    }
+
     public getGroupedNodes() {
         let nodes: Object[] = [];
         let hostSet = new Set();

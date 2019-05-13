@@ -186,6 +186,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
                     nodes: this.containerCtrl.getGroupedNodes()
                 };
+            case Modes.UTILIZATION:
+                return {
+                    edges: this.edgesCtrl.getList(),
+                    nodes: this.containerCtrl.getNodesWithUtilization()
+                };
             default:
                 console.log('Something went wrong');
                 return {};

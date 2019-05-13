@@ -50,10 +50,11 @@ export class HostCtrl {
     }
     getPrice(ip: string) {
         for (let host of this.hosts){
-            if (host.ip == ip){
+            if (host.ip === ip){
                 return host.price;
             }
         }
+        console.log('Price not found for ip: ' + ip);
         return 0;
     }
 }

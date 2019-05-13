@@ -38296,11 +38296,12 @@ function () {
     for (var _i = 0, _a = this.hosts; _i < _a.length; _i++) {
       var host = _a[_i];
 
-      if (host.ip == ip) {
+      if (host.ip === ip) {
         return host.price;
       }
     }
 
+    console.log('Price not found for ip: ' + ip);
     return 0;
   };
 

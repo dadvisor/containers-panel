@@ -38675,6 +38675,7 @@ function getStyle(panel) {
       'padding-left': '10px',
       'padding-bottom': '10px',
       'padding-right': '10px',
+      'text-wrap': 'wrap',
       'compound-sizing-wrt-labels': 'include',
       'width': 'label'
     }

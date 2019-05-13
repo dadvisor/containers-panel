@@ -219,6 +219,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     edges: this.edgesCtrl.getList(),
                     nodes: this.containerCtrl.getNodesWithUtilization(this.utilizationCtrl)
                 };
+            case Modes.COST_PREDICTION:
+                return {
+                    edges: this.edgesCtrl.getList(),
+                    nodes: this.containerCtrl.getNodesWithCost(this.utilizationCtrl, this.hostCtrl)
+                };
             default:
                 console.log('Something went wrong');
                 return {};
@@ -244,6 +249,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
                     'grouped per host (based on its external IP). Each node shows the container name, and the ' +
                     'utilization percentage, which is the average in the last hour.';
+            case Modes.COST_PREDICTION:
+                return 'The graph presented below shows all the containers that are deployed. The containers are ' +
+                    'grouped per host (based on its external IP). Each node shows the container name, and a cost ' +
+                    'prediction based on the utilization and the host price. The cost prediction is represented per ' +
+                    'hour, and formatted in USD.';
             default:
                 console.log('Something went wrong');
                 return '';

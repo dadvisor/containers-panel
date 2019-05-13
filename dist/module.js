@@ -38014,6 +38014,34 @@ function () {
     });
   };
 
+  ContainerCtrl.prototype.getNodesWithCost = function (utilCtrl, hostCtrl) {
+    var nodes = [];
+    var hostSet = new Set();
+
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+      hostSet.add(container['host']);
+      var price = (utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host'])).toFixed(2);
+      nodes.push({
+        id: container['hash'],
+        name: container['names'] + '\n$' + price,
+        parent: container['host']
+      });
+    }
+
+    hostSet.forEach(function (host) {
+      nodes.push({
+        id: host,
+        name: host
+      });
+    });
+    return nodes.map(function (item) {
+      return {
+        data: item
+      };
+    });
+  };
+
   ContainerCtrl.prototype.getGroupedNodes = function () {
     var nodes = [];
     var hostSet = new Set();
@@ -38262,6 +38290,18 @@ function () {
       var host = _a[_i];
       host.setDefaultPrice(this);
     }
+  };
+
+  HostCtrl.prototype.getPrice = function (ip) {
+    for (var _i = 0, _a = this.hosts; _i < _a.length; _i++) {
+      var host = _a[_i];
+
+      if (host.ip == ip) {
+        return host.price;
+      }
+    }
+
+    return 0;
   };
 
   return HostCtrl;
@@ -38687,6 +38727,12 @@ function (_super) {
           nodes: this.containerCtrl.getNodesWithUtilization(this.utilizationCtrl)
         };
 
+      case _util.Modes.COST_PREDICTION:
+        return {
+          edges: this.edgesCtrl.getList(),
+          nodes: this.containerCtrl.getNodesWithCost(this.utilizationCtrl, this.hostCtrl)
+        };
+
       default:
         console.log('Something went wrong');
         return {};
@@ -38707,6 +38753,9 @@ function (_super) {
 
       case _util.Modes.UTILIZATION:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'utilization percentage, which is the average in the last hour.';
+
+      case _util.Modes.COST_PREDICTION:
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and a cost ' + 'prediction based on the utilization and the host price. The cost prediction is represented per ' + 'hour, and formatted in USD.';
 
       default:
         console.log('Something went wrong');

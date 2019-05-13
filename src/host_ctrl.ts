@@ -48,4 +48,12 @@ export class HostCtrl {
             host.setDefaultPrice(this);
         }
     }
+    getPrice(ip: string) {
+        for (let host of this.hosts){
+            if (host.ip == ip){
+                return host.price;
+            }
+        }
+        return 0;
+    }
 }

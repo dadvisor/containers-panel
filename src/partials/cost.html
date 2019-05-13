@@ -1,33 +1,24 @@
 <div class="editor-row">
     <div class="section gf-form-group">
-        <h5 class="section-heading">Layout options</h5>
+        <h5 class="section-heading">Cost per host</h5>
         <div class="gf-form">
-            <label class="gf-form-label width-12">Node Background color</label>
-            <span class="max-width-9">
-				<spectrum-picker class="gf-form-input" ng-model="ctrl.panel.colorNodeBackground"
-                                 ng-change="ctrl.render()"></spectrum-picker>
-            </span>
-        </div>
-        <div class="gf-form">
-            <label class="gf-form-label width-12">Node Border color</label>
-            <span class="max-width-9">
-				<spectrum-picker class="gf-form-input" ng-model="ctrl.panel.colorNodeBorder"
-                                 ng-change="ctrl.render()"></spectrum-picker>
-            </span>
-        </div>
-        <div class="gf-form">
-            <label class="gf-form-label width-12">Edge color</label>
-            <span class="max-width-9">
-				<spectrum-picker class="gf-form-input" ng-model="ctrl.panel.colorEdge"
-                                 ng-change="ctrl.render()"></spectrum-picker>
-            </span>
-        </div>
-        <div class="gf-form">
-            <label class="gf-form-label width-12">Text color</label>
-            <span class="max-width-9">
-				<spectrum-picker class="gf-form-input" ng-model="ctrl.panel.colorText"
-                                 ng-change="ctrl.render()"></spectrum-picker>
-            </span>
+            <div class="gf-form">
+                <table>
+                    <tr>
+                        <th>External IP</th>
+                        <th>Cores</th>
+                        <th>Memory</th>
+                        <th>Price per hour</th>
+                    </tr>
+                    <tr ng-repeat="host in ctrl.hostCtrl.getList()">
+                        <td>{{host.ip}}</td>
+                        <td>{{host.numCores}}</td>
+                        <td>{{host.getMemory()}}</td>
+                        <td><input type="text" class="input-small gf-form-input width-9" ng-model="cont.group"
+                                   ng-change="ctrl.render()"/></td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 </div>

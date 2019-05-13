@@ -38185,6 +38185,81 @@ exports.EdgesCtrl = EdgesCtrl;
 
 /***/ }),
 
+/***/ "./host_ctrl.ts":
+/*!**********************!*\
+  !*** ./host_ctrl.ts ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.HostCtrl = undefined;
+exports.getHost = getHost;
+
+var _lodash = __webpack_require__(/*! lodash */ "lodash");
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _util = __webpack_require__(/*! ./util */ "./util.ts");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Host =
+/** @class */
+function () {
+  function Host(ip, numCores, memory) {
+    this.ip = ip;
+    this.numCores = numCores;
+    this.memory = memory;
+  }
+
+  Host.prototype.getMemory = function () {
+    return (0, _util.bytesToSize)(this.memory);
+  };
+
+  return Host;
+}();
+
+var HostCtrl =
+/** @class */
+function () {
+  function HostCtrl() {
+    this.hosts = [];
+  }
+
+  HostCtrl.prototype.addOrUpdate = function (obj) {
+    for (var _i = 0, _a = this.hosts; _i < _a.length; _i++) {
+      var host = _a[_i];
+
+      if (host.ip == obj.ip) {
+        host = _lodash2.default.defaults(obj, host);
+        return;
+      }
+    }
+
+    this.hosts.push(obj);
+  };
+
+  HostCtrl.prototype.getList = function () {
+    return this.hosts;
+  };
+
+  return HostCtrl;
+}();
+
+exports.HostCtrl = HostCtrl;
+
+function getHost(obj) {
+  return new Host(obj['ip'], obj['numCores'], obj['memory']);
+}
+
+/***/ }),
+
 /***/ "./mapping.ts":
 /*!********************!*\
   !*** ./mapping.ts ***!
@@ -38345,6 +38420,8 @@ var _container_ctrl = __webpack_require__(/*! ./container_ctrl */ "./container_c
 
 var _utilization_ctrl = __webpack_require__(/*! ./utilization_ctrl */ "./utilization_ctrl.ts");
 
+var _host_ctrl = __webpack_require__(/*! ./host_ctrl */ "./host_ctrl.ts");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var __extends = undefined && undefined.__extends || function () {
@@ -38388,6 +38465,7 @@ function (_super) {
     _this.edgesCtrl = new _edges_ctrl.EdgesCtrl();
     _this.containerCtrl = new _container_ctrl.ContainerCtrl();
     _this.utilizationCtrl = new _utilization_ctrl.UtilizationCtrl();
+    _this.hostCtrl = new _host_ctrl.HostCtrl();
     _this.firstRendering = 0;
     _this.mapping = new _mapping2.default(_this);
     _this.graph_height = _this.height;
@@ -38412,6 +38490,12 @@ function (_super) {
         "intervalFactor": 1,
         "legendFormat": "container_utilization",
         "refId": "C"
+      }, {
+        "expr": "default_host_price_total",
+        "format": "time_series",
+        "instant": true,
+        "intervalFactor": 1,
+        "refId": "D"
       }],
       interval: 'null',
       valueName: 'current',
@@ -38469,6 +38553,9 @@ function (_super) {
         this.edgesCtrl.add(newObj);
       } else if (dataObj.target === 'container_utilization') {
         this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
+      } else if (dataObj.target === 'default_host_price_total') {
+        console.log(dataObj);
+        this.hostCtrl.addOrUpdate((0, _host_ctrl.getHost)(obj));
       }
     }
 

@@ -38447,6 +38447,7 @@ function (_super) {
 
   PanelCtrl.prototype.onInitEditMode = function () {
     this.addEditorTab('Container Mapping', 'public/plugins/grafana-container-panel/partials/mapping.html', 2);
+    this.addEditorTab('Cost prediction', 'public/plugins/grafana/container-panel/partials/cost.html', 2);
     this.addEditorTab('Layout Options', 'public/plugins/grafana-container-panel/partials/layout.html', 2);
   };
 
@@ -38600,6 +38601,12 @@ function (_super) {
     switch (this.panel.mode) {
       case _util.Modes.CONTAINERS:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP), and based on the docker images that are used ' + 'inside this host. The edges represent the total amount of data that has been send from a ' + 'certain container to another container.';
+
+      case _util.Modes.GROUPED:
+        return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, you ' + 'can find out which groups are interacting with each other. This provides a higher hierarchy of ' + 'the deployed system.';
+
+      case _util.Modes.UTILIZATION:
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'utilization percentage, which is the average in the last hour.';
 
       default:
         console.log('Something went wrong');

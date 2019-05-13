@@ -81,6 +81,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
 
     onInitEditMode() {
         this.addEditorTab('Container Mapping', 'public/plugins/grafana-container-panel/partials/mapping.html', 2);
+        this.addEditorTab('Cost prediction', 'public/plugins/grafana/container-panel/partials/cost.html', 2);
         this.addEditorTab('Layout Options', 'public/plugins/grafana-container-panel/partials/layout.html', 2);
     }
 
@@ -97,11 +98,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 newObj['target'] = obj['dst'].substr(3);
                 newObj['bytes'] = dataObj.datapoints[0][0];
                 this.edgesCtrl.add(newObj);
-            } else if (dataObj.target === 'container_utilization'){
+            } else if (dataObj.target === 'container_utilization') {
                 this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
             }
         }
-        if (this.firstRendering == 0){
+        if (this.firstRendering == 0) {
             this.render();
         }
     }
@@ -169,18 +170,18 @@ export class PanelCtrl extends MetricsPanelCtrl {
 
     private static validateData(data) {
         // Remove an edge if the corresponding node is not found.
-        for (let edge of data.edges){
+        for (let edge of data.edges) {
             let sourceIncluded = false;
             let targetIncluded = false;
-            for (let node of data.nodes){
-                if (edge['data']['source'] === node['data']['id']){
+            for (let node of data.nodes) {
+                if (edge['data']['source'] === node['data']['id']) {
                     sourceIncluded = true;
                 }
-                if (edge['data']['target'] === node['data']['id']){
+                if (edge['data']['target'] === node['data']['id']) {
                     targetIncluded = true;
                 }
             }
-            if (!sourceIncluded || !targetIncluded){
+            if (!sourceIncluded || !targetIncluded) {
                 data.edges.splice(data.edges.indexOf(edge), 1);
             }
         }
@@ -213,13 +214,22 @@ export class PanelCtrl extends MetricsPanelCtrl {
     /**
      * Returns a graph description, based on the current visualization mode.
      */
-    public description(){
+    public description() {
         switch (this.panel.mode) {
             case Modes.CONTAINERS:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
                     'grouped per host (based on its external IP), and based on the docker images that are used ' +
                     'inside this host. The edges represent the total amount of data that has been send from a ' +
                     'certain container to another container.';
+            case Modes.GROUPED:
+                return 'The graph presented below groups related containers together. The groups are defined in the ' +
+                    'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, you ' +
+                    'can find out which groups are interacting with each other. This provides a higher hierarchy of ' +
+                    'the deployed system.';
+            case Modes.UTILIZATION:
+                return 'The graph presented below shows all the containers that are deployed. The containers are ' +
+                    'grouped per host (based on its external IP). Each node shows the container name, and the ' +
+                    'utilization percentage, which is the average in the last hour.';
             default:
                 console.log('Something went wrong');
                 return '';

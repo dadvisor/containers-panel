@@ -41,6 +41,13 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "instant": true,
                     "intervalFactor": 1,
                     "refId": "B"
+                },
+                {
+                    "expr": "avg_over_time(container_utilization[1h])",
+                    "format": "time_series",
+                    "instant": true,
+                    "intervalFactor": 1,
+                    "refId": "C"
                 }
             ],
             interval: 'null',
@@ -87,7 +94,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 newObj['target'] = obj['dst'].substr(3);
                 newObj['bytes'] = dataObj.datapoints[0][0];
                 this.edgesCtrl.add(newObj);
+            } else {
+                console.log('Received data');
+                console.log(dataObj);
             }
+
         }
         if (this.firstRendering == 0){
             this.render();

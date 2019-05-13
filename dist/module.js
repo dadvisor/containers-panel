@@ -38401,6 +38401,12 @@ function (_super) {
         "instant": true,
         "intervalFactor": 1,
         "refId": "B"
+      }, {
+        "expr": "avg_over_time(container_utilization[1h])",
+        "format": "time_series",
+        "instant": true,
+        "intervalFactor": 1,
+        "refId": "C"
       }],
       interval: 'null',
       valueName: 'current',
@@ -38455,6 +38461,9 @@ function (_super) {
         newObj['target'] = obj['dst'].substr(3);
         newObj['bytes'] = dataObj.datapoints[0][0];
         this.edgesCtrl.add(newObj);
+      } else {
+        console.log('Received data');
+        console.log(dataObj);
       }
     }
 
@@ -38615,7 +38624,7 @@ var Modes = exports.Modes = undefined;
 (function (Modes) {
   Modes["CONTAINERS"] = "Containers";
   Modes["GROUPED"] = "Grouped";
-  Modes["UTILIZATION"] = "Utilization";
+  Modes["UTILIZATION"] = "Utilization (last hour average)";
 })(Modes || (exports.Modes = Modes = {}));
 
 function add_width(edges) {

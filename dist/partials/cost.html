@@ -1,0 +1,24 @@
+<div class="editor-row">
+    <div class="section gf-form-group">
+        <h5 class="section-heading">Cost per host</h5>
+        <div class="gf-form">
+            <div class="gf-form">
+                <table>
+                    <tr>
+                        <th>External IP</th>
+                        <th>Cores</th>
+                        <th>Memory</th>
+                        <th>Price per hour</th>
+                    </tr>
+                    <tr ng-repeat="host in ctrl.hostCtrl.getList()">
+                        <td>{{host.ip}}</td>
+                        <td>{{host.numCores}}</td>
+                        <td>{{host.getMemory()}}</td>
+                        <td><input type="text" class="input-small gf-form-input width-9" ng-model="cont.group"
+                                   ng-change="ctrl.render()"/></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

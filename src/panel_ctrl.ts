@@ -8,7 +8,7 @@ import {decode, getStyle, Modes, NameImage} from "./util";
 import {EdgesCtrl} from "./edges_ctrl";
 import {ContainerCtrl} from "./container_ctrl";
 import {UtilizationCtrl} from "./utilization_ctrl";
-import {getHost, HostCtrl} from "./host_ctrl";
+import {HostCtrl} from "./host_ctrl";
 
 cytoscape.use(cola);
 
@@ -111,7 +111,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
             } else if (dataObj.target.startsWith('default_host_price_total')){
                 console.log(dataObj);
-                this.hostCtrl.addOrUpdate(getHost(obj));
+                this.hostCtrl.addOrUpdate(obj);
             } else {
                 console.log(dataObj);
             }

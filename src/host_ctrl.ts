@@ -1,24 +1,21 @@
 import _ from "lodash";
 import {bytesToSize} from "./util";
 
-const CPU_PRICE_HOUR = 0.021925;
-const GB_PRICE_HOUR = 0.002938;
-
 class Host {
     ip: string;
     numCores: number;
     memory: number;
     price: number;
 
-    constructor(ip: string, numCores: number, memory: number) {
+    constructor(ip: string, numCores: number, memory: number, hostCtrl: HostCtrl) {
         this.ip = ip;
         this.numCores = numCores;
         this.memory = memory;
-        this.price = this.getDefaultPrice();
+        this.price = this.getDefaultPrice(hostCtrl);
     }
 
-    private getDefaultPrice() {
-        return this.numCores * CPU_PRICE_HOUR + this.memory / Math.pow(2, 30) * GB_PRICE_HOUR;
+    private getDefaultPrice(hostCtrl: HostCtrl) {
+        return this.numCores * hostCtrl.cpuPriceHour + this.memory / Math.pow(2, 30) * hostCtrl.gbPriceHour;
     }
 
     public getMemory() {
@@ -27,23 +24,22 @@ class Host {
 }
 
 export class HostCtrl {
+    public cpuPriceHour = 0.021925;
+    public gbPriceHour =  0.002938;
     private hosts: Host[] = [];
 
-    public addOrUpdate(obj: Host) {
+    public addOrUpdate(obj: Object) {
+        const host_obj: Host = new Host(obj['host'], obj['num_cores'], obj['memory'], this);
         for (let host of this.hosts) {
-            if (host.ip == obj.ip) {
-                host = _.defaults(obj, host);
+            if (host.ip == host_obj.ip) {
+                host = _.defaults(host_obj, host);
                 return;
             }
         }
-        this.hosts.push(obj);
+        this.hosts.push(host_obj);
     }
 
     public getList() {
         return this.hosts;
     }
-}
-
-export function getHost(obj: Object): Host {
-    return new Host(obj['host'], obj['num_cores'], obj['memory']);
 }

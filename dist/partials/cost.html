@@ -1,6 +1,21 @@
 <div class="editor-row">
     <div class="section gf-form-group">
         <h5 class="section-heading">Cost per host</h5>
+
+        <div class="gf-form">
+            <label class="gf-form-label width-20">CPU price (in USD) per hour</label>
+            <span class="max-width-15">
+				<input type="text" class="input-small gf-form-input width-15" ng-model="ctrl.hostCtrl.cpuPriceHour" />
+            </span>
+        </div>
+        <div class="gf-form">
+            <label class="gf-form-label width-20">GB price (in USD) per hour</label>
+            <span class="max-width-15">
+				<input type="text" class="input-small gf-form-input width-15" ng-model="ctrl.hostCtrl.gbPriceHour" />
+            </span>
+        </div>
+    </div>
+    <div class="section gf-form-group">
         <div class="gf-form">
             <div class="gf-form">
                 <table>
@@ -8,13 +23,13 @@
                         <th>External IP</th>
                         <th>Cores</th>
                         <th>Memory</th>
-                        <th>Price per hour</th>
+                        <th>Price (in USD) per hour</th>
                     </tr>
                     <tr ng-repeat="host in ctrl.hostCtrl.getList()">
                         <td>{{host.ip}}</td>
                         <td>{{host.numCores}}</td>
                         <td>{{host.getMemory()}}</td>
-                        <td><input type="text" class="input-small gf-form-input width-9" ng-model="host.price"
+                        <td><input type="text" class="input-small gf-form-input width-15" ng-model="host.price"
                                    ng-change="ctrl.render()"/></td>
                     </tr>
                 </table>

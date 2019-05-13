@@ -38199,7 +38199,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.HostCtrl = undefined;
-exports.getHost = getHost;
 
 var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
@@ -38209,21 +38208,18 @@ var _util = __webpack_require__(/*! ./util */ "./util.ts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var CPU_PRICE_HOUR = 0.021925;
-var GB_PRICE_HOUR = 0.002938;
-
 var Host =
 /** @class */
 function () {
-  function Host(ip, numCores, memory) {
+  function Host(ip, numCores, memory, hostCtrl) {
     this.ip = ip;
     this.numCores = numCores;
     this.memory = memory;
-    this.price = this.getDefaultPrice();
+    this.price = this.getDefaultPrice(hostCtrl);
   }
 
-  Host.prototype.getDefaultPrice = function () {
-    return this.numCores * CPU_PRICE_HOUR + this.memory / Math.pow(2, 30) * GB_PRICE_HOUR;
+  Host.prototype.getDefaultPrice = function (hostCtrl) {
+    return this.numCores * hostCtrl.cpuPriceHour + this.memory / Math.pow(2, 30) * hostCtrl.gbPriceHour;
   };
 
   Host.prototype.getMemory = function () {
@@ -38237,20 +38233,24 @@ var HostCtrl =
 /** @class */
 function () {
   function HostCtrl() {
+    this.cpuPriceHour = 0.021925;
+    this.gbPriceHour = 0.002938;
     this.hosts = [];
   }
 
   HostCtrl.prototype.addOrUpdate = function (obj) {
+    var host_obj = new Host(obj['host'], obj['num_cores'], obj['memory'], this);
+
     for (var _i = 0, _a = this.hosts; _i < _a.length; _i++) {
       var host = _a[_i];
 
-      if (host.ip == obj.ip) {
-        host = _lodash2.default.defaults(obj, host);
+      if (host.ip == host_obj.ip) {
+        host = _lodash2.default.defaults(host_obj, host);
         return;
       }
     }
 
-    this.hosts.push(obj);
+    this.hosts.push(host_obj);
   };
 
   HostCtrl.prototype.getList = function () {
@@ -38261,10 +38261,6 @@ function () {
 }();
 
 exports.HostCtrl = HostCtrl;
-
-function getHost(obj) {
-  return new Host(obj['host'], obj['num_cores'], obj['memory']);
-}
 
 /***/ }),
 
@@ -38563,7 +38559,7 @@ function (_super) {
         this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
       } else if (dataObj.target.startsWith('default_host_price_total')) {
         console.log(dataObj);
-        this.hostCtrl.addOrUpdate((0, _host_ctrl.getHost)(obj));
+        this.hostCtrl.addOrUpdate(obj);
       } else {
         console.log(dataObj);
       }

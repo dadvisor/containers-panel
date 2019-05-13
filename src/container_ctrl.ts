@@ -56,7 +56,7 @@ export class ContainerCtrl {
             hostSet.add(container['host']);
             nodes.push({
                 id: container['hash'],
-                name: container['names'] + '/n' + '0%',
+                name: container['names'] + '\n' + '0%',
                 parent: container['host']
             });
         }

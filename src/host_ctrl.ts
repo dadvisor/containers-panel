@@ -11,11 +11,11 @@ class Host {
         this.ip = ip;
         this.numCores = numCores;
         this.memory = memory;
-        this.price = this.setDefaultPrice(hostCtrl);
+        this.setDefaultPrice(hostCtrl);
     }
 
     setDefaultPrice(hostCtrl: HostCtrl) {
-        return this.numCores * hostCtrl.cpuPriceHour + this.memory / Math.pow(2, 30) * hostCtrl.gbPriceHour;
+        this.price = this.numCores * hostCtrl.cpuPriceHour + this.memory / Math.pow(2, 30) * hostCtrl.gbPriceHour;
     }
 
     public getMemory() {
@@ -25,7 +25,7 @@ class Host {
 
 export class HostCtrl {
     public cpuPriceHour = 0.021925;
-    public gbPriceHour =  0.002938;
+    public gbPriceHour = 0.002938;
     private hosts: Host[] = [];
 
     public addOrUpdate(obj: Object) {
@@ -43,8 +43,8 @@ export class HostCtrl {
         return this.hosts;
     }
 
-    public updatePrices(){
-        for (let host of this.hosts){
+    public updatePrices() {
+        for (let host of this.hosts) {
             host.setDefaultPrice(this);
         }
     }

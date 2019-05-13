@@ -38215,11 +38215,11 @@ function () {
     this.ip = ip;
     this.numCores = numCores;
     this.memory = memory;
-    this.price = this.setDefaultPrice(hostCtrl);
+    this.setDefaultPrice(hostCtrl);
   }
 
   Host.prototype.setDefaultPrice = function (hostCtrl) {
-    return this.numCores * hostCtrl.cpuPriceHour + this.memory / Math.pow(2, 30) * hostCtrl.gbPriceHour;
+    this.price = this.numCores * hostCtrl.cpuPriceHour + this.memory / Math.pow(2, 30) * hostCtrl.gbPriceHour;
   };
 
   Host.prototype.getMemory = function () {
@@ -38565,9 +38565,9 @@ function (_super) {
       } else if (dataObj.target === 'container_utilization') {
         this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
       } else if (dataObj.target.startsWith('default_host_price_total')) {
-        console.log(dataObj);
         this.hostCtrl.addOrUpdate(obj);
       } else {
+        console.log('Can not parse dataObj: ');
         console.log(dataObj);
       }
     }

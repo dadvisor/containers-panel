@@ -110,9 +110,9 @@ export class PanelCtrl extends MetricsPanelCtrl {
             } else if (dataObj.target === 'container_utilization') {
                 this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
             } else if (dataObj.target.startsWith('default_host_price_total')){
-                console.log(dataObj);
                 this.hostCtrl.addOrUpdate(obj);
             } else {
+                console.log('Can not parse dataObj: ');
                 console.log(dataObj);
             }
         }

@@ -7,6 +7,7 @@ import Mapping from "./mapping";
 import {decode, getStyle, Modes, NameImage} from "./util";
 import {EdgesCtrl} from "./edges_ctrl";
 import {ContainerCtrl} from "./container_ctrl";
+import {UtilizationCtrl} from "./utilization_ctrl";
 
 cytoscape.use(cola);
 
@@ -15,6 +16,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
 
     public edgesCtrl = new EdgesCtrl();
     public containerCtrl = new ContainerCtrl();
+    public utilizationCtrl = new UtilizationCtrl();
     private cy;
     private firstRendering = 0;
 
@@ -47,6 +49,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "format": "time_series",
                     "instant": true,
                     "intervalFactor": 1,
+                    "legendFormat": "container_utilization",
                     "refId": "C"
                 }
             ],
@@ -94,11 +97,9 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 newObj['target'] = obj['dst'].substr(3);
                 newObj['bytes'] = dataObj.datapoints[0][0];
                 this.edgesCtrl.add(newObj);
-            } else {
-                console.log('Received data');
-                console.log(dataObj);
+            } else if (dataObj.target === 'container_utilization'){
+                this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
             }
-
         }
         if (this.firstRendering == 0){
             this.render();

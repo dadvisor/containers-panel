@@ -38342,6 +38342,8 @@ var _edges_ctrl = __webpack_require__(/*! ./edges_ctrl */ "./edges_ctrl.ts");
 
 var _container_ctrl = __webpack_require__(/*! ./container_ctrl */ "./container_ctrl.ts");
 
+var _utilization_ctrl = __webpack_require__(/*! ./utilization_ctrl */ "./utilization_ctrl.ts");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var __extends = undefined && undefined.__extends || function () {
@@ -38384,6 +38386,7 @@ function (_super) {
 
     _this.edgesCtrl = new _edges_ctrl.EdgesCtrl();
     _this.containerCtrl = new _container_ctrl.ContainerCtrl();
+    _this.utilizationCtrl = new _utilization_ctrl.UtilizationCtrl();
     _this.firstRendering = 0;
     _this.mapping = new _mapping2.default(_this);
     _this.graph_height = _this.height;
@@ -38406,6 +38409,7 @@ function (_super) {
         "format": "time_series",
         "instant": true,
         "intervalFactor": 1,
+        "legendFormat": "container_utilization",
         "refId": "C"
       }],
       interval: 'null',
@@ -38461,9 +38465,8 @@ function (_super) {
         newObj['target'] = obj['dst'].substr(3);
         newObj['bytes'] = dataObj.datapoints[0][0];
         this.edgesCtrl.add(newObj);
-      } else {
-        console.log('Received data');
-        console.log(dataObj);
+      } else if (dataObj.target === 'container_utilization') {
+        this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
       }
     }
 
@@ -38720,6 +38723,46 @@ function getStyle(panel) {
     }
   }];
 }
+
+/***/ }),
+
+/***/ "./utilization_ctrl.ts":
+/*!*****************************!*\
+  !*** ./utilization_ctrl.ts ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var UtilizationCtrl =
+/** @class */
+function () {
+  function UtilizationCtrl() {
+    this.data = {};
+  }
+
+  UtilizationCtrl.prototype.addOrUpdate = function (id, value) {
+    this.data[id] = value;
+  };
+
+  UtilizationCtrl.prototype.getValue = function (id) {
+    return this.data[id];
+  };
+
+  UtilizationCtrl.prototype.reset = function () {
+    this.data = {};
+  };
+
+  return UtilizationCtrl;
+}();
+
+exports.UtilizationCtrl = UtilizationCtrl;
 
 /***/ }),
 

@@ -1,18 +1,27 @@
 import _ from "lodash";
 import {bytesToSize} from "./util";
 
+const CPU_PRICE_HOUR = 0.021925;
+const GB_PRICE_HOUR = 0.002938;
+
 class Host {
     ip: string;
     numCores: number;
     memory: number;
+    price: number;
 
-    constructor(ip: string, numCores: number, memory: number){
+    constructor(ip: string, numCores: number, memory: number) {
         this.ip = ip;
         this.numCores = numCores;
         this.memory = memory;
+        this.price = this.getDefaultPrice();
     }
 
-    public getMemory(){
+    private getDefaultPrice() {
+        return this.numCores * CPU_PRICE_HOUR + this.memory / Math.pow(2, 30) * GB_PRICE_HOUR;
+    }
+
+    public getMemory() {
         return bytesToSize(this.memory);
     }
 }
@@ -35,6 +44,6 @@ export class HostCtrl {
     }
 }
 
-export function getHost(obj: Object): Host{
+export function getHost(obj: Object): Host {
     return new Host(obj['ip'], obj['numCores'], obj['memory']);
 }

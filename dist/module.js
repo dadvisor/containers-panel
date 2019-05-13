@@ -38209,6 +38209,9 @@ var _util = __webpack_require__(/*! ./util */ "./util.ts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var CPU_PRICE_HOUR = 0.021925;
+var GB_PRICE_HOUR = 0.002938;
+
 var Host =
 /** @class */
 function () {
@@ -38216,7 +38219,12 @@ function () {
     this.ip = ip;
     this.numCores = numCores;
     this.memory = memory;
+    this.price = this.getDefaultPrice();
   }
+
+  Host.prototype.getDefaultPrice = function () {
+    return this.numCores * CPU_PRICE_HOUR + this.memory / Math.pow(2, 30) * GB_PRICE_HOUR;
+  };
 
   Host.prototype.getMemory = function () {
     return (0, _util.bytesToSize)(this.memory);

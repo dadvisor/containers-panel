@@ -38590,6 +38590,21 @@ function (_super) {
         return {};
     }
   };
+  /**
+   * Returns a graph description, based on the current visualization mode.
+   */
+
+
+  PanelCtrl.prototype.description = function () {
+    switch (this.panel.mode) {
+      case _util.Modes.CONTAINERS:
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP), and based on the docker images that are used ' + 'inside this host. The edges represent the total amount of data that has been send from a ' + 'certain container to another container.';
+
+      default:
+        console.log('Something went wrong');
+        return '';
+    }
+  };
 
   PanelCtrl.templateUrl = './partials/module.html';
   return PanelCtrl;
@@ -38629,6 +38644,7 @@ var Modes = exports.Modes = undefined;
   Modes["CONTAINERS"] = "Containers";
   Modes["GROUPED"] = "Grouped";
   Modes["UTILIZATION"] = "Utilization (last hour average)";
+  Modes["COST_PREDICTION"] = "Cost prediction (based on last hour average)";
 })(Modes || (exports.Modes = Modes = {}));
 
 function add_width(edges) {

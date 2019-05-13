@@ -6,7 +6,8 @@ export enum NameImage {
 export enum Modes {
     CONTAINERS = 'Containers',
     GROUPED = 'Grouped',
-    UTILIZATION = 'Utilization (last hour average)'
+    UTILIZATION = 'Utilization (last hour average)',
+    COST_PREDICTION = 'Cost prediction (based on last hour average)',
 }
 
 

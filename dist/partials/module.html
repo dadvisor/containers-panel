@@ -1,13 +1,16 @@
 <section class="container">
     <div class="gf-form" id="graph-header">
         <label class="gf-form-label width-10">Visualization mode</label>
-        <div class="gf-form-select-wrapper max-width-10">
+        <div class="gf-form-select-wrapper max-width-30">
             <select class="input-medium gf-form-input" ng-model="ctrl.panel.mode"
                     ng-options="t for t in ctrl.get_modes()" ng-change="ctrl.render()"></select>
         </div>
         <button style="float: right;" class="gf-form-label"
                 ng-click="ctrl.render()"><i class="fa fa-refresh"></i>
         </button>
+    </div>
+    <div class="gf-form">
+        {{ ctrl.description() }}
     </div>
     <div class="container-panel" ng-style="{height: ctrl.graph_height}">
         <div id="graph-panel"></div>

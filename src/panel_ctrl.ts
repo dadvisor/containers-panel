@@ -208,4 +208,20 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 return {};
         }
     }
+
+    /**
+     * Returns a graph description, based on the current visualization mode.
+     */
+    public description(){
+        switch (this.panel.mode) {
+            case Modes.CONTAINERS:
+                return 'The graph presented below shows all the containers that are deployed. The containers are ' +
+                    'grouped per host (based on its external IP), and based on the docker images that are used ' +
+                    'inside this host. The edges represent the total amount of data that has been send from a ' +
+                    'certain container to another container.';
+            default:
+                console.log('Something went wrong');
+                return '';
+        }
+    }
 }

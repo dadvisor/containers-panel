@@ -38160,6 +38160,50 @@ exports.ContainerCtrl = ContainerCtrl;
 
 /***/ }),
 
+/***/ "./cost_ctrl.ts":
+/*!**********************!*\
+  !*** ./cost_ctrl.ts ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var CostCtrl =
+/** @class */
+function () {
+  function CostCtrl() {
+    this.data = {};
+  }
+
+  CostCtrl.prototype.addOrUpdate = function (id, value) {
+    this.data[id] = value;
+  };
+
+  CostCtrl.prototype.getValue = function (id) {
+    if (this.data[id] !== undefined) {
+      return this.data[id];
+    }
+
+    return 0;
+  };
+
+  CostCtrl.prototype.reset = function () {
+    this.data = {};
+  };
+
+  return CostCtrl;
+}();
+
+exports.CostCtrl = CostCtrl;
+
+/***/ }),
+
 /***/ "./css/main.css":
 /*!**********************!*\
   !*** ./css/main.css ***!
@@ -38499,6 +38543,8 @@ var _utilization_ctrl = __webpack_require__(/*! ./utilization_ctrl */ "./utiliza
 
 var _host_ctrl = __webpack_require__(/*! ./host_ctrl */ "./host_ctrl.ts");
 
+var _cost_ctrl = __webpack_require__(/*! ./cost_ctrl */ "./cost_ctrl.ts");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var __extends = undefined && undefined.__extends || function () {
@@ -38543,6 +38589,7 @@ function (_super) {
     _this.containerCtrl = new _container_ctrl.ContainerCtrl();
     _this.utilizationCtrl = new _utilization_ctrl.UtilizationCtrl();
     _this.hostCtrl = new _host_ctrl.HostCtrl();
+    _this.costCtrl = new _cost_ctrl.CostCtrl();
     _this.firstRendering = 0;
     _this.mapping = new _mapping2.default(_this);
     _this.graph_height = _this.height;
@@ -38573,6 +38620,13 @@ function (_super) {
         "instant": true,
         "intervalFactor": 1,
         "refId": "D"
+      }, {
+        "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h]) [1y:1h])",
+        "format": "time_series",
+        "instant": true,
+        "intervalFactor": 1,
+        "legendFormat": "container_total_util",
+        "refId": "E"
       }],
       interval: 'null',
       valueName: 'current',
@@ -38632,6 +38686,8 @@ function (_super) {
         this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
       } else if (dataObj.target.startsWith('default_host_price_total')) {
         this.hostCtrl.addOrUpdate(obj);
+      } else if (dataObj.target === 'container_total_util') {
+        this.costCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
       } else {
         console.log('Can not parse dataObj: ');
         console.log(dataObj);

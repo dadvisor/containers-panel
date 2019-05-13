@@ -9,6 +9,7 @@ import {EdgesCtrl} from "./edges_ctrl";
 import {ContainerCtrl} from "./container_ctrl";
 import {UtilizationCtrl} from "./utilization_ctrl";
 import {HostCtrl} from "./host_ctrl";
+import {CostCtrl} from "./cost_ctrl";
 
 cytoscape.use(cola);
 
@@ -19,6 +20,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     public containerCtrl = new ContainerCtrl();
     public utilizationCtrl = new UtilizationCtrl();
     public hostCtrl = new HostCtrl();
+    public costCtrl = new CostCtrl();
     private cy;
     private firstRendering = 0;
 
@@ -60,6 +62,14 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "instant": true,
                     "intervalFactor": 1,
                     "refId": "D"
+                },
+                {
+                    "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h]) [1y:1h])",
+                    "format": "time_series",
+                    "instant": true,
+                    "intervalFactor": 1,
+                    "legendFormat": "container_total_util",
+                    "refId": "E"
                 }
             ],
             interval: 'null',
@@ -109,8 +119,10 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 this.edgesCtrl.add(newObj);
             } else if (dataObj.target === 'container_utilization') {
                 this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
-            } else if (dataObj.target.startsWith('default_host_price_total')){
+            } else if (dataObj.target.startsWith('default_host_price_total')) {
                 this.hostCtrl.addOrUpdate(obj);
+            } else if (dataObj.target === 'container_total_util'){
+                this.costCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
             } else {
                 console.log('Can not parse dataObj: ');
                 console.log(dataObj);

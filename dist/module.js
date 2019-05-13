@@ -38553,7 +38553,7 @@ function (_super) {
         this.edgesCtrl.add(newObj);
       } else if (dataObj.target === 'container_utilization') {
         this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
-      } else if (dataObj.target === 'default_host_price_total') {
+      } else if (dataObj.target.startsWith('default_host_price_total')) {
         console.log(dataObj);
         this.hostCtrl.addOrUpdate((0, _host_ctrl.getHost)(obj));
       } else {

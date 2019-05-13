@@ -201,7 +201,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             case Modes.UTILIZATION:
                 return {
                     edges: this.edgesCtrl.getList(),
-                    nodes: this.containerCtrl.getNodesWithUtilization()
+                    nodes: this.containerCtrl.getNodesWithUtilization(this.utilizationCtrl)
                 };
             default:
                 console.log('Something went wrong');

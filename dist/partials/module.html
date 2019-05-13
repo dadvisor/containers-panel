@@ -8,9 +8,7 @@
         <button style="float: right;" class="gf-form-label"
                 ng-click="ctrl.render()"><i class="fa fa-refresh"></i>
         </button>
-    </div>
-    <div class="gf-form">
-        {{ ctrl.description() }}
+        <p>{{ ctrl.description() }}</p>
     </div>
     <div class="container-panel" ng-style="{height: ctrl.graph_height}">
         <div id="graph-panel"></div>

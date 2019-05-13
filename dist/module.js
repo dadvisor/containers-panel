@@ -38535,6 +38535,7 @@ function (_super) {
     if (header !== undefined && header.height() !== undefined) {
       // @ts-ignore
       this.graph_height = this.height - header.height();
+      console.log('Updated graph_height to: ' + this.graph_height);
     }
   };
 

@@ -6,12 +6,11 @@
                 <select class="input-medium gf-form-input" ng-model="ctrl.panel.mode"
                         ng-options="t for t in ctrl.get_modes()" ng-change="ctrl.render()"></select>
             </div>
-            <button style="float: right;" class="gf-form-label"
-                    ng-click="ctrl.render()"><i class="fa fa-refresh"></i>
+            <button class="gf-form-label" ng-click="ctrl.render()"><i class="fa fa-refresh"></i>
             </button>
         </div>
         <div class="gf-form">
-            <p>{{ ctrl.description() }}</p>
+            <p><strong>Description: </strong>{{ ctrl.description() }}</p>
         </div>
     </div>
     <div class="container-panel" ng-style="{height: ctrl.graph_height}">

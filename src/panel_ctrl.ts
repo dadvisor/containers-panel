@@ -100,7 +100,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
 
     onInitEditMode() {
         this.addEditorTab('Container Mapping', 'public/plugins/grafana-container-panel/partials/mapping.html', 2);
-        this.addEditorTab('Cost prediction',   'public/plugins/grafana-container-panel/partials/cost.html', 2);
+        this.addEditorTab('Cost prediction', 'public/plugins/grafana-container-panel/partials/cost.html', 2);
         this.addEditorTab('Layout Options', 'public/plugins/grafana-container-panel/partials/layout.html', 2);
     }
 
@@ -121,7 +121,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
             } else if (dataObj.target.startsWith('default_host_price_total')) {
                 this.hostCtrl.addOrUpdate(obj);
-            } else if (dataObj.target === 'container_total_util'){
+            } else if (dataObj.target === 'container_total_util') {
                 let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
                 this.costCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
             } else {
@@ -252,6 +252,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     edges: this.edgesCtrl.getList(),
                     nodes: this.containerCtrl.getNodesWithUtilizationWaste(this.utilizationCtrl, this.hostCtrl),
                 };
+            case Modes.WASTE_PREDICTION_GROUPED:
+                return {
+                    edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
+                    nodes: this.containerCtrl.getGroupedNodesWaste(this.utilizationCtrl, this.hostCtrl)
+                };
             default:
                 console.log('Something went wrong');
                 return {};
@@ -295,6 +300,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
                     'grouped per host (based on its external IP). Each node shows the container name, and a ' +
                     'prediction of the amount of money that is wasted on the host (related to the container).';
+            case Modes.WASTE_PREDICTION_GROUPED:
+                return 'The graph presented below groups related containers together. The groups are defined in the ' +
+                    'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' +
+                    'estimation of the waste per group is presented. This graph is based on the previous graph ' +
+                    '(waste prediction).';
             default:
                 console.log('Something went wrong');
                 return '';

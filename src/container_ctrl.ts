@@ -155,6 +155,38 @@ export class ContainerCtrl {
         });
     }
 
+    getGroupedNodesWaste(utilCtrl: UtilizationCtrl, hostCtrl: HostCtrl) {
+        let groups: { [key: string]: number } = {};
+        let hosts: { [key: string]: number; } = {};
+
+        for (let container of this.getList()) {
+            if (hosts[container['host']] === undefined){
+                hosts[container['host']] = 0;
+            }
+            hosts[container['host']] += utilCtrl.getValue(container['hash']);
+        }
+
+        for (let container of this.getList()) {
+            let group = this.getGroupFromContainerHash(container['hash']);
+            if (groups[group] === undefined) {
+                groups[group] = 0;
+            }
+            let totalCost = hosts[container['host']];
+            let cost = utilCtrl.getValue(container['hash']);
+            let waste = (totalCost - cost)/totalCost * (1 - totalCost);
+            groups[group] += waste * hostCtrl.getPrice(container['host']);
+        }
+
+        return Object.keys(groups).map(key => {
+            return {
+                data: {
+                    id: key,
+                    name: key + '\n$' + groups[key].toFixed(2),
+                }
+            }
+        });
+    }
+
     public getGroupedNodesTotalCost(costCtrl: CostCtrl, hostCtrl: HostCtrl) {
         let groups: { [key: string]: number } = {};
         for (let container of this.getList()) {

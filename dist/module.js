@@ -38128,6 +38128,44 @@ function () {
     });
   };
 
+  ContainerCtrl.prototype.getGroupedNodesWaste = function (utilCtrl, hostCtrl) {
+    var groups = {};
+    var hosts = {};
+
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+
+      if (hosts[container['host']] === undefined) {
+        hosts[container['host']] = 0;
+      }
+
+      hosts[container['host']] += utilCtrl.getValue(container['hash']);
+    }
+
+    for (var _b = 0, _c = this.getList(); _b < _c.length; _b++) {
+      var container = _c[_b];
+      var group = this.getGroupFromContainerHash(container['hash']);
+
+      if (groups[group] === undefined) {
+        groups[group] = 0;
+      }
+
+      var totalCost = hosts[container['host']];
+      var cost = utilCtrl.getValue(container['hash']);
+      var waste = (totalCost - cost) / totalCost * (1 - totalCost);
+      groups[group] += waste * hostCtrl.getPrice(container['host']);
+    }
+
+    return Object.keys(groups).map(function (key) {
+      return {
+        data: {
+          id: key,
+          name: key + '\n$' + groups[key].toFixed(2)
+        }
+      };
+    });
+  };
+
   ContainerCtrl.prototype.getGroupedNodesTotalCost = function (costCtrl, hostCtrl) {
     var groups = {};
 
@@ -38902,6 +38940,12 @@ function (_super) {
           nodes: this.containerCtrl.getNodesWithUtilizationWaste(this.utilizationCtrl, this.hostCtrl)
         };
 
+      case _util.Modes.WASTE_PREDICTION_GROUPED:
+        return {
+          edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
+          nodes: this.containerCtrl.getGroupedNodesWaste(this.utilizationCtrl, this.hostCtrl)
+        };
+
       default:
         console.log('Something went wrong');
         return {};
@@ -38934,6 +38978,9 @@ function (_super) {
 
       case _util.Modes.WASTE_PREDICTION:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and a ' + 'prediction of the amount of money that is wasted on the host (related to the container).';
+
+      case _util.Modes.WASTE_PREDICTION_GROUPED:
+        return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' + 'estimation of the waste per group is presented. This graph is based on the previous graph ' + '(waste prediction).';
 
       default:
         console.log('Something went wrong');
@@ -38983,6 +39030,7 @@ var Modes = exports.Modes = undefined;
   Modes["COST_PREDICTION_GROUPED"] = "Cost prediction grouped";
   Modes["COST_TOTAL_GROUPED"] = "Total cost grouped";
   Modes["WASTE_PREDICTION"] = "Waste prediction (based on last hour average)";
+  Modes["WASTE_PREDICTION_GROUPED"] = "Waste prediction grouped";
 })(Modes || (exports.Modes = Modes = {}));
 
 function add_width(edges) {

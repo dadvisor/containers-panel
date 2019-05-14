@@ -72,6 +72,34 @@ export class ContainerCtrl {
         });
     }
 
+    public getNodesWithUtilizationWaste(utilCtrl: UtilizationCtrl) {
+        let nodes: Object[] = [];
+        let hosts: { [key: string]: number; } = {};
+        for (let container of this.getList()) {
+            if (hosts[container['host']] === undefined) {
+                hosts[container['host']] = 0;
+            }
+            hosts[container['host']] += utilCtrl.getValue(container['hash']);
+        }
+
+        for (let container of this.getList()){
+            let totalCost = hosts[container['host']];
+            let cost = utilCtrl.getValue(container['hash']);
+            let waste = ((totalCost - cost)/totalCost * (1 - totalCost) * 100).toFixed(2) + '%';
+            nodes.push({
+                id: container['hash'],
+                name: container['names'] + '\n' + waste,
+                parent: container['host']
+            });
+        }
+        Object.keys(hosts).forEach(host => {
+            nodes.push({id: host, name: host});
+        });
+        return nodes.map(item => {
+            return {data: item}
+        });
+    }
+
     getNodesWithCost(utilCtrl: UtilizationCtrl, hostCtrl: HostCtrl) {
         let nodes: Object[] = [];
         let hostSet = new Set();

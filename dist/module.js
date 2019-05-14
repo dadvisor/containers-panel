@@ -38014,6 +38014,45 @@ function () {
     });
   };
 
+  ContainerCtrl.prototype.getNodesWithUtilizationWaste = function (utilCtrl) {
+    var nodes = [];
+    var hosts = {};
+
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+
+      if (hosts[container['host']] === undefined) {
+        hosts[container['host']] = 0;
+      }
+
+      hosts[container['host']] += utilCtrl.getValue(container['hash']);
+    }
+
+    for (var _b = 0, _c = this.getList(); _b < _c.length; _b++) {
+      var container = _c[_b];
+      var totalCost = hosts[container['host']];
+      var cost = utilCtrl.getValue(container['hash']);
+      var waste = ((totalCost - cost) / totalCost * (1 - totalCost) * 100).toFixed(2) + '%';
+      nodes.push({
+        id: container['hash'],
+        name: container['names'] + '\n' + waste,
+        parent: container['host']
+      });
+    }
+
+    Object.keys(hosts).forEach(function (host) {
+      nodes.push({
+        id: host,
+        name: host
+      });
+    });
+    return nodes.map(function (item) {
+      return {
+        data: item
+      };
+    });
+  };
+
   ContainerCtrl.prototype.getNodesWithCost = function (utilCtrl, hostCtrl) {
     var nodes = [];
     var hostSet = new Set();
@@ -38209,7 +38248,6 @@ function () {
   }
 
   CostCtrl.prototype.addOrUpdate = function (id, value) {
-    console.log('CostCtrl with id: ' + id);
     this.data[id] = value;
   };
 
@@ -38857,6 +38895,12 @@ function (_super) {
           nodes: this.containerCtrl.getGroupedNodesTotalCost(this.costCtrl, this.hostCtrl)
         };
 
+      case _util.Modes.WASTE_PREDICTION:
+        return {
+          edges: this.edgesCtrl.getList(),
+          nodes: this.containerCtrl.getNodesWithUtilizationWaste(this.utilizationCtrl)
+        };
+
       default:
         console.log('Something went wrong');
         return {};
@@ -38876,7 +38920,7 @@ function (_super) {
         return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, you ' + 'can find out which groups are interacting with each other. This provides a higher hierarchy of ' + 'the deployed system.';
 
       case _util.Modes.UTILIZATION:
-        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'utilization percentage, which is the average in the last hour.';
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'utilization percentage, which is the average over the last hour.';
 
       case _util.Modes.COST_PREDICTION:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and a cost ' + 'prediction based on the utilization and the host price. The cost prediction is represented per ' + 'hour, and formatted in USD.';
@@ -38886,6 +38930,9 @@ function (_super) {
 
       case _util.Modes.COST_TOTAL_GROUPED:
         return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' + 'the total amount of costs for running a specific group of containers.';
+
+      case _util.Modes.WASTE_PREDICTION:
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'waste percentage, which is the average over the last hour.';
 
       default:
         console.log('Something went wrong');
@@ -38934,6 +38981,7 @@ var Modes = exports.Modes = undefined;
   Modes["COST_PREDICTION"] = "Cost prediction (based on last hour average)";
   Modes["COST_PREDICTION_GROUPED"] = "Cost prediction grouped";
   Modes["COST_TOTAL_GROUPED"] = "Total cost grouped";
+  Modes["WASTE_PREDICTION"] = "Waste prediction (based on last hour average)";
 })(Modes || (exports.Modes = Modes = {}));
 
 function add_width(edges) {
@@ -39059,7 +39107,6 @@ function () {
   }
 
   UtilizationCtrl.prototype.addOrUpdate = function (id, value) {
-    console.log('UtilCtrl with id: ' + id);
     this.data[id] = value;
   };
 

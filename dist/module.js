@@ -38531,7 +38531,6 @@ var Mapping =
 function () {
   function Mapping(panelCtrl) {
     this.panelCtrl = panelCtrl;
-    this.add_row();
   }
 
   Mapping.prototype.add_row = function () {

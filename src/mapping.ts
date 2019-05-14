@@ -8,7 +8,6 @@ export default class Mapping {
 
     constructor(panelCtrl: PanelCtrl) {
         this.panelCtrl = panelCtrl;
-        this.add_row();
     }
 
     public add_row() {

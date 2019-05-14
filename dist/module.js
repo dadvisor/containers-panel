@@ -38030,9 +38030,9 @@ function () {
 
     for (var _b = 0, _c = this.getList(); _b < _c.length; _b++) {
       var container = _c[_b];
-      var totalCost = hosts[container['host']];
-      var cost = utilCtrl.getValue(container['hash']);
-      var waste = (totalCost - cost) / totalCost * (1 - totalCost);
+      var totalUtil = hosts[container['host']];
+      var util = utilCtrl.getValue(container['hash']);
+      var waste = (totalUtil - util) / totalUtil * (1 - totalUtil);
       var wastePrice = (waste * hostCtrl.getPrice(container['host'])).toFixed(2);
       nodes.push({
         id: container['hash'],
@@ -38150,9 +38150,9 @@ function () {
         groups[group] = 0;
       }
 
-      var totalCost = hosts[container['host']];
-      var cost = utilCtrl.getValue(container['hash']);
-      var waste = (totalCost - cost) / totalCost * (1 - totalCost);
+      var totalUtil = hosts[container['host']];
+      var util = utilCtrl.getValue(container['hash']);
+      var waste = (totalUtil - util) / totalUtil * (1 - totalUtil);
       groups[group] += waste * hostCtrl.getPrice(container['host']);
     }
 
@@ -39204,6 +39204,7 @@ function () {
   }
 
   UtilizationCtrl.prototype.addOrUpdate = function (id, value) {
+    console.log('UtilizationCtrl id: ' + id);
     this.data[id] = value;
   };
 

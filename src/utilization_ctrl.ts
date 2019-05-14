@@ -7,6 +7,7 @@ export class UtilizationCtrl {
     private data: { [key: string]: number; } = {};
 
     public addOrUpdate(id: string, value: number) {
+        console.log('UtilizationCtrl id: ' + id);
         this.data[id] = value;
     }
 

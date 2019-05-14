@@ -84,9 +84,9 @@ export class ContainerCtrl {
         }
 
         for (let container of this.getList()){
-            let totalCost = hosts[container['host']];
-            let cost = utilCtrl.getValue(container['hash']);
-            let waste = (totalCost - cost)/totalCost * (1 - totalCost);
+            let totalUtil = hosts[container['host']];
+            let util = utilCtrl.getValue(container['hash']);
+            let waste = (totalUtil - util)/totalUtil * (1 - totalUtil);
             let wastePrice = (waste * hostCtrl.getPrice(container['host'])).toFixed(2);
             nodes.push({
                 id: container['hash'],
@@ -172,9 +172,9 @@ export class ContainerCtrl {
             if (groups[group] === undefined) {
                 groups[group] = 0;
             }
-            let totalCost = hosts[container['host']];
-            let cost = utilCtrl.getValue(container['hash']);
-            let waste = (totalCost - cost)/totalCost * (1 - totalCost);
+            let totalUtil = hosts[container['host']];
+            let util = utilCtrl.getValue(container['hash']);
+            let waste = (totalUtil - util)/totalUtil * (1 - totalUtil);
             groups[group] += waste * hostCtrl.getPrice(container['host']);
         }
 

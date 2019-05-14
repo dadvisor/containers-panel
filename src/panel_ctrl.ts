@@ -128,6 +128,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 newObj['bytes'] = dataObj.datapoints[0][0];
                 this.edgesCtrl.add(newObj);
             } else if (dataObj.target === 'container_utilization') {
+
                 this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
             } else if (dataObj.target.startsWith('default_host_price_total')) {
                 this.hostCtrl.addOrUpdate(obj);

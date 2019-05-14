@@ -1,7 +1,12 @@
+/**
+ * Class for storing the total cost of a container.
+ */
+
 export class CostCtrl {
     private data: { [key: string]: number; } = {};
 
     public addOrUpdate(id: string, value: number) {
+        console.log('CostCtrl with id: ' + id);
         this.data[id] = value;
     }
 

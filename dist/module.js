@@ -38198,6 +38198,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+/**
+ * Class for storing the total cost of a container.
+ */
 var CostCtrl =
 /** @class */
 function () {
@@ -38206,6 +38209,7 @@ function () {
   }
 
   CostCtrl.prototype.addOrUpdate = function (id, value) {
+    console.log('CostCtrl with id: ' + id);
     this.data[id] = value;
   };
 
@@ -39040,6 +39044,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+/**
+ * Class for storing the current utilization of a certain container.
+ * Note that a prediction of the cost can be made with the following formula:
+ * - prediction per hour = util over last hour * host price per hour.
+ */
 var UtilizationCtrl =
 /** @class */
 function () {
@@ -39048,6 +39057,7 @@ function () {
   }
 
   UtilizationCtrl.prototype.addOrUpdate = function (id, value) {
+    console.log('UtilCtrl with id: ' + id);
     this.data[id] = value;
   };
 

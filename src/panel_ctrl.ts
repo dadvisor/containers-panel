@@ -21,7 +21,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     public containerCtrl = new ContainerCtrl();
     public utilizationCtrl = new UtilizationCtrl();
     public wasteCtrl = new WasteCtrl();
-    public hostCtrl = new HostCtrl();
+    public hostCtrl = new HostCtrl(this);
     public costCtrl = new CostCtrl();
     private cy;
     private firstRendering = 0;
@@ -83,6 +83,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 }
             ],
             ruleMappings: [],
+            cpuPriceHour: 0.021925,
+            gbPriceHour: 0.002938,
             interval: 'null',
             valueName: 'current',
             mode: Modes.CONTAINERS,
@@ -131,8 +133,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 newObj['bytes'] = dataObj.datapoints[0][0];
                 this.edgesCtrl.add(newObj);
             } else if (dataObj.target === 'container_utilization') {
-
-                this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
+                let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
+                this.utilizationCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
             } else if (dataObj.target.startsWith('default_host_price_total')) {
                 this.hostCtrl.addOrUpdate(obj);
             } else if (dataObj.target === 'container_total_util') {

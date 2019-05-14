@@ -1,5 +1,6 @@
 import _ from "lodash";
 import {bytesToSize} from "./util";
+import {PanelCtrl} from "./panel_ctrl";
 
 class Host {
     ip: string;
@@ -15,7 +16,8 @@ class Host {
     }
 
     setDefaultPrice(hostCtrl: HostCtrl) {
-        this.price = this.numCores * hostCtrl.cpuPriceHour + this.memory / Math.pow(2, 30) * hostCtrl.gbPriceHour;
+        this.price = this.numCores * hostCtrl.getCpuPriceHour() +
+            this.memory / Math.pow(2, 30) * hostCtrl.getGbPriceHour();
     }
 
     public getMemory() {
@@ -24,9 +26,12 @@ class Host {
 }
 
 export class HostCtrl {
-    public cpuPriceHour = 0.021925;
-    public gbPriceHour = 0.002938;
     private hosts: Host[] = [];
+    private panelCtrl: PanelCtrl;
+
+    constructor(panelCtrl: PanelCtrl) {
+        this.panelCtrl = panelCtrl;
+    }
 
     public addOrUpdate(obj: Object) {
         const host_obj: Host = new Host(obj['host'], obj['num_cores'], obj['memory'], this);
@@ -39,6 +44,14 @@ export class HostCtrl {
         this.hosts.push(host_obj);
     }
 
+    getCpuPriceHour() {
+        return this.panelCtrl.panel['cpuPriceHour'];
+    }
+
+    getGbPriceHour() {
+        return this.panelCtrl.panel['gbPriceHour'];
+    }
+
     public getList() {
         return this.hosts;
     }
@@ -48,9 +61,10 @@ export class HostCtrl {
             host.setDefaultPrice(this);
         }
     }
+
     getPrice(ip: string) {
-        for (let host of this.hosts){
-            if (host.ip === ip){
+        for (let host of this.hosts) {
+            if (host.ip === ip) {
                 return host.price;
             }
         }

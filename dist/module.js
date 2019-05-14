@@ -38445,7 +38445,7 @@ function () {
   }
 
   Host.prototype.setDefaultPrice = function (hostCtrl) {
-    this.price = this.numCores * hostCtrl.cpuPriceHour + this.memory / Math.pow(2, 30) * hostCtrl.gbPriceHour;
+    this.price = this.numCores * hostCtrl.getCpuPriceHour() + this.memory / Math.pow(2, 30) * hostCtrl.getGbPriceHour();
   };
 
   Host.prototype.getMemory = function () {
@@ -38458,10 +38458,9 @@ function () {
 var HostCtrl =
 /** @class */
 function () {
-  function HostCtrl() {
-    this.cpuPriceHour = 0.021925;
-    this.gbPriceHour = 0.002938;
+  function HostCtrl(panelCtrl) {
     this.hosts = [];
+    this.panelCtrl = panelCtrl;
   }
 
   HostCtrl.prototype.addOrUpdate = function (obj) {
@@ -38477,6 +38476,14 @@ function () {
     }
 
     this.hosts.push(host_obj);
+  };
+
+  HostCtrl.prototype.getCpuPriceHour = function () {
+    return this.panelCtrl.panel['cpuPriceHour'];
+  };
+
+  HostCtrl.prototype.getGbPriceHour = function () {
+    return this.panelCtrl.panel['gbPriceHour'];
   };
 
   HostCtrl.prototype.getList = function () {
@@ -38709,7 +38716,7 @@ function (_super) {
     _this.containerCtrl = new _container_ctrl.ContainerCtrl();
     _this.utilizationCtrl = new _utilization_ctrl.UtilizationCtrl();
     _this.wasteCtrl = new _waste_ctrl.WasteCtrl();
-    _this.hostCtrl = new _host_ctrl.HostCtrl();
+    _this.hostCtrl = new _host_ctrl.HostCtrl(_this);
     _this.costCtrl = new _cost_ctrl.CostCtrl();
     _this.firstRendering = 0;
     _this.graph_height = _this.height;
@@ -38756,6 +38763,8 @@ function (_super) {
         "refId": "F"
       }],
       ruleMappings: [],
+      cpuPriceHour: 0.021925,
+      gbPriceHour: 0.002938,
       interval: 'null',
       valueName: 'current',
       mode: _util.Modes.CONTAINERS,
@@ -38812,7 +38821,9 @@ function (_super) {
         newObj['bytes'] = dataObj.datapoints[0][0];
         this.edgesCtrl.add(newObj);
       } else if (dataObj.target === 'container_utilization') {
-        this.utilizationCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
+        var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
+
+        this.utilizationCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
       } else if (dataObj.target.startsWith('default_host_price_total')) {
         this.hostCtrl.addOrUpdate(obj);
       } else if (dataObj.target === 'container_total_util') {

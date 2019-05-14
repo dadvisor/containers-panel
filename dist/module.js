@@ -38715,7 +38715,9 @@ function (_super) {
       } else if (dataObj.target.startsWith('default_host_price_total')) {
         this.hostCtrl.addOrUpdate(obj);
       } else if (dataObj.target === 'container_total_util') {
-        this.costCtrl.addOrUpdate(dataObj.labels.id, dataObj.datapoints[0][0]);
+        var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
+
+        this.costCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
       } else {
         console.log('Can not parse dataObj: ');
         console.log(dataObj);

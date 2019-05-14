@@ -38530,8 +38530,8 @@ var Mapping =
 /** @class */
 function () {
   function Mapping(panelCtrl) {
-    this.add_row();
     this.panelCtrl = panelCtrl;
+    this.add_row();
   }
 
   Mapping.prototype.add_row = function () {

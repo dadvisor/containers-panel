@@ -10,6 +10,7 @@ import {ContainerCtrl} from "./container_ctrl";
 import {UtilizationCtrl} from "./utilization_ctrl";
 import {HostCtrl} from "./host_ctrl";
 import {CostCtrl} from "./cost_ctrl";
+import {WasteCtrl} from "./waste_ctrl";
 
 cytoscape.use(cola);
 
@@ -19,6 +20,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     public edgesCtrl = new EdgesCtrl();
     public containerCtrl = new ContainerCtrl();
     public utilizationCtrl = new UtilizationCtrl();
+    public wasteCtrl = new WasteCtrl();
     public hostCtrl = new HostCtrl();
     public costCtrl = new CostCtrl();
     private cy;
@@ -70,6 +72,14 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "intervalFactor": 1,
                     "legendFormat": "container_total_util",
                     "refId": "E"
+                },
+                {
+                    "expr": "sum_over_time((( 1 - avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h]) / scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h])\n)) ) * (1 - scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h]))) ))[1y:1h])",
+                    "format": "time_series",
+                    "instant": true,
+                    "intervalFactor": 1,
+                    "legendFormat": "waste_total_util",
+                    "refId": "F"
                 }
             ],
             interval: 'null',
@@ -124,6 +134,9 @@ export class PanelCtrl extends MetricsPanelCtrl {
             } else if (dataObj.target === 'container_total_util') {
                 let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
                 this.costCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
+            } else if (dataObj.target === 'waste_total_util') {
+                let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
+                this.wasteCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
             } else {
                 console.log('Can not parse dataObj: ');
                 console.log(dataObj);
@@ -257,6 +270,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
                     nodes: this.containerCtrl.getGroupedNodesWaste(this.utilizationCtrl, this.hostCtrl)
                 };
+            case Modes.WASTE_TOTAL_GROUPED:
+                return {
+                    edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
+                    nodes: this.containerCtrl.getGroupedNodesTotalWaste(this.wasteCtrl, this.hostCtrl)
+                };
             default:
                 console.log('Something went wrong');
                 return {};
@@ -295,7 +313,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             case Modes.COST_TOTAL_GROUPED:
                 return 'The graph presented below groups related containers together. The groups are defined in the ' +
                     'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' +
-                    'the total amount of costs for running a specific group of containers.';
+                    'the total amount of costs of running a specific group of containers.';
             case Modes.WASTE_PREDICTION:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
                     'grouped per host (based on its external IP). Each node shows the container name, and a ' +
@@ -305,6 +323,10 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' +
                     'estimation of the waste per group is presented. This graph is based on the previous graph ' +
                     '(waste prediction).';
+            case Modes.WASTE_TOTAL_GROUPED:
+                return 'The graph presented below groups related containers together. The groups are defined in the ' +
+                    'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' +
+                    'the total amount of waste of running a specific group of containers.';
             default:
                 console.log('Something went wrong');
                 return '';

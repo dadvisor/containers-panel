@@ -38190,6 +38190,30 @@ function () {
     });
   };
 
+  ContainerCtrl.prototype.getGroupedNodesTotalWaste = function (wasteCtrl, hostCtrl) {
+    var groups = {};
+
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+      var group = this.getGroupFromContainerHash(container['hash']);
+
+      if (groups[group] === undefined) {
+        groups[group] = 0;
+      }
+
+      groups[group] += wasteCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
+    }
+
+    return Object.keys(groups).map(function (key) {
+      return {
+        data: {
+          id: key,
+          name: key + '\n$' + groups[key].toFixed(4)
+        }
+      };
+    });
+  };
+
   ContainerCtrl.prototype.getGroupedEdges = function (edgesCtrl) {
     var edges = [];
 
@@ -38650,6 +38674,8 @@ var _host_ctrl = __webpack_require__(/*! ./host_ctrl */ "./host_ctrl.ts");
 
 var _cost_ctrl = __webpack_require__(/*! ./cost_ctrl */ "./cost_ctrl.ts");
 
+var _waste_ctrl = __webpack_require__(/*! ./waste_ctrl */ "./waste_ctrl.ts");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var __extends = undefined && undefined.__extends || function () {
@@ -38693,6 +38719,7 @@ function (_super) {
     _this.edgesCtrl = new _edges_ctrl.EdgesCtrl();
     _this.containerCtrl = new _container_ctrl.ContainerCtrl();
     _this.utilizationCtrl = new _utilization_ctrl.UtilizationCtrl();
+    _this.wasteCtrl = new _waste_ctrl.WasteCtrl();
     _this.hostCtrl = new _host_ctrl.HostCtrl();
     _this.costCtrl = new _cost_ctrl.CostCtrl();
     _this.firstRendering = 0;
@@ -38732,6 +38759,13 @@ function (_super) {
         "intervalFactor": 1,
         "legendFormat": "container_total_util",
         "refId": "E"
+      }, {
+        "expr": "sum_over_time((( 1 - avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h]) / scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h])\n)) ) * (1 - scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h]))) ))[1y:1h])",
+        "format": "time_series",
+        "instant": true,
+        "intervalFactor": 1,
+        "legendFormat": "waste_total_util",
+        "refId": "F"
       }],
       interval: 'null',
       valueName: 'current',
@@ -38795,6 +38829,10 @@ function (_super) {
         var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
 
         this.costCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
+      } else if (dataObj.target === 'waste_total_util') {
+        var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
+
+        this.wasteCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
       } else {
         console.log('Can not parse dataObj: ');
         console.log(dataObj);
@@ -38946,6 +38984,12 @@ function (_super) {
           nodes: this.containerCtrl.getGroupedNodesWaste(this.utilizationCtrl, this.hostCtrl)
         };
 
+      case _util.Modes.WASTE_TOTAL_GROUPED:
+        return {
+          edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
+          nodes: this.containerCtrl.getGroupedNodesTotalWaste(this.wasteCtrl, this.hostCtrl)
+        };
+
       default:
         console.log('Something went wrong');
         return {};
@@ -38974,13 +39018,16 @@ function (_super) {
         return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' + 'estimation of the cost per group is presented. This graph is based on the previous graph (cost ' + 'prediction).';
 
       case _util.Modes.COST_TOTAL_GROUPED:
-        return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' + 'the total amount of costs for running a specific group of containers.';
+        return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' + 'the total amount of costs of running a specific group of containers.';
 
       case _util.Modes.WASTE_PREDICTION:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and a ' + 'prediction of the amount of money that is wasted on the host (related to the container).';
 
       case _util.Modes.WASTE_PREDICTION_GROUPED:
         return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' + 'estimation of the waste per group is presented. This graph is based on the previous graph ' + '(waste prediction).';
+
+      case _util.Modes.WASTE_TOTAL_GROUPED:
+        return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' + 'the total amount of waste of running a specific group of containers.';
 
       default:
         console.log('Something went wrong');
@@ -39031,6 +39078,7 @@ var Modes = exports.Modes = undefined;
   Modes["COST_TOTAL_GROUPED"] = "Total cost grouped";
   Modes["WASTE_PREDICTION"] = "Waste prediction (based on last hour average)";
   Modes["WASTE_PREDICTION_GROUPED"] = "Waste prediction grouped";
+  Modes["WASTE_TOTAL_GROUPED"] = "Total waste grouped";
 })(Modes || (exports.Modes = Modes = {}));
 
 function add_width(edges) {
@@ -39175,6 +39223,53 @@ function () {
 }();
 
 exports.UtilizationCtrl = UtilizationCtrl;
+
+/***/ }),
+
+/***/ "./waste_ctrl.ts":
+/*!***********************!*\
+  !*** ./waste_ctrl.ts ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+/**
+ * Class for storing the total cost of a container.
+ */
+var WasteCtrl =
+/** @class */
+function () {
+  function WasteCtrl() {
+    this.data = {};
+  }
+
+  WasteCtrl.prototype.addOrUpdate = function (id, value) {
+    this.data[id] = value;
+  };
+
+  WasteCtrl.prototype.getValue = function (id) {
+    if (this.data[id] !== undefined) {
+      return this.data[id];
+    }
+
+    return 0;
+  };
+
+  WasteCtrl.prototype.reset = function () {
+    this.data = {};
+  };
+
+  return WasteCtrl;
+}();
+
+exports.WasteCtrl = WasteCtrl;
 
 /***/ }),
 

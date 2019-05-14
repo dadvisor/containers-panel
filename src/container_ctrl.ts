@@ -3,6 +3,7 @@ import _ from "lodash";
 import {UtilizationCtrl} from "./utilization_ctrl";
 import {HostCtrl} from "./host_ctrl";
 import {CostCtrl} from "./cost_ctrl";
+import {WasteCtrl} from "./waste_ctrl";
 
 export class ContainerCtrl {
     private containers: Object[] = [];
@@ -195,6 +196,26 @@ export class ContainerCtrl {
                 groups[group] = 0;
             }
             groups[group] += costCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
+        }
+
+        return Object.keys(groups).map(key => {
+            return {
+                data: {
+                    id: key,
+                    name: key + '\n$' + groups[key].toFixed(4),
+                }
+            }
+        });
+    }
+
+    public getGroupedNodesTotalWaste(wasteCtrl: WasteCtrl, hostCtrl: HostCtrl) {
+        let groups: { [key: string]: number } = {};
+        for (let container of this.getList()) {
+            let group = this.getGroupFromContainerHash(container['hash']);
+            if (groups[group] === undefined) {
+                groups[group] = 0;
+            }
+            groups[group] += wasteCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
         }
 
         return Object.keys(groups).map(key => {

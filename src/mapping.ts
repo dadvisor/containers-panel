@@ -1,23 +1,9 @@
 import {NameImage} from "./util";
 import {PanelCtrl} from "./panel_ctrl";
 
-class RuleMapping {
-    regex: string;
-    group: string;
-    match: NameImage;
-
-    constructor(regex, group, match) {
-        this.regex = regex;
-        this.group = group;
-        this.match = match;
-    }
-}
-
 export default class Mapping {
 
     /** Variables */
-
-    private rule_mappings: RuleMapping[] = [];
     private panelCtrl: PanelCtrl;
 
     constructor(panelCtrl: PanelCtrl) {
@@ -26,11 +12,15 @@ export default class Mapping {
     }
 
     public add_row() {
-        this.rule_mappings.push(new RuleMapping('', '', NameImage.NAME));
+        this.panelCtrl.panel['ruleMappings'].push({
+            regex: '',
+            group: '',
+            match: NameImage.NAME,
+        });
     }
 
     public apply() {
-        for (let mapping of this.rule_mappings) {
+        for (let mapping of this.panelCtrl.panel['ruleMappings']) {
             if (mapping.regex === "") {
                 continue;
             }
@@ -57,10 +47,10 @@ export default class Mapping {
     }
 
     public remove(row) {
-        this.rule_mappings.splice(this.rule_mappings.indexOf(row), 1);
+        this.panelCtrl.panel['ruleMappings'].splice(this.panelCtrl.panel['ruleMappings'].indexOf(row), 1);
     }
 
     public getList() {
-        return this.rule_mappings;
+        return this.panelCtrl.panel['ruleMappings'];
     }
 }

@@ -26,7 +26,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     private cy;
     private firstRendering = 0;
 
-    public mapping = new Mapping(this);
+    public mapping: Mapping;
     public graph_height = this.height;
 
     /** @ngInject */
@@ -82,6 +82,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "refId": "F"
                 }
             ],
+            ruleMappings: [],
             interval: 'null',
             valueName: 'current',
             mode: Modes.CONTAINERS,
@@ -90,6 +91,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
             colorText: '#d9d9d9',
             colorNodeBorder: '#808080',
         };
+
+        this.mapping = new Mapping(this);
 
         this.events.on('init-edit-mode', this.onInitEditMode.bind(this));
         this.events.on('panel-initialized', this.render.bind(this));

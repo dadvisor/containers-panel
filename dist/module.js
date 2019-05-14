@@ -38526,34 +38526,24 @@ Object.defineProperty(exports, "__esModule", {
 
 var _util = __webpack_require__(/*! ./util */ "./util.ts");
 
-var RuleMapping =
-/** @class */
-function () {
-  function RuleMapping(regex, group, match) {
-    this.regex = regex;
-    this.group = group;
-    this.match = match;
-  }
-
-  return RuleMapping;
-}();
-
 var Mapping =
 /** @class */
 function () {
   function Mapping(panelCtrl) {
-    /** Variables */
-    this.rule_mappings = [];
     this.add_row();
     this.panelCtrl = panelCtrl;
   }
 
   Mapping.prototype.add_row = function () {
-    this.rule_mappings.push(new RuleMapping('', '', _util.NameImage.NAME));
+    this.panelCtrl.panel['ruleMappings'].push({
+      regex: '',
+      group: '',
+      match: _util.NameImage.NAME
+    });
   };
 
   Mapping.prototype.apply = function () {
-    for (var _i = 0, _a = this.rule_mappings; _i < _a.length; _i++) {
+    for (var _i = 0, _a = this.panelCtrl.panel['ruleMappings']; _i < _a.length; _i++) {
       var mapping = _a[_i];
 
       if (mapping.regex === "") {
@@ -38592,11 +38582,11 @@ function () {
   };
 
   Mapping.prototype.remove = function (row) {
-    this.rule_mappings.splice(this.rule_mappings.indexOf(row), 1);
+    this.panelCtrl.panel['ruleMappings'].splice(this.panelCtrl.panel['ruleMappings'].indexOf(row), 1);
   };
 
   Mapping.prototype.getList = function () {
-    return this.rule_mappings;
+    return this.panelCtrl.panel['ruleMappings'];
   };
 
   return Mapping;
@@ -38723,7 +38713,6 @@ function (_super) {
     _this.hostCtrl = new _host_ctrl.HostCtrl();
     _this.costCtrl = new _cost_ctrl.CostCtrl();
     _this.firstRendering = 0;
-    _this.mapping = new _mapping2.default(_this);
     _this.graph_height = _this.height;
     var panelDefaults = {
       datasource: 'Prometheus',
@@ -38767,6 +38756,7 @@ function (_super) {
         "legendFormat": "waste_total_util",
         "refId": "F"
       }],
+      ruleMappings: [],
       interval: 'null',
       valueName: 'current',
       mode: _util.Modes.CONTAINERS,
@@ -38775,6 +38765,7 @@ function (_super) {
       colorText: '#d9d9d9',
       colorNodeBorder: '#808080'
     };
+    _this.mapping = new _mapping2.default(_this);
 
     _this.events.on('init-edit-mode', _this.onInitEditMode.bind(_this));
 

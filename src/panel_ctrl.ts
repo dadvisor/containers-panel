@@ -250,8 +250,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
             case Modes.WASTE_PREDICTION:
                 return {
                     edges: this.edgesCtrl.getList(),
-                    nodes: this.containerCtrl.getNodesWithUtilizationWaste(this.utilizationCtrl),
-                }
+                    nodes: this.containerCtrl.getNodesWithUtilizationWaste(this.utilizationCtrl, this.hostCtrl),
+                };
             default:
                 console.log('Something went wrong');
                 return {};
@@ -293,8 +293,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     'the total amount of costs for running a specific group of containers.';
             case Modes.WASTE_PREDICTION:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
-                'grouped per host (based on its external IP). Each node shows the container name, and the ' +
-                'waste percentage, which is the average over the last hour.';
+                    'grouped per host (based on its external IP). Each node shows the container name, and a ' +
+                    'prediction of the amount of money that is wasted on the host (related to the container).';
             default:
                 console.log('Something went wrong');
                 return '';

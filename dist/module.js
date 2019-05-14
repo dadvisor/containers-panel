@@ -38014,7 +38014,7 @@ function () {
     });
   };
 
-  ContainerCtrl.prototype.getNodesWithUtilizationWaste = function (utilCtrl) {
+  ContainerCtrl.prototype.getNodesWithUtilizationWaste = function (utilCtrl, hostCtrl) {
     var nodes = [];
     var hosts = {};
 
@@ -38032,10 +38032,11 @@ function () {
       var container = _c[_b];
       var totalCost = hosts[container['host']];
       var cost = utilCtrl.getValue(container['hash']);
-      var waste = ((totalCost - cost) / totalCost * (1 - totalCost) * 100).toFixed(2) + '%';
+      var waste = (totalCost - cost) / totalCost * (1 - totalCost);
+      var wastePrice = (waste * hostCtrl.getPrice(container['host'])).toFixed(2);
       nodes.push({
         id: container['hash'],
-        name: container['names'] + '\n' + waste,
+        name: container['names'] + '\n$' + wastePrice,
         parent: container['host']
       });
     }
@@ -38898,7 +38899,7 @@ function (_super) {
       case _util.Modes.WASTE_PREDICTION:
         return {
           edges: this.edgesCtrl.getList(),
-          nodes: this.containerCtrl.getNodesWithUtilizationWaste(this.utilizationCtrl)
+          nodes: this.containerCtrl.getNodesWithUtilizationWaste(this.utilizationCtrl, this.hostCtrl)
         };
 
       default:
@@ -38932,7 +38933,7 @@ function (_super) {
         return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' + 'the total amount of costs for running a specific group of containers.';
 
       case _util.Modes.WASTE_PREDICTION:
-        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'waste percentage, which is the average over the last hour.';
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and a ' + 'prediction of the amount of money that is wasted on the host (related to the container).';
 
       default:
         console.log('Something went wrong');

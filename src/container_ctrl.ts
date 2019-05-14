@@ -72,7 +72,7 @@ export class ContainerCtrl {
         });
     }
 
-    public getNodesWithUtilizationWaste(utilCtrl: UtilizationCtrl) {
+    public getNodesWithUtilizationWaste(utilCtrl: UtilizationCtrl, hostCtrl: HostCtrl) {
         let nodes: Object[] = [];
         let hosts: { [key: string]: number; } = {};
         for (let container of this.getList()) {
@@ -85,10 +85,11 @@ export class ContainerCtrl {
         for (let container of this.getList()){
             let totalCost = hosts[container['host']];
             let cost = utilCtrl.getValue(container['hash']);
-            let waste = ((totalCost - cost)/totalCost * (1 - totalCost) * 100).toFixed(2) + '%';
+            let waste = (totalCost - cost)/totalCost * (1 - totalCost);
+            let wastePrice = (waste * hostCtrl.getPrice(container['host'])).toFixed(2);
             nodes.push({
                 id: container['hash'],
-                name: container['names'] + '\n' + waste,
+                name: container['names'] + '\n$' + wastePrice,
                 parent: container['host']
             });
         }

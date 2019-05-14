@@ -39205,7 +39205,6 @@ function () {
   }
 
   UtilizationCtrl.prototype.addOrUpdate = function (id, value) {
-    console.log('UtilizationCtrl id: ' + id);
     this.data[id] = value;
   };
 

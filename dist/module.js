@@ -37993,7 +37993,7 @@ function () {
     for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
       var container = _a[_i];
       hostSet.add(container['host']);
-      var percentage = (utilCtrl.getValue(container['hash']) * 100).toFixed(1) + '%';
+      var percentage = (utilCtrl.getValue(container['hash']) * 100).toFixed(2) + '%';
       nodes.push({
         id: container['hash'],
         name: container['names'] + '\n' + percentage,
@@ -38076,6 +38076,30 @@ function () {
       }
 
       groups[group] += utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
+    }
+
+    return Object.keys(groups).map(function (key) {
+      return {
+        data: {
+          id: key,
+          name: key + '\n$' + groups[key].toFixed(4)
+        }
+      };
+    });
+  };
+
+  ContainerCtrl.prototype.getGroupedNodesTotalCost = function (costCtrl, hostCtrl) {
+    var groups = {};
+
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+      var group = this.getGroupFromContainerHash(container['hash']);
+
+      if (groups[group] === undefined) {
+        groups[group] = 0;
+      }
+
+      groups[group] += costCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
     }
 
     return Object.keys(groups).map(function (key) {
@@ -38608,7 +38632,7 @@ function (_super) {
         "intervalFactor": 1,
         "refId": "B"
       }, {
-        "expr": "avg_over_time(container_utilization[1h])",
+        "expr": "avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1h:1h])",
         "format": "time_series",
         "instant": true,
         "intervalFactor": 1,
@@ -38821,6 +38845,12 @@ function (_super) {
           nodes: this.containerCtrl.getGroupedNodesCost(this.utilizationCtrl, this.hostCtrl)
         };
 
+      case _util.Modes.COST_TOTAL_GROUPED:
+        return {
+          edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
+          nodes: this.containerCtrl.getGroupedNodesTotalCost(this.costCtrl, this.hostCtrl)
+        };
+
       default:
         console.log('Something went wrong');
         return {};
@@ -38847,6 +38877,9 @@ function (_super) {
 
       case _util.Modes.COST_PREDICTION_GROUPED:
         return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' + 'estimation of the cost per group is presented. This graph is based on the previous graph (cost ' + 'prediction).';
+
+      case _util.Modes.COST_TOTAL_GROUPED:
+        return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' + 'the total amount of costs for running a specific group of containers.';
 
       default:
         console.log('Something went wrong');
@@ -38894,6 +38927,7 @@ var Modes = exports.Modes = undefined;
   Modes["UTILIZATION"] = "Utilization (last hour average)";
   Modes["COST_PREDICTION"] = "Cost prediction (based on last hour average)";
   Modes["COST_PREDICTION_GROUPED"] = "Cost prediction grouped";
+  Modes["COST_TOTAL_GROUPED"] = "Total cost grouped";
 })(Modes || (exports.Modes = Modes = {}));
 
 function add_width(edges) {

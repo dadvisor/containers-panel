@@ -2,6 +2,7 @@ import {add_width} from "./util";
 import _ from "lodash";
 import {UtilizationCtrl} from "./utilization_ctrl";
 import {HostCtrl} from "./host_ctrl";
+import {CostCtrl} from "./cost_ctrl";
 
 export class ContainerCtrl {
     private containers: Object[] = [];
@@ -56,7 +57,7 @@ export class ContainerCtrl {
         let hostSet = new Set();
         for (let container of this.getList()) {
             hostSet.add(container['host']);
-            let percentage = (utilCtrl.getValue(container['hash']) * 100).toFixed(1) + '%';
+            let percentage = (utilCtrl.getValue(container['hash']) * 100).toFixed(2) + '%';
             nodes.push({
                 id: container['hash'],
                 name: container['names'] + '\n' + percentage,
@@ -113,6 +114,26 @@ export class ContainerCtrl {
                 groups[group] = 0;
             }
             groups[group] += utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
+        }
+
+        return Object.keys(groups).map(key => {
+            return {
+                data: {
+                    id: key,
+                    name: key + '\n$' + groups[key].toFixed(4),
+                }
+            }
+        });
+    }
+
+    public getGroupedNodesTotalCost(costCtrl: CostCtrl, hostCtrl: HostCtrl) {
+        let groups: { [key: string]: number } = {};
+        for (let container of this.getList()) {
+            let group = this.getGroupFromContainerHash(container['hash']);
+            if (groups[group] === undefined) {
+                groups[group] = 0;
+            }
+            groups[group] += costCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
         }
 
         return Object.keys(groups).map(key => {

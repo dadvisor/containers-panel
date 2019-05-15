@@ -178,7 +178,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             this.cy.layout({
                 name: this.panel.layoutType,
                 padding: 30,
-                animate: true,
+                animate: false,
                 nodeSpacing: function (node) {
                     return 40;
                 },
@@ -195,7 +195,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 layout: {
                     name: this.panel.layoutType,
                     padding: 30,
-                    animate: true,
+                    animate: false,
                     nodeSpacing: function (node) {
                         return 40;
                     },

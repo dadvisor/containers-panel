@@ -38875,7 +38875,7 @@ function (_super) {
       this.cy.layout({
         name: this.panel.layoutType,
         padding: 30,
-        animate: false,
+        animate: true,
         nodeSpacing: function nodeSpacing(node) {
           return 40;
         },
@@ -38891,7 +38891,7 @@ function (_super) {
         layout: {
           name: this.panel.layoutType,
           padding: 30,
-          animate: false,
+          animate: true,
           nodeSpacing: function nodeSpacing(node) {
             return 40;
           },

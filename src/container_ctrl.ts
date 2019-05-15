@@ -234,6 +234,9 @@ export class ContainerCtrl {
             let data_edge = edge['data'];
             data_edge['source'] = this.getGroupFromContainerHash(data_edge['source']);
             data_edge['target'] = this.getGroupFromContainerHash(data_edge['target']);
+            if (data_edge['source'] === data_edge['target']){
+                data_edge['type'] = 'loop';
+            }
             edges.push(edge);
         }
         return this.mergeItemsInList(edges);

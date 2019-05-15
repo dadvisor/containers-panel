@@ -28,5 +28,12 @@
                                  ng-change="ctrl.render()"></spectrum-picker>
             </span>
         </div>
+        <div class="gf-form">
+            <label class="gf-form-label width-12">Layout type</label>
+            <div class="gf-form-select-wrapper max-width-9">
+				<select class="input-medium gf-form-input" ng-model="ctrl.panel.layoutType"
+                        ng-options="['name', 'grid']" ng-change="ctrl.render()"></select>
+            </span>
+        </div>
     </div>
 </div>

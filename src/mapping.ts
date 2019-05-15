@@ -10,7 +10,7 @@ export default class Mapping {
         this.panelCtrl = panelCtrl;
     }
 
-    public add_row() {
+    public addRow() {
         this.panelCtrl.panel['ruleMappings'].push({
             regex: '',
             group: '',

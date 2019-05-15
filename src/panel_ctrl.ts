@@ -44,14 +44,14 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "refId": "A"
                 },
                 {
-                    "expr": "{__name__=\"bytes_send_total\"}",
+                    "expr": "bytes_send_total",
                     "format": "time_series",
                     "instant": true,
                     "intervalFactor": 1,
                     "refId": "B"
                 },
                 {
-                    "expr": "avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1h:1h])",
+                    "expr": "avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h])",
                     "format": "time_series",
                     "instant": true,
                     "intervalFactor": 1,
@@ -66,7 +66,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "refId": "D"
                 },
                 {
-                    "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h]) [1y:1h])",
+                    "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1y:1h]) [1y:1h])",
                     "format": "time_series",
                     "instant": true,
                     "intervalFactor": 1,
@@ -74,7 +74,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "refId": "E"
                 },
                 {
-                    "expr": "sum_over_time((( 1 - avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h]) / scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h])\n)) ) * (1 - scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h]))) ))[1y:1h])",
+                    "expr": "sum_over_time((( 1 - avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1y:1h]) / scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1y:1h])\n)) ) * (1 - scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1y:1h]))) ))[1y:1h])",
                     "format": "time_series",
                     "instant": true,
                     "intervalFactor": 1,
@@ -92,6 +92,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             colorEdge: '#9fbfdf',
             colorText: '#d9d9d9',
             colorNodeBorder: '#808080',
+            layoutType: 'grid',
         };
 
         this.mapping = new Mapping(this);
@@ -175,7 +176,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
             this.cy.add(data);
             this.cy.resize();
             this.cy.layout({
-                name: 'cola',
+                name: this.panel.layoutType,
+                padding: 30,
                 animate: false,
                 nodeSpacing: function (node) {
                     return 40;
@@ -191,7 +193,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 style: getStyle(this.panel),
                 elements: data,
                 layout: {
-                    name: 'cola',
+                    name: this.panel.layoutType,
+                    padding: 30,
                     animate: false,
                     nodeSpacing: function (node) {
                         return 40;

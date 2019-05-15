@@ -38222,6 +38222,11 @@ function () {
       var data_edge = edge['data'];
       data_edge['source'] = this.getGroupFromContainerHash(data_edge['source']);
       data_edge['target'] = this.getGroupFromContainerHash(data_edge['target']);
+
+      if (data_edge['source'] === data_edge['target']) {
+        data_edge['type'] = 'loop';
+      }
+
       edges.push(edge);
     }
 
@@ -38540,7 +38545,7 @@ function () {
     this.panelCtrl = panelCtrl;
   }
 
-  Mapping.prototype.add_row = function () {
+  Mapping.prototype.addRow = function () {
     this.panelCtrl.panel['ruleMappings'].push({
       regex: '',
       group: '',
@@ -38729,13 +38734,13 @@ function (_super) {
         "intervalFactor": 1,
         "refId": "A"
       }, {
-        "expr": "{__name__=\"bytes_send_total\"}",
+        "expr": "bytes_send_total",
         "format": "time_series",
         "instant": true,
         "intervalFactor": 1,
         "refId": "B"
       }, {
-        "expr": "avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1h:1h])",
+        "expr": "avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h])",
         "format": "time_series",
         "instant": true,
         "intervalFactor": 1,
@@ -38748,14 +38753,14 @@ function (_super) {
         "intervalFactor": 1,
         "refId": "D"
       }, {
-        "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h]) [1y:1h])",
+        "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1y:1h]) [1y:1h])",
         "format": "time_series",
         "instant": true,
         "intervalFactor": 1,
         "legendFormat": "container_total_util",
         "refId": "E"
       }, {
-        "expr": "sum_over_time((( 1 - avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h]) / scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h])\n)) ) * (1 - scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[15s])[1y:1h]))) ))[1y:1h])",
+        "expr": "sum_over_time((( 1 - avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1y:1h]) / scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1y:1h])\n)) ) * (1 - scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1y:1h]))) ))[1y:1h])",
         "format": "time_series",
         "instant": true,
         "intervalFactor": 1,
@@ -38771,7 +38776,8 @@ function (_super) {
       colorNodeBackground: '#ffffff',
       colorEdge: '#9fbfdf',
       colorText: '#d9d9d9',
-      colorNodeBorder: '#808080'
+      colorNodeBorder: '#808080',
+      layoutType: 'grid'
     };
     _this.mapping = new _mapping2.default(_this);
 
@@ -38867,7 +38873,8 @@ function (_super) {
       this.cy.add(data);
       this.cy.resize();
       this.cy.layout({
-        name: 'cola',
+        name: this.panel.layoutType,
+        padding: 30,
         animate: false,
         nodeSpacing: function nodeSpacing(node) {
           return 40;
@@ -38882,7 +38889,8 @@ function (_super) {
         style: (0, _util.getStyle)(this.panel),
         elements: data,
         layout: {
-          name: 'cola',
+          name: this.panel.layoutType,
+          padding: 30,
           animate: false,
           nodeSpacing: function nodeSpacing(node) {
             return 40;

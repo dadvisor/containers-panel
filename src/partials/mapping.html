@@ -22,11 +22,13 @@
         <h3 class="section-heading">Create a mapping for automatically grouping</h3>
         <p>In order to automatically map the container to a certain group, you can create a mapping that performs a
             regular expression mapping based on the container name, or the container ID. </p>
-        <button class="btn navbar-button">
-            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions"
-               target="_blank">Need more help?
-            </a>
-        </button>
+        <div class="gf-form">
+            <button class="btn navbar-button">
+                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions"
+                   target="_blank">Need more help?
+                </a>
+            </button>
+        </div>
         <br/>
         <div class="gf-form">
             <table>
@@ -53,14 +55,10 @@
             </table>
         </div>
     </div>
-    <div class="gf-form-group">
-        <div class="gf-form">
-            <button class="input-small gf-form-input width-12" ng-click="ctrl.mapping.add_row()">Add row</button>
-        </div>
+    <div class="gf-form">
+        <button class="input-small gf-form-input width-12" ng-click="ctrl.mapping.addRow()">Add row</button>
     </div>
-    <div class="gf-form-group">
-        <div class="gf-form">
-            <button class="input-small gf-form-input width-12" ng-click="ctrl.mapping.apply()">Apply mapping</button>
-        </div>
+    <div class="gf-form">
+        <button class="input-small gf-form-input width-12" ng-click="ctrl.mapping.apply()">Apply mapping</button>
     </div>
 </div>

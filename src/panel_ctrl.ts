@@ -282,7 +282,10 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     nodes: this.containerCtrl.getGroupedNodesTotalCost(this.costCtrl, this.hostCtrl)
                 };
             case Modes.RELATIVE_WASTE:
-                return {}; // TODO: return something useful
+                return {
+                    edges: this.edgesCtrl.getList(),
+                    nodes: this.containerCtrl.getNodesWithRelativeUtilizationWaste(this.wasteCtrl),
+                };
             case Modes.WASTE_PREDICTION:
                 return {
                     edges: this.edgesCtrl.getList(),

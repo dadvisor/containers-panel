@@ -127,6 +127,37 @@ export class ContainerCtrl {
         });
     }
 
+    public getNodesWithRelativeUtilizationWaste(wasteCtrl: WasteCtrl) {
+        let nodes: Object[] = [];
+        let hosts: { [key: string]: number; } = {};
+        for (let container of this.getList()) {
+            if (hosts[container['host']] === undefined) {
+                hosts[container['host']] = 0;
+            }
+            hosts[container['host']] += wasteCtrl.getValue(container['hash']);
+        }
+
+        for (let container of this.getList()) {
+            let totalWaste = hosts[container['host']];
+            let waste = 0;
+            if (totalWaste > 0.01){
+                waste = wasteCtrl.getValue(container['hash']) / totalWaste * 100;
+            }
+            let wastePercentage = waste.toFixed(2) + '%';
+            nodes.push({
+                id: container['hash'],
+                name: container['names'] + '\n' + wastePercentage,
+                parent: container['host']
+            });
+        }
+        Object.keys(hosts).forEach(host => {
+            nodes.push({id: host, name: host + '\n' + hosts[host].toFixed(2) + '%'});
+        });
+        return nodes.map(item => {
+            return {data: item}
+        });
+    }
+
     getNodesWithCost(utilCtrl: UtilizationCtrl, hostCtrl: HostCtrl) {
         let nodes: Object[] = [];
         let hostSet = new Set();

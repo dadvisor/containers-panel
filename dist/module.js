@@ -38089,6 +38089,50 @@ function () {
     });
   };
 
+  ContainerCtrl.prototype.getNodesWithRelativeUtilizationWaste = function (wasteCtrl) {
+    var nodes = [];
+    var hosts = {};
+
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+
+      if (hosts[container['host']] === undefined) {
+        hosts[container['host']] = 0;
+      }
+
+      hosts[container['host']] += wasteCtrl.getValue(container['hash']);
+    }
+
+    for (var _b = 0, _c = this.getList(); _b < _c.length; _b++) {
+      var container = _c[_b];
+      var totalWaste = hosts[container['host']];
+      var waste = 0;
+
+      if (totalWaste > 0.01) {
+        waste = wasteCtrl.getValue(container['hash']) / totalWaste * 100;
+      }
+
+      var wastePercentage = waste.toFixed(2) + '%';
+      nodes.push({
+        id: container['hash'],
+        name: container['names'] + '\n' + wastePercentage,
+        parent: container['host']
+      });
+    }
+
+    Object.keys(hosts).forEach(function (host) {
+      nodes.push({
+        id: host,
+        name: host + '\n' + hosts[host].toFixed(2) + '%'
+      });
+    });
+    return nodes.map(function (item) {
+      return {
+        data: item
+      };
+    });
+  };
+
   ContainerCtrl.prototype.getNodesWithCost = function (utilCtrl, hostCtrl) {
     var nodes = [];
     var hostSet = new Set();
@@ -39043,8 +39087,10 @@ function (_super) {
         };
 
       case _util.Modes.RELATIVE_WASTE:
-        return {};
-      // TODO: return something useful
+        return {
+          edges: this.edgesCtrl.getList(),
+          nodes: this.containerCtrl.getNodesWithRelativeUtilizationWaste(this.wasteCtrl)
+        };
 
       case _util.Modes.WASTE_PREDICTION:
         return {
@@ -39157,7 +39203,7 @@ var Modes = exports.Modes = undefined;
   Modes["COST_PREDICTION"] = "Cost prediction (based on last hour average)";
   Modes["COST_PREDICTION_GROUPED"] = "Cost prediction grouped (based on last hour average)";
   Modes["COST_TOTAL_GROUPED"] = "Total cost grouped";
-  Modes["RELATIVE_WASTE"] = "Relative Waste (based on Relative Utilization)";
+  Modes["RELATIVE_WASTE"] = "Relative Waste";
   Modes["WASTE_PREDICTION"] = "Waste prediction (based on last hour average)";
   Modes["WASTE_PREDICTION_GROUPED"] = "Waste prediction grouped (based on last hour average)";
   Modes["WASTE_TOTAL_GROUPED"] = "Total waste grouped";

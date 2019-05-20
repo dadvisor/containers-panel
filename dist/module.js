@@ -37978,11 +37978,16 @@ function () {
 
   ContainerCtrl.prototype.getNodesWithUtilization = function (utilCtrl) {
     var nodes = [];
-    var hostSet = new Set();
+    var hosts = {};
 
     for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
       var container = _a[_i];
-      hostSet.add(container['host']);
+
+      if (hosts[container['host']] === undefined) {
+        hosts[container['host']] = 0;
+      }
+
+      hosts[container['host']] += utilCtrl.getValue(container['hash']);
       var percentage = (utilCtrl.getValue(container['hash']) * 100).toFixed(2) + '%';
       nodes.push({
         id: container['hash'],
@@ -37991,10 +37996,11 @@ function () {
       });
     }
 
-    hostSet.forEach(function (host) {
+    Object.keys(hosts).forEach(function (host) {
+      var percentage = hosts[host].toFixed(2) + '%';
       nodes.push({
         id: host,
-        name: host
+        name: host + '\n' + percentage
       });
     });
     return nodes.map(function (item) {

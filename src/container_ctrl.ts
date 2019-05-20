@@ -49,9 +49,12 @@ export class ContainerCtrl {
 
     public getNodesWithUtilization(utilCtrl: UtilizationCtrl) {
         let nodes: Object[] = [];
-        let hostSet = new Set();
+        let hosts: {[key: string]: number;} = {};
         for (let container of this.getList()) {
-            hostSet.add(container['host']);
+            if (hosts[container['host']] === undefined){
+                hosts[container['host']] = 0;
+            }
+            hosts[container['host']] += utilCtrl.getValue(container['hash']);
             let percentage = (utilCtrl.getValue(container['hash']) * 100).toFixed(2) + '%';
             nodes.push({
                 id: container['hash'],
@@ -59,8 +62,9 @@ export class ContainerCtrl {
                 parent: container['host']
             });
         }
-        hostSet.forEach(host => {
-            nodes.push({id: host, name: host});
+        Object.keys(hosts).forEach(host => {
+            let percentage = hosts[host].toFixed(2) + '%';
+            nodes.push({id: host, name: host + '\n' + percentage});
         });
         return nodes.map(item => {
             return {data: item}

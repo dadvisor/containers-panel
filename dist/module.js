@@ -39480,6 +39480,7 @@ function () {
   }
 
   WasteTotalCtrl.prototype.addOrUpdate = function (id, value) {
+    console.log('WasteTotalCtrl with id: ' + id);
     this.data[id] = value;
   };
 

@@ -148,8 +148,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
                 this.costCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
             } else if (dataObj.target.startsWith('waste_container')) { // Query F
-                let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
-                this.wasteCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
+                this.wasteCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
             } else if (dataObj.target === 'waste_container_total') { // Query G
                 this.wasteCtrlTotal.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
             } else {

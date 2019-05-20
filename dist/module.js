@@ -38821,7 +38821,7 @@ function (_super) {
       var dataObj = dataList_1[_i];
       var obj = (0, _util.decode)(dataObj.target);
 
-      if (dataObj.target === "docker_container_info") {
+      if (dataObj.target.startsWith("docker_container_info")) {
         // Query A
         this.containerCtrl.addOrUpdate(obj['hash'], obj, this.mapping);
       } else if (dataObj.target.startsWith("bytes_send_total")) {

@@ -38979,12 +38979,12 @@ function (_super) {
         var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
 
         this.costCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
+      } else if (dataObj.target.startsWith('waste_container_total')) {
+        // Query G (needs to be before Query F)
+        this.wasteTotalCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
       } else if (dataObj.target.startsWith('waste_container')) {
         // Query F
         this.wasteCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
-      } else if (dataObj.target === 'waste_container_total') {
-        // Query G
-        this.wasteTotalCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
       } else {
         console.log('Can not parse dataObj: ');
         console.log(dataObj);

@@ -39461,6 +39461,7 @@ function () {
   }
 
   WasteTotalCtrl.prototype.addOrUpdate = function (id, value) {
+    console.log('WasteTotalCtrl id: ' + id);
     this.data[id] = value;
   };
 

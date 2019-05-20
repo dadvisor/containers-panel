@@ -280,6 +280,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
                     nodes: this.containerCtrl.getGroupedNodesTotalCost(this.costCtrl, this.hostCtrl)
                 };
+            case Modes.WASTE:
+                return {
+                    edges: this.edgesCtrl.getList(),
+                    nodes: this.containerCtrl.getNodesWithWaste(this.wasteCtrl),
+                };
             case Modes.RELATIVE_WASTE:
                 return {
                     edges: this.edgesCtrl.getList(),
@@ -343,6 +348,10 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 return 'The graph presented below groups related containers together. The groups are defined in the ' +
                     'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' +
                     'the total amount of costs of running a specific group of containers.';
+            case Modes.WASTE:
+                return 'The graph presented below shows all the containers that are deployed. The containers are ' +
+                    'grouped per host (based on its external IP). Each node shows the container name, and the ' +
+                    'waste percentage, which is the average over the last hour.';
             case Modes.RELATIVE_WASTE:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
                     'grouped per host (based on its external IP). Each node shows the container name, and the ' +

@@ -131,6 +131,34 @@ export class ContainerCtrl {
         });
     }
 
+    public getNodesWithWaste(wasteCtrl: WasteCtrl) {
+        let nodes: Object[] = [];
+        let hosts: { [key: string]: number; } = {};
+        for (let container of this.getList()) {
+            if (hosts[container['host']] === undefined) {
+                hosts[container['host']] = 0;
+            }
+            hosts[container['host']] += wasteCtrl.getValue(container['hash']);
+        }
+
+        for (let container of this.getList()) {
+            let waste = wasteCtrl.getValue(container['hash']) * 100;
+            let wastePercentage = waste.toFixed(2) + '%';
+            nodes.push({
+                id: container['hash'],
+                name: container['names'] + '\n' + wastePercentage,
+                parent: container['host']
+            });
+        }
+        Object.keys(hosts).forEach(host => {
+            let percentage = (hosts[host] * 100).toFixed(2) + '%';
+            nodes.push({id: host, name: host + '\n' + percentage});
+        });
+        return nodes.map(item => {
+            return {data: item}
+        });
+    }
+
     public getNodesWithRelativeUtilizationWaste(wasteCtrl: WasteCtrl) {
         let nodes: Object[] = [];
         let hosts: { [key: string]: number; } = {};
@@ -155,7 +183,8 @@ export class ContainerCtrl {
             });
         }
         Object.keys(hosts).forEach(host => {
-            nodes.push({id: host, name: host + '\n' + hosts[host].toFixed(2) + '%'});
+            let percentage = (hosts[host] * 100).toFixed(2) + '%';
+            nodes.push({id: host, name: host + '\n' + percentage});
         });
         return nodes.map(item => {
             return {data: item}

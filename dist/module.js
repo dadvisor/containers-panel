@@ -38095,6 +38095,45 @@ function () {
     });
   };
 
+  ContainerCtrl.prototype.getNodesWithWaste = function (wasteCtrl) {
+    var nodes = [];
+    var hosts = {};
+
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+
+      if (hosts[container['host']] === undefined) {
+        hosts[container['host']] = 0;
+      }
+
+      hosts[container['host']] += wasteCtrl.getValue(container['hash']);
+    }
+
+    for (var _b = 0, _c = this.getList(); _b < _c.length; _b++) {
+      var container = _c[_b];
+      var waste = wasteCtrl.getValue(container['hash']) * 100;
+      var wastePercentage = waste.toFixed(2) + '%';
+      nodes.push({
+        id: container['hash'],
+        name: container['names'] + '\n' + wastePercentage,
+        parent: container['host']
+      });
+    }
+
+    Object.keys(hosts).forEach(function (host) {
+      var percentage = (hosts[host] * 100).toFixed(2) + '%';
+      nodes.push({
+        id: host,
+        name: host + '\n' + percentage
+      });
+    });
+    return nodes.map(function (item) {
+      return {
+        data: item
+      };
+    });
+  };
+
   ContainerCtrl.prototype.getNodesWithRelativeUtilizationWaste = function (wasteCtrl) {
     var nodes = [];
     var hosts = {};
@@ -38127,9 +38166,10 @@ function () {
     }
 
     Object.keys(hosts).forEach(function (host) {
+      var percentage = (hosts[host] * 100).toFixed(2) + '%';
       nodes.push({
         id: host,
-        name: host + '\n' + hosts[host].toFixed(2) + '%'
+        name: host + '\n' + percentage
       });
     });
     return nodes.map(function (item) {
@@ -39090,6 +39130,12 @@ function (_super) {
           nodes: this.containerCtrl.getGroupedNodesTotalCost(this.costCtrl, this.hostCtrl)
         };
 
+      case _util.Modes.WASTE:
+        return {
+          edges: this.edgesCtrl.getList(),
+          nodes: this.containerCtrl.getNodesWithWaste(this.wasteCtrl)
+        };
+
       case _util.Modes.RELATIVE_WASTE:
         return {
           edges: this.edgesCtrl.getList(),
@@ -39146,6 +39192,9 @@ function (_super) {
 
       case _util.Modes.COST_TOTAL_GROUPED:
         return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' + 'the total amount of costs of running a specific group of containers.';
+
+      case _util.Modes.WASTE:
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'waste percentage, which is the average over the last hour.';
 
       case _util.Modes.RELATIVE_WASTE:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'waste percentage, which is based on the utilization percentage.';
@@ -39207,6 +39256,7 @@ var Modes = exports.Modes = undefined;
   Modes["COST_PREDICTION"] = "Cost prediction (based on last hour average)";
   Modes["COST_PREDICTION_GROUPED"] = "Cost prediction grouped (based on last hour average)";
   Modes["COST_TOTAL_GROUPED"] = "Total cost grouped";
+  Modes["WASTE"] = "Waste (last hour average)";
   Modes["RELATIVE_WASTE"] = "Relative Waste";
   Modes["WASTE_PREDICTION"] = "Waste prediction (based on last hour average)";
   Modes["WASTE_PREDICTION_GROUPED"] = "Waste prediction grouped (based on last hour average)";

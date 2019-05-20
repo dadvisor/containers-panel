@@ -63,7 +63,7 @@ export class ContainerCtrl {
             });
         }
         Object.keys(hosts).forEach(host => {
-            let percentage = hosts[host].toFixed(2) + '%';
+            let percentage = (hosts[host] * 100).toFixed(2) + '%';
             nodes.push({id: host, name: host + '\n' + percentage});
         });
         return nodes.map(item => {
@@ -82,7 +82,7 @@ export class ContainerCtrl {
             hosts[container['host']] += utilCtrl.getValue(container['hash']);
         }
         for (let container of this.getList()){
-            let hostUtil = hosts[container['hosts']];
+            let hostUtil = hosts[container['host']];
             let percentage = '0%';
             if (hostUtil > 0.01) { // avoid division by zero
                 percentage = (utilCtrl.getValue(container['hash']) / hostUtil * 100).toFixed(2) + '%';

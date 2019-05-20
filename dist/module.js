@@ -37997,7 +37997,7 @@ function () {
     }
 
     Object.keys(hosts).forEach(function (host) {
-      var percentage = hosts[host].toFixed(2) + '%';
+      var percentage = (hosts[host] * 100).toFixed(2) + '%';
       nodes.push({
         id: host,
         name: host + '\n' + percentage
@@ -38026,7 +38026,7 @@ function () {
 
     for (var _b = 0, _c = this.getList(); _b < _c.length; _b++) {
       var container = _c[_b];
-      var hostUtil = hosts[container['hosts']];
+      var hostUtil = hosts[container['host']];
       var percentage = '0%';
 
       if (hostUtil > 0.01) {
@@ -38939,7 +38939,7 @@ function (_super) {
         var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
 
         this.costCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
-      } else if (dataObj.target === 'waste_container') {
+      } else if (dataObj.target.startsWith('waste_container')) {
         // Query F
         var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
 

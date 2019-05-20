@@ -39,7 +39,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             datasource: 'Prometheus',
             targets: [
                 {
-                    "expr": "docker_container",
+                    "expr": "docker_container_info",
                     "format": "time_series",
                     "instant": true,
                     "intervalFactor": 1,
@@ -131,7 +131,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     onDataReceived(dataList) {
         for (let dataObj of dataList) {
             let obj = decode(dataObj.target);
-            if (dataObj.target === "docker_container") { // Query A
+            if (dataObj.target === "docker_container_info") { // Query A
                 this.containerCtrl.addOrUpdate(obj['hash'], obj, this.mapping);
             } else if (dataObj.target.startsWith("bytes_send_total")) { // Query B
                 let newObj = {};

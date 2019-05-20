@@ -11,6 +11,7 @@ import {UtilizationCtrl} from "./utilization_ctrl";
 import {HostCtrl} from "./host_ctrl";
 import {CostCtrl} from "./cost_ctrl";
 import {WasteCtrl} from "./waste_ctrl";
+import {WasteCtrlTotal} from "./waste_ctrl_total";
 
 cytoscape.use(cola);
 
@@ -21,6 +22,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     public containerCtrl = new ContainerCtrl();
     public utilizationCtrl = new UtilizationCtrl();
     public wasteCtrl = new WasteCtrl();
+    public wasteCtrlTotal = new WasteCtrlTotal();
     public hostCtrl = new HostCtrl(this);
     public costCtrl = new CostCtrl();
     private cy;
@@ -37,7 +39,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             datasource: 'Prometheus',
             targets: [
                 {
-                    "expr": "{__name__=~\"docker_container_.*\"}",
+                    "expr": "docker_container",
                     "format": "time_series",
                     "instant": true,
                     "intervalFactor": 1,
@@ -59,14 +61,14 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "refId": "C"
                 },
                 {
-                    "expr": "default_host_price_total",
+                    "expr": "default_host_price_info",
                     "format": "time_series",
                     "instant": true,
                     "intervalFactor": 1,
                     "refId": "D"
                 },
                 {
-                    "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1y:1h]) [1y:1h])",
+                    "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h]) [1h:1h])",
                     "format": "time_series",
                     "instant": true,
                     "intervalFactor": 1,
@@ -74,12 +76,18 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "refId": "E"
                 },
                 {
-                    "expr": "sum_over_time((( 1 - avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1y:1h]) / scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1y:1h])\n)) ) * (1 - scalar(sum(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1y:1h]))) ))[1y:1h])",
+                    "expr": "waste_container",
                     "format": "time_series",
                     "instant": true,
                     "intervalFactor": 1,
-                    "legendFormat": "waste_total_util",
                     "refId": "F"
+                },
+                {
+                    "expr": "waste_container_total",
+                    "format": "time_series",
+                    "instant": true,
+                    "intervalFactor": 1,
+                    "refId": "G"
                 }
             ],
             ruleMappings: [],
@@ -121,29 +129,29 @@ export class PanelCtrl extends MetricsPanelCtrl {
     }
 
     onDataReceived(dataList) {
-        console.log('On data received');
-        this.edgesCtrl.clear();
         for (let dataObj of dataList) {
             let obj = decode(dataObj.target);
-            if (dataObj.target.startsWith("docker_container")) {
-                this.containerCtrl.addOrUpdate(obj);
-            } else if (dataObj.target.startsWith("bytes_send_total")) {
+            if (dataObj.target === "docker_container") { // Query A
+                this.containerCtrl.addOrUpdate(obj['hash'], obj, this.mapping);
+            } else if (dataObj.target.startsWith("bytes_send_total")) { // Query B
                 let newObj = {};
-                newObj['source'] = obj['src'].substr(3);
-                newObj['target'] = obj['dst'].substr(3);
+                newObj['source'] = obj['src'].substr('id_'.length);
+                newObj['target'] = obj['dst'].substr('id_'.length);
                 newObj['bytes'] = dataObj.datapoints[0][0];
-                this.edgesCtrl.add(newObj);
-            } else if (dataObj.target === 'container_utilization') {
+                this.edgesCtrl.addOrUpdate(newObj);
+            } else if (dataObj.target === 'container_utilization') { // Query C
                 let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
                 this.utilizationCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
-            } else if (dataObj.target.startsWith('default_host_price_total')) {
+            } else if (dataObj.target.startsWith('default_host_price_info')) { // Query D
                 this.hostCtrl.addOrUpdate(obj);
-            } else if (dataObj.target === 'container_total_util') {
+            } else if (dataObj.target === 'container_total_util') { // Query E
                 let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
                 this.costCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
-            } else if (dataObj.target === 'waste_total_util') {
+            } else if (dataObj.target === 'waste_container') { // Query F
                 let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
                 this.wasteCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
+            } else if (dataObj.target === 'waste_container_total') { // Query G
+                this.wasteCtrlTotal.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
             } else {
                 console.log('Can not parse dataObj: ');
                 console.log(dataObj);
@@ -234,7 +242,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 data.edges.splice(data.edges.indexOf(edge), 1);
             }
         }
-        return undefined;
     }
 
     private getData() {
@@ -254,6 +261,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     edges: this.edgesCtrl.getList(),
                     nodes: this.containerCtrl.getNodesWithUtilization(this.utilizationCtrl)
                 };
+            case Modes.RELATIVE_UTILIZATION:
+                return {}; // TODO: return something useful
             case Modes.COST_PREDICTION:
                 return {
                     edges: this.edgesCtrl.getList(),
@@ -269,6 +278,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
                     nodes: this.containerCtrl.getGroupedNodesTotalCost(this.costCtrl, this.hostCtrl)
                 };
+            case Modes.RELATIVE_WASTE:
+                return {}; // TODO: return something useful
             case Modes.WASTE_PREDICTION:
                 return {
                     edges: this.edgesCtrl.getList(),
@@ -309,6 +320,10 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
                     'grouped per host (based on its external IP). Each node shows the container name, and the ' +
                     'utilization percentage, which is the average over the last hour.';
+            case Modes.RELATIVE_UTILIZATION:
+                return 'The graph presented below shows all the containers that are deployed. The containers are ' +
+                    'grouped per host (based on its external IP). Each node shows the container name, and the ' +
+                    'utilization percentage, which is relative to its host.';
             case Modes.COST_PREDICTION:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
                     'grouped per host (based on its external IP). Each node shows the container name, and a cost ' +
@@ -323,6 +338,10 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 return 'The graph presented below groups related containers together. The groups are defined in the ' +
                     'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' +
                     'the total amount of costs of running a specific group of containers.';
+            case Modes.RELATIVE_WASTE:
+                return 'The graph presented below shows all the containers that are deployed. The containers are ' +
+                    'grouped per host (based on its external IP). Each node shows the container name, and the ' +
+                    'waste percentage, which is based on the utilization percentage.';
             case Modes.WASTE_PREDICTION:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
                     'grouped per host (based on its external IP). Each node shows the container name, and a ' +

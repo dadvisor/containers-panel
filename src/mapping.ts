@@ -19,30 +19,35 @@ export default class Mapping {
     }
 
     public apply() {
+        for (let container of this.panelCtrl.containerCtrl.getList()) {
+            this.mapContainer(container)
+        }
+        this.panelCtrl.updateGraph();
+    }
+
+    public mapContainer(container) {
         for (let mapping of this.panelCtrl.panel['ruleMappings']) {
             if (mapping.regex === "") {
                 continue;
             }
             let re = new RegExp(mapping.regex);
-            for (let container of this.panelCtrl.containerCtrl.getList()) {
-                switch (mapping.match) {
-                    case NameImage.NAME:
-                        if (re.test(container['names'])) {
-                            container['group'] = mapping.group;
-                        }
-                        break;
-                    case NameImage.IMAGE:
-                        if (re.test(container['image'])) {
-                            container['group'] = mapping.group;
-                        }
-                        break;
-                    default:
-                        console.log('Cannot end in this state: ' + mapping.match);
-                }
-                container['group'].replace(re, container['group']);
+
+            switch (mapping.match) {
+                case NameImage.NAME:
+                    if (re.test(container['names'])) {
+                        container['group'] = mapping.group;
+                    }
+                    break;
+                case NameImage.IMAGE:
+                    if (re.test(container['image'])) {
+                        container['group'] = mapping.group;
+                    }
+                    break;
+                default:
+                    console.log('Cannot end in this state: ' + mapping.match);
             }
+            container['group'].replace(re, container['group']);
         }
-        this.panelCtrl.updateGraph();
     }
 
     public remove(row) {

@@ -7,11 +7,13 @@ export enum Modes {
     CONTAINERS = 'Containers',
     GROUPED = 'Grouped',
     UTILIZATION = 'Utilization (last hour average)',
+    RELATIVE_UTILIZATION = 'Relative Utilization (last hour average)',
     COST_PREDICTION = 'Cost prediction (based on last hour average)',
-    COST_PREDICTION_GROUPED = 'Cost prediction grouped',
+    COST_PREDICTION_GROUPED = 'Cost prediction grouped (based on last hour average)',
     COST_TOTAL_GROUPED = 'Total cost grouped',
+    RELATIVE_WASTE = 'Relative Waste (based on Relative Utilization)',
     WASTE_PREDICTION = 'Waste prediction (based on last hour average)',
-    WASTE_PREDICTION_GROUPED = 'Waste prediction grouped',
+    WASTE_PREDICTION_GROUPED = 'Waste prediction grouped (based on last hour average)',
     WASTE_TOTAL_GROUPED = 'Total waste grouped',
 }
 

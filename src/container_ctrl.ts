@@ -1,27 +1,21 @@
 import {add_width} from "./util";
-import _ from "lodash";
 import {UtilizationCtrl} from "./utilization_ctrl";
 import {HostCtrl} from "./host_ctrl";
 import {CostCtrl} from "./cost_ctrl";
 import {WasteCtrl} from "./waste_ctrl";
+import Mapping from "./mapping";
 
 export class ContainerCtrl {
-    private containers: Object[] = [];
+    private data: { [key: string]: {}; } = {};
 
-    public addOrUpdate(obj: Object) {
-        for (let container of this.containers) {
-            if (container['hash'] === obj['hash']) {
-                container = _.defaults(obj, container);
-                return;
-            }
-        }
-
+    public addOrUpdate(id: string, obj: Object, mapping: Mapping) {
         obj['group'] = obj['names'];
-        this.containers.push(obj);
+        mapping.mapContainer(obj);
+        this.data[id] = obj;
     }
 
     public getList() {
-        return this.containers;
+        return Object.keys(this.data).map(key => this.data[key]);
     }
 
     public getNodes() {
@@ -243,7 +237,7 @@ export class ContainerCtrl {
     }
 
     private getGroupFromContainerHash(hash) {
-        for (let container of this.containers) {
+        for (let container of this.getList()) {
             if (container['hash'] === hash) {
                 return container['group'];
             }

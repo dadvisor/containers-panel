@@ -1,18 +1,19 @@
 import {add_width} from "./util";
 
 export class EdgesCtrl {
-    private edges: Object[] = [];
+    private data: { [key: string]: number; } = {};
 
     public clear(){
-        this.edges = [];
+        this.data = {};
     }
 
-    public add(edge){
-        this.edges.push(edge);
+    public addOrUpdate(edge){
+        let key = edge['source'] + edge['target'];
+        this.data[key] = edge;
     }
 
     public getList(){
-        let edges = add_width(this.edges);
+        let edges = add_width(Object.keys(this.data).map(key => this.data[key]));
         return edges.map(item => {
             return {data: item}
         });

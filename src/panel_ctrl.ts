@@ -11,7 +11,7 @@ import {UtilizationCtrl} from "./utilization_ctrl";
 import {HostCtrl} from "./host_ctrl";
 import {CostCtrl} from "./cost_ctrl";
 import {WasteCtrl} from "./waste_ctrl";
-import {WasteCtrlTotal} from "./waste_ctrl_total";
+import {WasteTotalCtrl} from "./waste_total_ctrl";
 
 cytoscape.use(cola);
 
@@ -22,7 +22,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     public containerCtrl = new ContainerCtrl();
     public utilizationCtrl = new UtilizationCtrl();
     public wasteCtrl = new WasteCtrl();
-    public wasteCtrlTotal = new WasteCtrlTotal();
+    public wasteTotalCtrl = new WasteTotalCtrl();
     public hostCtrl = new HostCtrl(this);
     public costCtrl = new CostCtrl();
     private cy;
@@ -150,7 +150,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             } else if (dataObj.target.startsWith('waste_container')) { // Query F
                 this.wasteCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
             } else if (dataObj.target === 'waste_container_total') { // Query G
-                this.wasteCtrlTotal.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
+                this.wasteTotalCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
             } else {
                 console.log('Can not parse dataObj: ');
                 console.log(dataObj);
@@ -303,7 +303,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             case Modes.WASTE_TOTAL_GROUPED:
                 return {
                     edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
-                    nodes: this.containerCtrl.getGroupedNodesTotalWaste(this.wasteCtrl, this.hostCtrl)
+                    nodes: this.containerCtrl.getGroupedNodesTotalWaste(this.wasteTotalCtrl, this.hostCtrl)
                 };
             default:
                 console.log('Something went wrong');

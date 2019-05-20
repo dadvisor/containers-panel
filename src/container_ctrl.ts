@@ -4,6 +4,7 @@ import {HostCtrl} from "./host_ctrl";
 import {CostCtrl} from "./cost_ctrl";
 import {WasteCtrl} from "./waste_ctrl";
 import Mapping from "./mapping";
+import {WasteTotalCtrl} from "./waste_total_ctrl";
 
 export class ContainerCtrl {
     private data: { [key: string]: {}; } = {};
@@ -297,21 +298,21 @@ export class ContainerCtrl {
         });
     }
 
-    public getGroupedNodesTotalWaste(wasteCtrl: WasteCtrl, hostCtrl: HostCtrl) {
+    public getGroupedNodesTotalWaste(wasteTotalCtrl: WasteTotalCtrl, hostCtrl: HostCtrl) {
         let groups: { [key: string]: number } = {};
         for (let container of this.getList()) {
             let group = this.getGroupFromContainerHash(container['hash']);
             if (groups[group] === undefined) {
                 groups[group] = 0;
             }
-            groups[group] += wasteCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
+            groups[group] += wasteTotalCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
         }
 
         return Object.keys(groups).map(key => {
             return {
                 data: {
                     id: key,
-                    name: key + '\n$' + groups[key].toFixed(4),
+                    name: key + '\n$' + groups[key].toFixed(2),
                 }
             }
         });

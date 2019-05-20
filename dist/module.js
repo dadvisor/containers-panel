@@ -38315,7 +38315,7 @@ function () {
     });
   };
 
-  ContainerCtrl.prototype.getGroupedNodesTotalWaste = function (wasteCtrl, hostCtrl) {
+  ContainerCtrl.prototype.getGroupedNodesTotalWaste = function (wasteTotalCtrl, hostCtrl) {
     var groups = {};
 
     for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
@@ -38326,14 +38326,14 @@ function () {
         groups[group] = 0;
       }
 
-      groups[group] += wasteCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
+      groups[group] += wasteTotalCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
     }
 
     return Object.keys(groups).map(function (key) {
       return {
         data: {
           id: key,
-          name: key + '\n$' + groups[key].toFixed(4)
+          name: key + '\n$' + groups[key].toFixed(2)
         }
       };
     });
@@ -38810,7 +38810,7 @@ var _cost_ctrl = __webpack_require__(/*! ./cost_ctrl */ "./cost_ctrl.ts");
 
 var _waste_ctrl = __webpack_require__(/*! ./waste_ctrl */ "./waste_ctrl.ts");
 
-var _waste_ctrl_total = __webpack_require__(/*! ./waste_ctrl_total */ "./waste_ctrl_total.ts");
+var _waste_total_ctrl = __webpack_require__(/*! ./waste_total_ctrl */ "./waste_total_ctrl.ts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -38856,7 +38856,7 @@ function (_super) {
     _this.containerCtrl = new _container_ctrl.ContainerCtrl();
     _this.utilizationCtrl = new _utilization_ctrl.UtilizationCtrl();
     _this.wasteCtrl = new _waste_ctrl.WasteCtrl();
-    _this.wasteCtrlTotal = new _waste_ctrl_total.WasteCtrlTotal();
+    _this.wasteTotalCtrl = new _waste_total_ctrl.WasteTotalCtrl();
     _this.hostCtrl = new _host_ctrl.HostCtrl(_this);
     _this.costCtrl = new _cost_ctrl.CostCtrl();
     _this.firstRendering = 0;
@@ -38984,7 +38984,7 @@ function (_super) {
         this.wasteCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
       } else if (dataObj.target === 'waste_container_total') {
         // Query G
-        this.wasteCtrlTotal.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
+        this.wasteTotalCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
       } else {
         console.log('Can not parse dataObj: ');
         console.log(dataObj);
@@ -39157,7 +39157,7 @@ function (_super) {
       case _util.Modes.WASTE_TOTAL_GROUPED:
         return {
           edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
-          nodes: this.containerCtrl.getGroupedNodesTotalWaste(this.wasteCtrl, this.hostCtrl)
+          nodes: this.containerCtrl.getGroupedNodesTotalWaste(this.wasteTotalCtrl, this.hostCtrl)
         };
 
       default:
@@ -39455,9 +39455,9 @@ exports.WasteCtrl = WasteCtrl;
 
 /***/ }),
 
-/***/ "./waste_ctrl_total.ts":
+/***/ "./waste_total_ctrl.ts":
 /*!*****************************!*\
-  !*** ./waste_ctrl_total.ts ***!
+  !*** ./waste_total_ctrl.ts ***!
   \*****************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
@@ -39472,18 +39472,18 @@ Object.defineProperty(exports, "__esModule", {
 /**
  * Class for storing the total cost of a container.
  */
-var WasteCtrlTotal =
+var WasteTotalCtrl =
 /** @class */
 function () {
-  function WasteCtrlTotal() {
+  function WasteTotalCtrl() {
     this.data = {};
   }
 
-  WasteCtrlTotal.prototype.addOrUpdate = function (id, value) {
+  WasteTotalCtrl.prototype.addOrUpdate = function (id, value) {
     this.data[id] = value;
   };
 
-  WasteCtrlTotal.prototype.getValue = function (id) {
+  WasteTotalCtrl.prototype.getValue = function (id) {
     if (this.data[id] !== undefined) {
       return this.data[id];
     }
@@ -39491,14 +39491,14 @@ function () {
     return 0;
   };
 
-  WasteCtrlTotal.prototype.reset = function () {
+  WasteTotalCtrl.prototype.reset = function () {
     this.data = {};
   };
 
-  return WasteCtrlTotal;
+  return WasteTotalCtrl;
 }();
 
-exports.WasteCtrlTotal = WasteCtrlTotal;
+exports.WasteTotalCtrl = WasteTotalCtrl;
 
 /***/ }),
 

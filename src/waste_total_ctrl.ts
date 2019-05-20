@@ -2,7 +2,7 @@
  * Class for storing the total cost of a container.
  */
 
-export class WasteCtrlTotal {
+export class WasteTotalCtrl {
     private data: { [key: string]: number; } = {};
 
     public addOrUpdate(id: string, value: number) {

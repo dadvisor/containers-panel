@@ -6,7 +6,6 @@ export class WasteCtrl {
     private data: { [key: string]: number; } = {};
 
     public addOrUpdate(id: string, value: number) {
-        console.log('WasteCtrl id: ' + id);
         this.data[id] = value;
     }
 

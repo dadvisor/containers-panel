@@ -293,7 +293,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             case Modes.WASTE_PREDICTION:
                 return {
                     edges: this.edgesCtrl.getList(),
-                    nodes: this.containerCtrl.getNodesWithUtilizationWaste(this.utilizationCtrl, this.hostCtrl),
+                    nodes: this.containerCtrl.getNodesWithWastePrediction(this.wasteCtrl, this.hostCtrl),
                 };
             case Modes.WASTE_PREDICTION_GROUPED:
                 return {

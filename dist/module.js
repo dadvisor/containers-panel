@@ -38055,7 +38055,7 @@ function () {
     });
   };
 
-  ContainerCtrl.prototype.getNodesWithUtilizationWaste = function (utilCtrl, hostCtrl) {
+  ContainerCtrl.prototype.getNodesWithWastePrediction = function (wasteCtrl, hostCtrl) {
     var nodes = [];
     var hosts = {};
 
@@ -38066,26 +38066,21 @@ function () {
         hosts[container['host']] = 0;
       }
 
-      hosts[container['host']] += utilCtrl.getValue(container['hash']);
-    }
-
-    for (var _b = 0, _c = this.getList(); _b < _c.length; _b++) {
-      var container = _c[_b];
-      var totalUtil = hosts[container['host']];
-      var util = utilCtrl.getValue(container['hash']);
-      var waste = (totalUtil - util) / totalUtil * (1 - totalUtil);
-      var wastePrice = (waste * hostCtrl.getPrice(container['host'])).toFixed(2);
+      var wastePercentage = wasteCtrl.getValue(container['hash']);
+      hosts[container['host']] += wastePercentage;
+      var waste = wastePercentage * hostCtrl.getPrice(container['host']);
       nodes.push({
         id: container['hash'],
-        name: container['names'] + '\n$' + wastePrice,
+        name: container['names'] + '\n$' + waste.toFixed(2),
         parent: container['host']
       });
     }
 
     Object.keys(hosts).forEach(function (host) {
+      var waste = (hosts[host] * hostCtrl.getPrice(host)).toFixed(2);
       nodes.push({
         id: host,
-        name: host
+        name: host + '\n$' + waste
       });
     });
     return nodes.map(function (item) {
@@ -39145,7 +39140,7 @@ function (_super) {
       case _util.Modes.WASTE_PREDICTION:
         return {
           edges: this.edgesCtrl.getList(),
-          nodes: this.containerCtrl.getNodesWithUtilizationWaste(this.utilizationCtrl, this.hostCtrl)
+          nodes: this.containerCtrl.getNodesWithWastePrediction(this.wasteCtrl, this.hostCtrl)
         };
 
       case _util.Modes.WASTE_PREDICTION_GROUPED:
@@ -39256,8 +39251,8 @@ var Modes = exports.Modes = undefined;
   Modes["COST_PREDICTION"] = "Cost prediction (based on last hour average)";
   Modes["COST_PREDICTION_GROUPED"] = "Cost prediction grouped (based on last hour average)";
   Modes["COST_TOTAL_GROUPED"] = "Total cost grouped";
-  Modes["WASTE"] = "Waste (last hour average)";
-  Modes["RELATIVE_WASTE"] = "Relative Waste";
+  Modes["WASTE"] = "Waste distribution (last hour average)";
+  Modes["RELATIVE_WASTE"] = "Relative Waste distribution";
   Modes["WASTE_PREDICTION"] = "Waste prediction (based on last hour average)";
   Modes["WASTE_PREDICTION_GROUPED"] = "Waste prediction grouped (based on last hour average)";
   Modes["WASTE_TOTAL_GROUPED"] = "Total waste grouped";
@@ -39480,7 +39475,6 @@ function () {
   }
 
   WasteTotalCtrl.prototype.addOrUpdate = function (id, value) {
-    console.log('WasteTotalCtrl with id: ' + id);
     this.data[id] = value;
   };
 

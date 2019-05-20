@@ -67,6 +67,37 @@ export class ContainerCtrl {
         });
     }
 
+    public getNodesWithRelativeUtilization(utilCtrl: UtilizationCtrl) {
+        let nodes: Object[] = [];
+        let hosts: { [key: string]: number; } = {};
+        for (let container of this.getList()) {
+            if (hosts[container['host']] === undefined) {
+
+                hosts[container['host']] = 0;
+            }
+            hosts[container['host']] += utilCtrl.getValue(container['hash']);
+        }
+        for (let container of this.getList()){
+            let hostUtil = hosts[container['hosts']];
+            let percentage = '0%';
+            if (hostUtil > 0.01) { // avoid division by zero
+                percentage = (utilCtrl.getValue(container['hash']) / hostUtil * 100).toFixed(2) + '%';
+            }
+            nodes.push({
+                id: container['hash'],
+                name: container['names'] + '\n' + percentage,
+                parent: container['host']
+            });
+        }
+        Object.keys(hosts).forEach(host => {
+            let percentage = (hosts[host] * 100).toFixed(2) + '%';
+            nodes.push({id: host, name: host + '\n' + percentage });
+        });
+        return nodes.map(item => {
+            return {data: item}
+        });
+    }
+
     public getNodesWithUtilizationWaste(utilCtrl: UtilizationCtrl, hostCtrl: HostCtrl) {
         let nodes: Object[] = [];
         let hosts: { [key: string]: number; } = {};
@@ -77,10 +108,10 @@ export class ContainerCtrl {
             hosts[container['host']] += utilCtrl.getValue(container['hash']);
         }
 
-        for (let container of this.getList()){
+        for (let container of this.getList()) {
             let totalUtil = hosts[container['host']];
             let util = utilCtrl.getValue(container['hash']);
-            let waste = (totalUtil - util)/totalUtil * (1 - totalUtil);
+            let waste = (totalUtil - util) / totalUtil * (1 - totalUtil);
             let wastePrice = (waste * hostCtrl.getPrice(container['host'])).toFixed(2);
             nodes.push({
                 id: container['hash'],
@@ -155,7 +186,7 @@ export class ContainerCtrl {
         let hosts: { [key: string]: number; } = {};
 
         for (let container of this.getList()) {
-            if (hosts[container['host']] === undefined){
+            if (hosts[container['host']] === undefined) {
                 hosts[container['host']] = 0;
             }
             hosts[container['host']] += utilCtrl.getValue(container['hash']);
@@ -168,7 +199,7 @@ export class ContainerCtrl {
             }
             let totalUtil = hosts[container['host']];
             let util = utilCtrl.getValue(container['hash']);
-            let waste = (totalUtil - util)/totalUtil * (1 - totalUtil);
+            let waste = (totalUtil - util) / totalUtil * (1 - totalUtil);
             groups[group] += waste * hostCtrl.getPrice(container['host']);
         }
 
@@ -228,7 +259,7 @@ export class ContainerCtrl {
             let data_edge = edge['data'];
             data_edge['source'] = this.getGroupFromContainerHash(data_edge['source']);
             data_edge['target'] = this.getGroupFromContainerHash(data_edge['target']);
-            if (data_edge['source'] === data_edge['target']){
+            if (data_edge['source'] === data_edge['target']) {
                 data_edge['type'] = 'loop';
             }
             edges.push(edge);

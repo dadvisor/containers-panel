@@ -38004,6 +38004,51 @@ function () {
     });
   };
 
+  ContainerCtrl.prototype.getNodesWithRelativeUtilization = function (utilCtrl) {
+    var nodes = [];
+    var hosts = {};
+
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+
+      if (hosts[container['host']] === undefined) {
+        hosts[container['host']] = 0;
+      }
+
+      hosts[container['host']] += utilCtrl.getValue(container['hash']);
+    }
+
+    for (var _b = 0, _c = this.getList(); _b < _c.length; _b++) {
+      var container = _c[_b];
+      var hostUtil = hosts[container['hosts']];
+      var percentage = '0%';
+
+      if (hostUtil > 0.01) {
+        // avoid division by zero
+        percentage = (utilCtrl.getValue(container['hash']) / hostUtil * 100).toFixed(2) + '%';
+      }
+
+      nodes.push({
+        id: container['hash'],
+        name: container['names'] + '\n' + percentage,
+        parent: container['host']
+      });
+    }
+
+    Object.keys(hosts).forEach(function (host) {
+      var percentage = (hosts[host] * 100).toFixed(2) + '%';
+      nodes.push({
+        id: host,
+        name: host + '\n' + percentage
+      });
+    });
+    return nodes.map(function (item) {
+      return {
+        data: item
+      };
+    });
+  };
+
   ContainerCtrl.prototype.getNodesWithUtilizationWaste = function (utilCtrl, hostCtrl) {
     var nodes = [];
     var hosts = {};
@@ -38974,8 +39019,10 @@ function (_super) {
         };
 
       case _util.Modes.RELATIVE_UTILIZATION:
-        return {};
-      // TODO: return something useful
+        return {
+          edges: this.edgesCtrl.getList(),
+          nodes: this.containerCtrl.getNodesWithRelativeUtilization(this.utilizationCtrl)
+        };
 
       case _util.Modes.COST_PREDICTION:
         return {

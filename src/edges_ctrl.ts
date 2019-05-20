@@ -1,13 +1,13 @@
 import {add_width} from "./util";
 
 export class EdgesCtrl {
-    private data: { [key: string]: number; } = {};
+    private data: { [key: string]: {}; } = {};
 
     public clear(){
         this.data = {};
     }
 
-    public addOrUpdate(edge){
+    public addOrUpdate(edge: Object){
         let key = edge['source'] + edge['target'];
         this.data[key] = edge;
     }

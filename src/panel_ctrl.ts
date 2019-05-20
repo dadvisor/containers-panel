@@ -262,7 +262,10 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     nodes: this.containerCtrl.getNodesWithUtilization(this.utilizationCtrl)
                 };
             case Modes.RELATIVE_UTILIZATION:
-                return {}; // TODO: return something useful
+                return {
+                    edges: this.edgesCtrl.getList(),
+                    nodes: this.containerCtrl.getNodesWithRelativeUtilization(this.utilizationCtrl)
+                };
             case Modes.COST_PREDICTION:
                 return {
                     edges: this.edgesCtrl.getList(),

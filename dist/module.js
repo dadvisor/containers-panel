@@ -38129,7 +38129,7 @@ function () {
     });
   };
 
-  ContainerCtrl.prototype.getNodesWithRelativeUtilizationWaste = function (wasteCtrl) {
+  ContainerCtrl.prototype.getNodesWithRelativeWaste = function (wasteCtrl) {
     var nodes = [];
     var hosts = {};
 
@@ -38238,49 +38238,35 @@ function () {
       groups[group] += utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
     }
 
-    return Object.keys(groups).map(function (key) {
+    return Object.keys(groups).map(function (group) {
       return {
         data: {
-          id: key,
-          name: key + '\n$' + groups[key].toFixed(4)
+          id: group,
+          name: group + '\n$' + groups[group].toFixed(4)
         }
       };
     });
   };
 
-  ContainerCtrl.prototype.getGroupedNodesWaste = function (utilCtrl, hostCtrl) {
+  ContainerCtrl.prototype.getGroupedNodesWastePrediction = function (wasteCtrl, hostCtrl) {
     var groups = {};
-    var hosts = {};
 
     for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
       var container = _a[_i];
-
-      if (hosts[container['host']] === undefined) {
-        hosts[container['host']] = 0;
-      }
-
-      hosts[container['host']] += utilCtrl.getValue(container['hash']);
-    }
-
-    for (var _b = 0, _c = this.getList(); _b < _c.length; _b++) {
-      var container = _c[_b];
       var group = this.getGroupFromContainerHash(container['hash']);
 
       if (groups[group] === undefined) {
         groups[group] = 0;
       }
 
-      var totalUtil = hosts[container['host']];
-      var util = utilCtrl.getValue(container['hash']);
-      var waste = (totalUtil - util) / totalUtil * (1 - totalUtil);
-      groups[group] += waste * hostCtrl.getPrice(container['host']);
+      groups[group] += wasteCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
     }
 
-    return Object.keys(groups).map(function (key) {
+    return Object.keys(groups).map(function (group) {
       return {
         data: {
-          id: key,
-          name: key + '\n$' + groups[key].toFixed(2)
+          id: group,
+          name: group + '\n$' + groups[group].toFixed(2)
         }
       };
     });
@@ -39134,7 +39120,7 @@ function (_super) {
       case _util.Modes.RELATIVE_WASTE:
         return {
           edges: this.edgesCtrl.getList(),
-          nodes: this.containerCtrl.getNodesWithRelativeUtilizationWaste(this.wasteCtrl)
+          nodes: this.containerCtrl.getNodesWithRelativeWaste(this.wasteCtrl)
         };
 
       case _util.Modes.WASTE_PREDICTION:
@@ -39146,7 +39132,7 @@ function (_super) {
       case _util.Modes.WASTE_PREDICTION_GROUPED:
         return {
           edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
-          nodes: this.containerCtrl.getGroupedNodesWaste(this.utilizationCtrl, this.hostCtrl)
+          nodes: this.containerCtrl.getGroupedNodesWastePrediction(this.wasteCtrl, this.hostCtrl)
         };
 
       case _util.Modes.WASTE_TOTAL_GROUPED:

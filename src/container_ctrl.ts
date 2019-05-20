@@ -157,7 +157,7 @@ export class ContainerCtrl {
         });
     }
 
-    public getNodesWithRelativeUtilizationWaste(wasteCtrl: WasteCtrl) {
+    public getNodesWithRelativeWaste(wasteCtrl: WasteCtrl) {
         let nodes: Object[] = [];
         let hosts: { [key: string]: number; } = {};
         for (let container of this.getList()) {
@@ -233,43 +233,32 @@ export class ContainerCtrl {
             groups[group] += utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
         }
 
-        return Object.keys(groups).map(key => {
+        return Object.keys(groups).map(group => {
             return {
                 data: {
-                    id: key,
-                    name: key + '\n$' + groups[key].toFixed(4),
+                    id: group,
+                    name: group + '\n$' + groups[group].toFixed(4),
                 }
             }
         });
     }
 
-    getGroupedNodesWaste(utilCtrl: UtilizationCtrl, hostCtrl: HostCtrl) {
+    getGroupedNodesWastePrediction(wasteCtrl: WasteCtrl, hostCtrl: HostCtrl) {
         let groups: { [key: string]: number } = {};
-        let hosts: { [key: string]: number; } = {};
-
-        for (let container of this.getList()) {
-            if (hosts[container['host']] === undefined) {
-                hosts[container['host']] = 0;
-            }
-            hosts[container['host']] += utilCtrl.getValue(container['hash']);
-        }
 
         for (let container of this.getList()) {
             let group = this.getGroupFromContainerHash(container['hash']);
             if (groups[group] === undefined) {
                 groups[group] = 0;
             }
-            let totalUtil = hosts[container['host']];
-            let util = utilCtrl.getValue(container['hash']);
-            let waste = (totalUtil - util) / totalUtil * (1 - totalUtil);
-            groups[group] += waste * hostCtrl.getPrice(container['host']);
+            groups[group] += wasteCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
         }
 
-        return Object.keys(groups).map(key => {
+        return Object.keys(groups).map(group => {
             return {
                 data: {
-                    id: key,
-                    name: key + '\n$' + groups[key].toFixed(2),
+                    id: group,
+                    name: group + '\n$' + groups[group].toFixed(2),
                 }
             }
         });

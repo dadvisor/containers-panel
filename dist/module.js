@@ -38071,13 +38071,13 @@ function () {
       var waste = wastePercentage * hostCtrl.getPrice(container['host']);
       nodes.push({
         id: container['hash'],
-        name: container['names'] + '\n$' + waste.toFixed(2),
+        name: container['names'] + '\n$' + waste.toFixed(4),
         parent: container['host']
       });
     }
 
     Object.keys(hosts).forEach(function (host) {
-      var waste = (hosts[host] * hostCtrl.getPrice(host)).toFixed(2);
+      var waste = (hosts[host] * hostCtrl.getPrice(host)).toFixed(4);
       nodes.push({
         id: host,
         name: host + '\n$' + waste
@@ -38266,7 +38266,7 @@ function () {
       return {
         data: {
           id: group,
-          name: group + '\n$' + groups[group].toFixed(2)
+          name: group + '\n$' + groups[group].toFixed(4)
         }
       };
     });
@@ -38870,7 +38870,7 @@ function (_super) {
         "intervalFactor": 1,
         "refId": "D"
       }, {
-        "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h]) [1h:1h])",
+        "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h]) [1y:1h])",
         "format": "time_series",
         "instant": true,
         "intervalFactor": 1,

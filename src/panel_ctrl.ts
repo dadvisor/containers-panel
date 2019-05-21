@@ -157,25 +157,33 @@ export class PanelCtrl extends MetricsPanelCtrl {
             }
         }
 
-        this.computeTotalWaste();
+        this.computeTotalCostAndWaste();
 
         if (this.firstRendering == 0) {
             this.render();
         }
     }
 
-    private computeTotalWaste() {
+    private computeTotalCostAndWaste() {
         let totalWaste = 0;
+        let totalCost = 0;
         for (let container of this.containerCtrl.getList()) {
             totalWaste += this.wasteTotalCtrl.getValue(container['hash']) * this.hostCtrl.getPrice(container['host']);
+            totalCost += this.costCtrl.getValue(container['hash']) * this.hostCtrl.getPrice(container['host']);
         }
         console.log(totalWaste);
         console.log(this.templateSrv);
-        for (let variable of this.templateSrv.variables){
-            if (variable.name === 'TOTAL_WASTE'){
-                variable.current.name = totalWaste;
-                variable.current.value = totalWaste;
-            }
+
+        const variableCost = this.templateSrv.variables.find(v => v.name === 'TOTAL_COST');
+        if (variableCost){
+            variableCost.current.text = totalCost;
+            variableCost.current.value = totalCost;
+        }
+
+        const variableWaste = this.templateSrv.variables.find(v => v.name === 'TOTAL_WASTE');
+        if (variableWaste){
+            variableWaste.current.text = totalWaste;
+            variableWaste.current.value = totalWaste;
         }
     }
 

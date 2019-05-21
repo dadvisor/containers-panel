@@ -38972,31 +38972,41 @@ function (_super) {
       }
     }
 
-    this.computeTotalWaste();
+    this.computeTotalCostAndWaste();
 
     if (this.firstRendering == 0) {
       this.render();
     }
   };
 
-  PanelCtrl.prototype.computeTotalWaste = function () {
+  PanelCtrl.prototype.computeTotalCostAndWaste = function () {
     var totalWaste = 0;
+    var totalCost = 0;
 
     for (var _i = 0, _a = this.containerCtrl.getList(); _i < _a.length; _i++) {
       var container = _a[_i];
       totalWaste += this.wasteTotalCtrl.getValue(container['hash']) * this.hostCtrl.getPrice(container['host']);
+      totalCost += this.costCtrl.getValue(container['hash']) * this.hostCtrl.getPrice(container['host']);
     }
 
     console.log(totalWaste);
     console.log(this.templateSrv);
+    var variableCost = this.templateSrv.variables.find(function (v) {
+      return v.name === 'TOTAL_COST';
+    });
 
-    for (var _b = 0, _c = this.templateSrv.variables; _b < _c.length; _b++) {
-      var variable = _c[_b];
+    if (variableCost) {
+      variableCost.current.text = totalCost;
+      variableCost.current.value = totalCost;
+    }
 
-      if (variable.name === 'TOTAL_WASTE') {
-        variable.current.name = totalWaste;
-        variable.current.value = totalWaste;
-      }
+    var variableWaste = this.templateSrv.variables.find(function (v) {
+      return v.name === 'TOTAL_WASTE';
+    });
+
+    if (variableWaste) {
+      variableWaste.current.text = totalWaste;
+      variableWaste.current.value = totalWaste;
     }
   };
   /**

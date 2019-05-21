@@ -156,9 +156,21 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 console.log(dataObj);
             }
         }
+
+        this.computeTotalWaste();
+
         if (this.firstRendering == 0) {
             this.render();
         }
+    }
+
+    private computeTotalWaste() {
+        let totalWaste = 0;
+        for (let container of this.containerCtrl.getList()) {
+            totalWaste += this.wasteTotalCtrl.getValue(container['hash']) * this.hostCtrl.getPrice(container['host']);
+        }
+        console.log(totalWaste);
+        console.log(this.templateSrv);
     }
 
     /**

@@ -38972,9 +38972,23 @@ function (_super) {
       }
     }
 
+    this.computeTotalWaste();
+
     if (this.firstRendering == 0) {
       this.render();
     }
+  };
+
+  PanelCtrl.prototype.computeTotalWaste = function () {
+    var totalWaste = 0;
+
+    for (var _i = 0, _a = this.containerCtrl.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+      totalWaste += this.wasteTotalCtrl.getValue(container['hash']) * this.hostCtrl.getPrice(container['host']);
+    }
+
+    console.log(totalWaste);
+    console.log(this.templateSrv);
   };
   /**
    * Main method for the panel controller. This updates the graph with the new data.

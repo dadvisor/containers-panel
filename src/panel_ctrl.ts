@@ -171,6 +171,12 @@ export class PanelCtrl extends MetricsPanelCtrl {
         }
         console.log(totalWaste);
         console.log(this.templateSrv);
+        for (let variable of this.templateSrv.variables){
+            if (variable.name === 'TOTAL_WASTE'){
+                variable.current.name = totalWaste;
+                variable.current.value = totalWaste;
+            }
+        }
     }
 
     /**

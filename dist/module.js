@@ -38989,6 +38989,15 @@ function (_super) {
 
     console.log(totalWaste);
     console.log(this.templateSrv);
+
+    for (var _b = 0, _c = this.templateSrv.variables; _b < _c.length; _b++) {
+      var variable = _c[_b];
+
+      if (variable.name === 'TOTAL_WASTE') {
+        variable.current.name = totalWaste;
+        variable.current.value = totalWaste;
+      }
+    }
   };
   /**
    * Main method for the panel controller. This updates the graph with the new data.

@@ -115,13 +115,13 @@ export class ContainerCtrl {
             let waste = wastePercentage * hostCtrl.getPrice(container['host']);
             nodes.push({
                 id: container['hash'],
-                name: container['names'] + '\n$' + waste.toFixed(2),
+                name: container['names'] + '\n$' + waste.toFixed(4),
                 parent: container['host']
             });
         }
 
         Object.keys(hosts).forEach(host => {
-            let waste = (hosts[host] * hostCtrl.getPrice(host)).toFixed(2);
+            let waste = (hosts[host] * hostCtrl.getPrice(host)).toFixed(4);
             nodes.push({id: host, name: host + '\n$' + waste});
         });
         return nodes.map(item => {
@@ -258,7 +258,7 @@ export class ContainerCtrl {
             return {
                 data: {
                     id: group,
-                    name: group + '\n$' + groups[group].toFixed(2),
+                    name: group + '\n$' + groups[group].toFixed(4),
                 }
             }
         });

@@ -68,7 +68,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "refId": "D"
                 },
                 {
-                    "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h]) [1h:1h])",
+                    "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h]) [1y:1h])",
                     "format": "time_series",
                     "instant": true,
                     "intervalFactor": 1,

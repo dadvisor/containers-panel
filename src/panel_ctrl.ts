@@ -175,14 +175,14 @@ export class PanelCtrl extends MetricsPanelCtrl {
 
         const variableCost = this.templateSrv.variables.find(v => v.name === 'TOTAL_COST');
         if (variableCost){
-            variableCost.current.text = totalCost.toString();
-            variableCost.current.value = totalCost.toString();
+            variableCost.current.text = totalCost.toFixed(2);
+            variableCost.current.value = totalCost.toFixed(2);
         }
 
         const variableWaste = this.templateSrv.variables.find(v => v.name === 'TOTAL_WASTE');
         if (variableWaste){
-            variableWaste.current.text = totalWaste.toString();
-            variableWaste.current.value = totalWaste.toString();
+            variableWaste.current.text = totalWaste.toFixed(2);
+            variableWaste.current.value = totalWaste.toFixed(2);
         }
     }
 

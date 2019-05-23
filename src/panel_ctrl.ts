@@ -41,7 +41,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             datasource: 'Prometheus',
             targets: [
                 {
-                    "expr": "docker_container_info",
+                    "expr": "docker_container_info{stopped=\"\"}",
                     "format": "time_series",
                     "instant": true,
                     "intervalFactor": 1,

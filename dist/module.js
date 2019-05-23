@@ -39058,7 +39058,7 @@ function (_super) {
     var panelDefaults = {
       datasource: 'Prometheus',
       targets: [{
-        "expr": "docker_container_info",
+        "expr": "docker_container_info{stopped=\"\"}",
         "format": "time_series",
         "instant": true,
         "intervalFactor": 1,

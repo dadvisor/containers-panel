@@ -5,13 +5,14 @@ import cola from 'cytoscape-cola';
 import _ from "lodash";
 import Mapping from "./mapping";
 import {decode, getStyle, Modes, NameImage} from "./util";
-import {EdgesCtrl} from "./edges_ctrl";
-import {ContainerCtrl} from "./container_ctrl";
-import {UtilizationCtrl} from "./utilization_ctrl";
-import {HostCtrl} from "./host_ctrl";
-import {CostCtrl} from "./cost_ctrl";
-import {WasteCtrl} from "./waste_ctrl";
-import {WasteTotalCtrl} from "./waste_total_ctrl";
+import {EdgesCtrl} from "./dataControllers/edges_ctrl";
+import {ContainerCtrl} from "./dataControllers/container_ctrl";
+import {UtilizationCtrl} from "./dataControllers/utilization_ctrl";
+import {HostCtrl} from "./dataControllers/host_ctrl";
+import {CostCtrl} from "./dataControllers/cost_ctrl";
+import {WasteCtrl} from "./dataControllers/waste_ctrl";
+import {WasteTotalCtrl} from "./dataControllers/waste_total_ctrl";
+import {TrafficCtrl} from "./dataControllers/traffic_ctrl";
 
 cytoscape.use(cola);
 
@@ -25,6 +26,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     public wasteTotalCtrl = new WasteTotalCtrl();
     public hostCtrl = new HostCtrl(this);
     public costCtrl = new CostCtrl();
+    public trafficCtrl = new TrafficCtrl();
     private cy;
     private firstRendering = 0;
 
@@ -88,7 +90,14 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     "instant": true,
                     "intervalFactor": 1,
                     "refId": "G"
-                }
+                },
+                {
+                    "expr": "container_network_receive_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}",
+                    "format": "time_series",
+                    "instant": true,
+                    "intervalFactor": 1,
+                    "refId": "H"
+                },
             ],
             ruleMappings: [],
             cpuPriceHour: 0.021925,
@@ -151,6 +160,9 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 this.wasteTotalCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
             } else if (dataObj.target.startsWith('waste_container')) { // Query F
                 this.wasteCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
+            } else if (dataObj.target === 'container_network_receive_bytes_total') { // Query H
+                let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
+                this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
             } else {
                 console.log('Can not parse dataObj: ');
                 console.log(dataObj);
@@ -171,7 +183,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
             totalWaste += this.wasteTotalCtrl.getValue(container['hash']) * this.hostCtrl.getPrice(container['host']);
             totalCost += this.costCtrl.getValue(container['hash']) * this.hostCtrl.getPrice(container['host']);
         }
-        console.log(this.templateSrv);
 
         const variableCost = this.templateSrv.variables.find(v => v.name === 'TOTAL_COST');
         if (variableCost){

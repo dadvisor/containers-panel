@@ -1,4 +1,4 @@
-import {add_width} from "./util";
+import {add_width} from "../util";
 
 export class EdgesCtrl {
     private data: { [key: string]: {}; } = {};

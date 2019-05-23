@@ -1,9 +1,9 @@
-import {add_width} from "./util";
+import {add_width} from "../util";
 import {UtilizationCtrl} from "./utilization_ctrl";
 import {HostCtrl} from "./host_ctrl";
 import {CostCtrl} from "./cost_ctrl";
 import {WasteCtrl} from "./waste_ctrl";
-import Mapping from "./mapping";
+import Mapping from "../mapping";
 import {WasteTotalCtrl} from "./waste_total_ctrl";
 
 export class ContainerCtrl {
@@ -14,7 +14,6 @@ export class ContainerCtrl {
             obj['group'] = obj['names'];
             mapping.mapContainer(obj);
             this.data[id] = obj;
-            console.log(`${id} added to containerCtrl`);
         }
     }
 

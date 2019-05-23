@@ -37902,10 +37902,40 @@ module.exports = g;
 
 /***/ }),
 
-/***/ "./container_ctrl.ts":
-/*!***************************!*\
-  !*** ./container_ctrl.ts ***!
-  \***************************/
+/***/ "./css/main.css":
+/*!**********************!*\
+  !*** ./css/main.css ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../node_modules/css-loader??ref--5-1!./main.css */ "../node_modules/css-loader/index.js?!./css/main.css");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../node_modules/style-loader/lib/addStyles.js */ "../node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
+/***/ "./dataControllers/container_ctrl.ts":
+/*!*******************************************!*\
+  !*** ./dataControllers/container_ctrl.ts ***!
+  \*******************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -37917,7 +37947,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.ContainerCtrl = undefined;
 
-var _util = __webpack_require__(/*! ./util */ "./util.ts");
+var _util = __webpack_require__(/*! ../util */ "./util.ts");
 
 var ContainerCtrl =
 /** @class */
@@ -37931,7 +37961,6 @@ function () {
       obj['group'] = obj['names'];
       mapping.mapContainer(obj);
       this.data[id] = obj;
-      console.log(id + " added to containerCtrl");
     }
   };
 
@@ -38400,10 +38429,10 @@ exports.ContainerCtrl = ContainerCtrl;
 
 /***/ }),
 
-/***/ "./cost_ctrl.ts":
-/*!**********************!*\
-  !*** ./cost_ctrl.ts ***!
-  \**********************/
+/***/ "./dataControllers/cost_ctrl.ts":
+/*!**************************************!*\
+  !*** ./dataControllers/cost_ctrl.ts ***!
+  \**************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -38447,40 +38476,10 @@ exports.CostCtrl = CostCtrl;
 
 /***/ }),
 
-/***/ "./css/main.css":
-/*!**********************!*\
-  !*** ./css/main.css ***!
-  \**********************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-
-var content = __webpack_require__(/*! !../../node_modules/css-loader??ref--5-1!./main.css */ "../node_modules/css-loader/index.js?!./css/main.css");
-
-if(typeof content === 'string') content = [[module.i, content, '']];
-
-var transform;
-var insertInto;
-
-
-
-var options = {"hmr":true}
-
-options.transform = transform
-options.insertInto = undefined;
-
-var update = __webpack_require__(/*! ../../node_modules/style-loader/lib/addStyles.js */ "../node_modules/style-loader/lib/addStyles.js")(content, options);
-
-if(content.locals) module.exports = content.locals;
-
-if(false) {}
-
-/***/ }),
-
-/***/ "./edges_ctrl.ts":
-/*!***********************!*\
-  !*** ./edges_ctrl.ts ***!
-  \***********************/
+/***/ "./dataControllers/edges_ctrl.ts":
+/*!***************************************!*\
+  !*** ./dataControllers/edges_ctrl.ts ***!
+  \***************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -38492,7 +38491,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.EdgesCtrl = undefined;
 
-var _util = __webpack_require__(/*! ./util */ "./util.ts");
+var _util = __webpack_require__(/*! ../util */ "./util.ts");
 
 var EdgesCtrl =
 /** @class */
@@ -38530,10 +38529,10 @@ exports.EdgesCtrl = EdgesCtrl;
 
 /***/ }),
 
-/***/ "./host_ctrl.ts":
-/*!**********************!*\
-  !*** ./host_ctrl.ts ***!
-  \**********************/
+/***/ "./dataControllers/host_ctrl.ts":
+/*!**************************************!*\
+  !*** ./dataControllers/host_ctrl.ts ***!
+  \**************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -38549,7 +38548,7 @@ var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _util = __webpack_require__(/*! ./util */ "./util.ts");
+var _util = __webpack_require__(/*! ../util */ "./util.ts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -38633,6 +38632,196 @@ function () {
 }();
 
 exports.HostCtrl = HostCtrl;
+
+/***/ }),
+
+/***/ "./dataControllers/traffic_ctrl.ts":
+/*!*****************************************!*\
+  !*** ./dataControllers/traffic_ctrl.ts ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+/**
+ * Class for storing the total cost of a container.
+ */
+var TrafficCtrl =
+/** @class */
+function () {
+  function TrafficCtrl() {
+    this.data = {};
+  }
+
+  TrafficCtrl.prototype.addOrUpdate = function (id, value) {
+    this.data[id] = value;
+  };
+
+  TrafficCtrl.prototype.getValue = function (id) {
+    if (this.data[id] !== undefined) {
+      return this.data[id];
+    }
+
+    return 0;
+  };
+
+  TrafficCtrl.prototype.reset = function () {
+    this.data = {};
+  };
+
+  return TrafficCtrl;
+}();
+
+exports.TrafficCtrl = TrafficCtrl;
+
+/***/ }),
+
+/***/ "./dataControllers/utilization_ctrl.ts":
+/*!*********************************************!*\
+  !*** ./dataControllers/utilization_ctrl.ts ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+/**
+ * Class for storing the current utilization of a certain container.
+ * Note that a prediction of the cost can be made with the following formula:
+ * - prediction per hour = util over last hour * host price per hour.
+ */
+var UtilizationCtrl =
+/** @class */
+function () {
+  function UtilizationCtrl() {
+    this.data = {};
+  }
+
+  UtilizationCtrl.prototype.addOrUpdate = function (id, value) {
+    this.data[id] = value;
+  };
+
+  UtilizationCtrl.prototype.getValue = function (id) {
+    if (this.data[id] !== undefined) {
+      return this.data[id];
+    }
+
+    return 0;
+  };
+
+  UtilizationCtrl.prototype.reset = function () {
+    this.data = {};
+  };
+
+  return UtilizationCtrl;
+}();
+
+exports.UtilizationCtrl = UtilizationCtrl;
+
+/***/ }),
+
+/***/ "./dataControllers/waste_ctrl.ts":
+/*!***************************************!*\
+  !*** ./dataControllers/waste_ctrl.ts ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+/**
+ * Class for storing the total cost of a container.
+ */
+var WasteCtrl =
+/** @class */
+function () {
+  function WasteCtrl() {
+    this.data = {};
+  }
+
+  WasteCtrl.prototype.addOrUpdate = function (id, value) {
+    this.data[id] = value;
+  };
+
+  WasteCtrl.prototype.getValue = function (id) {
+    if (this.data[id] !== undefined) {
+      return this.data[id];
+    }
+
+    return 0;
+  };
+
+  WasteCtrl.prototype.reset = function () {
+    this.data = {};
+  };
+
+  return WasteCtrl;
+}();
+
+exports.WasteCtrl = WasteCtrl;
+
+/***/ }),
+
+/***/ "./dataControllers/waste_total_ctrl.ts":
+/*!*********************************************!*\
+  !*** ./dataControllers/waste_total_ctrl.ts ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+/**
+ * Class for storing the total cost of a container.
+ */
+var WasteTotalCtrl =
+/** @class */
+function () {
+  function WasteTotalCtrl() {
+    this.data = {};
+  }
+
+  WasteTotalCtrl.prototype.addOrUpdate = function (id, value) {
+    this.data[id] = value;
+  };
+
+  WasteTotalCtrl.prototype.getValue = function (id) {
+    if (this.data[id] !== undefined) {
+      return this.data[id];
+    }
+
+    return 0;
+  };
+
+  WasteTotalCtrl.prototype.reset = function () {
+    this.data = {};
+  };
+
+  return WasteTotalCtrl;
+}();
+
+exports.WasteTotalCtrl = WasteTotalCtrl;
 
 /***/ }),
 
@@ -38782,19 +38971,21 @@ var _mapping2 = _interopRequireDefault(_mapping);
 
 var _util = __webpack_require__(/*! ./util */ "./util.ts");
 
-var _edges_ctrl = __webpack_require__(/*! ./edges_ctrl */ "./edges_ctrl.ts");
+var _edges_ctrl = __webpack_require__(/*! ./dataControllers/edges_ctrl */ "./dataControllers/edges_ctrl.ts");
 
-var _container_ctrl = __webpack_require__(/*! ./container_ctrl */ "./container_ctrl.ts");
+var _container_ctrl = __webpack_require__(/*! ./dataControllers/container_ctrl */ "./dataControllers/container_ctrl.ts");
 
-var _utilization_ctrl = __webpack_require__(/*! ./utilization_ctrl */ "./utilization_ctrl.ts");
+var _utilization_ctrl = __webpack_require__(/*! ./dataControllers/utilization_ctrl */ "./dataControllers/utilization_ctrl.ts");
 
-var _host_ctrl = __webpack_require__(/*! ./host_ctrl */ "./host_ctrl.ts");
+var _host_ctrl = __webpack_require__(/*! ./dataControllers/host_ctrl */ "./dataControllers/host_ctrl.ts");
 
-var _cost_ctrl = __webpack_require__(/*! ./cost_ctrl */ "./cost_ctrl.ts");
+var _cost_ctrl = __webpack_require__(/*! ./dataControllers/cost_ctrl */ "./dataControllers/cost_ctrl.ts");
 
-var _waste_ctrl = __webpack_require__(/*! ./waste_ctrl */ "./waste_ctrl.ts");
+var _waste_ctrl = __webpack_require__(/*! ./dataControllers/waste_ctrl */ "./dataControllers/waste_ctrl.ts");
 
-var _waste_total_ctrl = __webpack_require__(/*! ./waste_total_ctrl */ "./waste_total_ctrl.ts");
+var _waste_total_ctrl = __webpack_require__(/*! ./dataControllers/waste_total_ctrl */ "./dataControllers/waste_total_ctrl.ts");
+
+var _traffic_ctrl = __webpack_require__(/*! ./dataControllers/traffic_ctrl */ "./dataControllers/traffic_ctrl.ts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -38843,6 +39034,7 @@ function (_super) {
     _this.wasteTotalCtrl = new _waste_total_ctrl.WasteTotalCtrl();
     _this.hostCtrl = new _host_ctrl.HostCtrl(_this);
     _this.costCtrl = new _cost_ctrl.CostCtrl();
+    _this.trafficCtrl = new _traffic_ctrl.TrafficCtrl();
     _this.firstRendering = 0;
     _this.graph_height = _this.height;
     var panelDefaults = {
@@ -38891,6 +39083,12 @@ function (_super) {
         "instant": true,
         "intervalFactor": 1,
         "refId": "G"
+      }, {
+        "expr": "container_network_receive_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}",
+        "format": "time_series",
+        "instant": true,
+        "intervalFactor": 1,
+        "refId": "H"
       }],
       ruleMappings: [],
       cpuPriceHour: 0.021925,
@@ -38969,6 +39167,11 @@ function (_super) {
       } else if (dataObj.target.startsWith('waste_container')) {
         // Query F
         this.wasteCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
+      } else if (dataObj.target === 'container_network_receive_bytes_total') {
+        // Query H
+        var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
+
+        this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
       } else {
         console.log('Can not parse dataObj: ');
         console.log(dataObj);
@@ -38992,7 +39195,6 @@ function (_super) {
       totalCost += this.costCtrl.getValue(container['hash']) * this.hostCtrl.getPrice(container['host']);
     }
 
-    console.log(this.templateSrv);
     var variableCost = this.templateSrv.variables.find(function (v) {
       return v.name === 'TOTAL_COST';
     });
@@ -39373,149 +39575,6 @@ function getStyle(panel) {
     }
   }];
 }
-
-/***/ }),
-
-/***/ "./utilization_ctrl.ts":
-/*!*****************************!*\
-  !*** ./utilization_ctrl.ts ***!
-  \*****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-/**
- * Class for storing the current utilization of a certain container.
- * Note that a prediction of the cost can be made with the following formula:
- * - prediction per hour = util over last hour * host price per hour.
- */
-var UtilizationCtrl =
-/** @class */
-function () {
-  function UtilizationCtrl() {
-    this.data = {};
-  }
-
-  UtilizationCtrl.prototype.addOrUpdate = function (id, value) {
-    this.data[id] = value;
-  };
-
-  UtilizationCtrl.prototype.getValue = function (id) {
-    if (this.data[id] !== undefined) {
-      return this.data[id];
-    }
-
-    return 0;
-  };
-
-  UtilizationCtrl.prototype.reset = function () {
-    this.data = {};
-  };
-
-  return UtilizationCtrl;
-}();
-
-exports.UtilizationCtrl = UtilizationCtrl;
-
-/***/ }),
-
-/***/ "./waste_ctrl.ts":
-/*!***********************!*\
-  !*** ./waste_ctrl.ts ***!
-  \***********************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-/**
- * Class for storing the total cost of a container.
- */
-var WasteCtrl =
-/** @class */
-function () {
-  function WasteCtrl() {
-    this.data = {};
-  }
-
-  WasteCtrl.prototype.addOrUpdate = function (id, value) {
-    this.data[id] = value;
-  };
-
-  WasteCtrl.prototype.getValue = function (id) {
-    if (this.data[id] !== undefined) {
-      return this.data[id];
-    }
-
-    return 0;
-  };
-
-  WasteCtrl.prototype.reset = function () {
-    this.data = {};
-  };
-
-  return WasteCtrl;
-}();
-
-exports.WasteCtrl = WasteCtrl;
-
-/***/ }),
-
-/***/ "./waste_total_ctrl.ts":
-/*!*****************************!*\
-  !*** ./waste_total_ctrl.ts ***!
-  \*****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-/**
- * Class for storing the total cost of a container.
- */
-var WasteTotalCtrl =
-/** @class */
-function () {
-  function WasteTotalCtrl() {
-    this.data = {};
-  }
-
-  WasteTotalCtrl.prototype.addOrUpdate = function (id, value) {
-    this.data[id] = value;
-  };
-
-  WasteTotalCtrl.prototype.getValue = function (id) {
-    if (this.data[id] !== undefined) {
-      return this.data[id];
-    }
-
-    return 0;
-  };
-
-  WasteTotalCtrl.prototype.reset = function () {
-    this.data = {};
-  };
-
-  return WasteTotalCtrl;
-}();
-
-exports.WasteTotalCtrl = WasteTotalCtrl;
 
 /***/ }),
 

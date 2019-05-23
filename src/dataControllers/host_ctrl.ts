@@ -1,6 +1,6 @@
 import _ from "lodash";
-import {bytesToSize} from "./util";
-import {PanelCtrl} from "./panel_ctrl";
+import {bytesToSize} from "../util";
+import {PanelCtrl} from "../panel_ctrl";
 
 class Host {
     ip: string;

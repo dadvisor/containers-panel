@@ -14,6 +14,7 @@ export class ContainerCtrl {
             obj['group'] = obj['names'];
             mapping.mapContainer(obj);
             this.data[id] = obj;
+            console.log(`${id} added to containerCtrl`);
         }
     }
 

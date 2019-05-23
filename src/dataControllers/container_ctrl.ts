@@ -8,13 +8,26 @@ import {WasteTotalCtrl} from "./waste_total_ctrl";
 
 export class ContainerCtrl {
     private data: { [key: string]: {}; } = {};
+    private idsUpdate: string[] = [];  // keep track of a list of all ids that have been updated.
 
     public addOrUpdate(id: string, obj: Object, mapping: Mapping) {
-        if (this.data[id] === undefined){
+        if (this.data[id] === undefined) {
             obj['group'] = obj['names'];
             mapping.mapContainer(obj);
             this.data[id] = obj;
         }
+        this.idsUpdate.push(id);
+    }
+
+    public startUpdate() {
+        this.idsUpdate = [];
+    }
+
+    public stopUpdate() {
+        let items = Object.keys(this.data).filter(id => !this.idsUpdate.includes(id));
+        items.forEach(id => {
+            delete this.data[id];
+        });
     }
 
     public getList() {
@@ -52,9 +65,9 @@ export class ContainerCtrl {
 
     public getNodesWithUtilization(utilCtrl: UtilizationCtrl) {
         let nodes: Object[] = [];
-        let hosts: {[key: string]: number;} = {};
+        let hosts: { [key: string]: number; } = {};
         for (let container of this.getList()) {
-            if (hosts[container['host']] === undefined){
+            if (hosts[container['host']] === undefined) {
                 hosts[container['host']] = 0;
             }
             hosts[container['host']] += utilCtrl.getValue(container['hash']);
@@ -84,7 +97,7 @@ export class ContainerCtrl {
             }
             hosts[container['host']] += utilCtrl.getValue(container['hash']);
         }
-        for (let container of this.getList()){
+        for (let container of this.getList()) {
             let hostUtil = hosts[container['host']];
             let percentage = '0%';
             if (hostUtil > 0.01) { // avoid division by zero
@@ -98,7 +111,7 @@ export class ContainerCtrl {
         }
         Object.keys(hosts).forEach(host => {
             let percentage = (hosts[host] * 100).toFixed(2) + '%';
-            nodes.push({id: host, name: host + '\n' + percentage });
+            nodes.push({id: host, name: host + '\n' + percentage});
         });
         return nodes.map(item => {
             return {data: item}
@@ -112,7 +125,7 @@ export class ContainerCtrl {
             if (hosts[container['host']] === undefined) {
                 hosts[container['host']] = 0;
             }
-            let wastePercentage =  wasteCtrl.getValue(container['hash']);
+            let wastePercentage = wasteCtrl.getValue(container['hash']);
             hosts[container['host']] += wastePercentage;
             let waste = wastePercentage * hostCtrl.getPrice(container['host']);
             nodes.push({
@@ -172,7 +185,7 @@ export class ContainerCtrl {
         for (let container of this.getList()) {
             let totalWaste = hosts[container['host']];
             let waste = 0;
-            if (totalWaste > 0.01){
+            if (totalWaste > 0.01) {
                 waste = wasteCtrl.getValue(container['hash']) / totalWaste * 100;
             }
             let wastePercentage = waste.toFixed(2) + '%';

@@ -138,6 +138,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
     }
 
     onDataReceived(dataList) {
+        this.containerCtrl.startUpdate();
+
         for (let dataObj of dataList) {
             let obj = decode(dataObj.target);
             if (dataObj.target.startsWith("docker_container_info")) { // Query A
@@ -168,6 +170,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 console.log(dataObj);
             }
         }
+        this.containerCtrl.stopUpdate();
 
         this.computeTotalCostAndWaste();
 

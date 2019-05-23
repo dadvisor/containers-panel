@@ -37954,6 +37954,7 @@ var ContainerCtrl =
 function () {
   function ContainerCtrl() {
     this.data = {};
+    this.idsUpdate = []; // keep track of a list of all ids that have been updated.
   }
 
   ContainerCtrl.prototype.addOrUpdate = function (id, obj, mapping) {
@@ -37962,6 +37963,23 @@ function () {
       mapping.mapContainer(obj);
       this.data[id] = obj;
     }
+
+    this.idsUpdate.push(id);
+  };
+
+  ContainerCtrl.prototype.startUpdate = function () {
+    this.idsUpdate = [];
+  };
+
+  ContainerCtrl.prototype.stopUpdate = function () {
+    var _this = this;
+
+    var items = Object.keys(this.data).filter(function (id) {
+      return !_this.idsUpdate.includes(id);
+    });
+    items.forEach(function (id) {
+      delete _this.data[id];
+    });
   };
 
   ContainerCtrl.prototype.getList = function () {
@@ -39134,6 +39152,8 @@ function (_super) {
   };
 
   PanelCtrl.prototype.onDataReceived = function (dataList) {
+    this.containerCtrl.startUpdate();
+
     for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
       var dataObj = dataList_1[_i];
       var obj = (0, _util.decode)(dataObj.target);
@@ -39178,6 +39198,7 @@ function (_super) {
       }
     }
 
+    this.containerCtrl.stopUpdate();
     this.computeTotalCostAndWaste();
 
     if (this.firstRendering == 0) {

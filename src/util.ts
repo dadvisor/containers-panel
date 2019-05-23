@@ -22,7 +22,8 @@ export enum Modes {
 export function add_width(edges: Object[]) {
     const max_width = Math.max(...edges.map(r => r['bytes']));
     for (let edge of edges) {
-        edge['width'] = 10.0 * edge['bytes'] / max_width;
+        let ratio = 10 * edge['bytes'] / max_width;
+        edge['width'] = Math.max(ratio, 1);
     }
     return edges;
 }

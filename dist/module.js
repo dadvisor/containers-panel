@@ -37927,9 +37927,11 @@ function () {
   }
 
   ContainerCtrl.prototype.addOrUpdate = function (id, obj, mapping) {
-    obj['group'] = obj['names'];
-    mapping.mapContainer(obj);
-    this.data[id] = obj;
+    if (this.data[id] === undefined) {
+      obj['group'] = obj['names'];
+      mapping.mapContainer(obj);
+      this.data[id] = obj;
+    }
   };
 
   ContainerCtrl.prototype.getList = function () {
@@ -39283,7 +39285,8 @@ function add_width(edges) {
 
   for (var _i = 0, edges_1 = edges; _i < edges_1.length; _i++) {
     var edge = edges_1[_i];
-    edge['width'] = 10.0 * edge['bytes'] / max_width;
+    var ratio = 10 * edge['bytes'] / max_width;
+    edge['width'] = Math.max(ratio, 1);
   }
 
   return edges;

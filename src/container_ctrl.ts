@@ -10,9 +10,11 @@ export class ContainerCtrl {
     private data: { [key: string]: {}; } = {};
 
     public addOrUpdate(id: string, obj: Object, mapping: Mapping) {
-        obj['group'] = obj['names'];
-        mapping.mapContainer(obj);
-        this.data[id] = obj;
+        if (this.data[id] === undefined){
+            obj['group'] = obj['names'];
+            mapping.mapContainer(obj);
+            this.data[id] = obj;
+        }
     }
 
     public getList() {

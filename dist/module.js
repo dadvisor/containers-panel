@@ -39513,7 +39513,7 @@ function (_super) {
       return String.fromCharCode(i + 'A'.charCodeAt(0));
     });
     return queries.map(function (obj, i) {
-      return _lodash2.default.defaults(obj, {
+      return _lodash2.default.assign({}, obj, {
         "format": "time_series",
         "instant": true,
         "intervalFactor": 1,

@@ -399,7 +399,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             (_, i) => String.fromCharCode(i + 'A'.charCodeAt(0)));
 
         return queries.map((obj, i) => {
-            return _.defaults(obj, {
+            return _.assign({}, obj, {
                 "format": "time_series",
                 "instant": true,
                 "intervalFactor": 1,

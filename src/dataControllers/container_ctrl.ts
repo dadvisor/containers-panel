@@ -1,10 +1,11 @@
-import {add_width} from "../util";
+import {add_width, bytesToSize} from "../util";
 import {UtilizationCtrl} from "./utilization_ctrl";
 import {HostCtrl} from "./host_ctrl";
 import {CostCtrl} from "./cost_ctrl";
 import {WasteCtrl} from "./waste_ctrl";
 import Mapping from "../mapping";
 import {WasteTotalCtrl} from "./waste_total_ctrl";
+import {TRAFFIC_TYPE, TrafficCtrl} from "./traffic_ctrl";
 
 export class ContainerCtrl {
     private data: { [key: string]: {}; } = {};
@@ -45,6 +46,38 @@ export class ContainerCtrl {
             nodes.push({
                 id: container['hash'],
                 name: container['names'],
+                parent: container['host'] + '-' + container['image']
+            });
+        }
+        hostSet.forEach(host => {
+            nodes.push({id: host, name: host});
+        });
+        imageSet.forEach(image => {
+            nodes.push({
+                id: image,
+                name: image.substr(image.indexOf('-') + 1),
+                parent: image.substr(0, image.indexOf('-'))
+            });
+        });
+        return nodes.map(item => {
+            return {data: item}
+        });
+    }
+
+    public getNodesWithTraffic(trafficCtrl: TrafficCtrl) {
+        let nodes: Object[] = [];
+
+        let hostSet = new Set();
+        let imageSet = new Set();
+        for (let container of this.getList()) {
+            hostSet.add(container['host']);
+            imageSet.add(container['host'] + '-' + container['image']);
+            const received = bytesToSize(trafficCtrl.getValue(container['hash'], TRAFFIC_TYPE.RECEIVED));
+            const transmitted = bytesToSize(trafficCtrl.getValue(container['hash'], TRAFFIC_TYPE.TRANSMITTED));
+
+            nodes.push({
+                id: container['hash'],
+                name: container['names'] + '\nin: ' + received + ', out: ' + transmitted,
                 parent: container['host'] + '-' + container['image']
             });
         }

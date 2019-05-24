@@ -5,6 +5,7 @@ export enum NameImage {
 
 export enum Modes {
     CONTAINERS = 'Containers',
+    CONTAINERS_TRAFFIC = 'Containers with traffic',
     GROUPED = 'Grouped',
     UTILIZATION = 'Utilization (last hour average)',
     RELATIVE_UTILIZATION = 'Relative Utilization (last hour average)',
@@ -19,7 +20,8 @@ export enum Modes {
 }
 
 export enum TIME_WINDOW {
-    TEN_M = '10m',
+    MIN = '1m',
+    TEN_MIN = '10m',
     HOUR = '1h',
     DAY = '1d',
     YEAR = '1y',

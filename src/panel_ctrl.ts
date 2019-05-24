@@ -12,7 +12,7 @@ import {HostCtrl} from "./dataControllers/host_ctrl";
 import {CostCtrl} from "./dataControllers/cost_ctrl";
 import {WasteCtrl} from "./dataControllers/waste_ctrl";
 import {WasteTotalCtrl} from "./dataControllers/waste_total_ctrl";
-import {TrafficCtrl} from "./dataControllers/traffic_ctrl";
+import {TRAFFIC_TYPE, TrafficCtrl} from "./dataControllers/traffic_ctrl";
 
 cytoscape.use(cola);
 
@@ -105,29 +105,32 @@ export class PanelCtrl extends MetricsPanelCtrl {
 
         for (let dataObj of dataList) {
             let obj = decode(dataObj.target);
-            if (dataObj.target.startsWith("docker_container_info")) { // Query A
+            if (dataObj.target.startsWith("docker_container_info")) {
                 this.containerCtrl.addOrUpdate(obj['hash'], obj, this.mapping);
-            } else if (dataObj.target.startsWith("bytes_send_total")) { // Query B
+            } else if (dataObj.target.startsWith("bytes_send_total")) {
                 let newObj = {};
                 newObj['source'] = obj['src'].substr('id_'.length);
                 newObj['target'] = obj['dst'].substr('id_'.length);
                 newObj['bytes'] = dataObj.datapoints[0][0];
                 this.edgesCtrl.addOrUpdate(newObj);
-            } else if (dataObj.target === 'container_utilization') { // Query C
+            } else if (dataObj.target === 'container_utilization') {
                 let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
                 this.utilizationCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
-            } else if (dataObj.target.startsWith('default_host_price_info')) { // Query D
+            } else if (dataObj.target.startsWith('default_host_price_info')) {
                 this.hostCtrl.addOrUpdate(obj);
-            } else if (dataObj.target === 'container_total_util') { // Query E
+            } else if (dataObj.target === 'container_total_util') {
                 let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
                 this.costCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
-            } else if (dataObj.target.startsWith('waste_container_total')) { // Query G (needs to be before Query F)
+            } else if (dataObj.target.startsWith('waste_container_total')) {
                 this.wasteTotalCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
-            } else if (dataObj.target.startsWith('waste_container')) { // Query F
+            } else if (dataObj.target.startsWith('waste_container')) {
                 this.wasteCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
-            } else if (dataObj.target === 'container_network_receive_bytes_total') { // Query H
+            } else if (dataObj.target.startsWith('container_network_receive_bytes_total')) {
                 let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
-                this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
+                this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0], TRAFFIC_TYPE.RECEIVED);
+            } else if (dataObj.target.startsWith('container_network_transmit_bytes_total')) {
+                let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
+                this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0], TRAFFIC_TYPE.TRANSMITTED);
             } else {
                 console.log('Can not parse dataObj: ');
                 console.log(dataObj);
@@ -250,6 +253,11 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     edges: this.edgesCtrl.getList(),
                     nodes: this.containerCtrl.getNodes()
                 };
+            case Modes.CONTAINERS_TRAFFIC:
+                return {
+                    edges: this.edgesCtrl.getList(),
+                    nodes: this.containerCtrl.getNodesWithTraffic(this.trafficCtrl)
+                };
             case Modes.GROUPED:
                 return {
                     edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
@@ -321,6 +329,12 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     'grouped per host (based on its external IP), and based on the docker images that are used ' +
                     'inside this host. The edges represent the total amount of data that has been send from a ' +
                     'certain container to another container.';
+            case Modes.CONTAINERS_TRAFFIC:
+                return 'The graph presented below shows all the containers that are deployed. The containers are ' +
+                    'grouped per host (based on its external IP), and based on the docker images that are used ' +
+                    'inside this host. The edges represent the total amount of data that has been send from a ' +
+                    'certain container to another container. Each node also shows the total amount of data that ' +
+                    'this container has received within the time frame set above.';
             case Modes.GROUPED:
                 return 'The graph presented below groups related containers together. The groups are defined in the ' +
                     'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, you ' +

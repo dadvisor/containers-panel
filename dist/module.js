@@ -37949,6 +37949,8 @@ exports.ContainerCtrl = undefined;
 
 var _util = __webpack_require__(/*! ../util */ "./util.ts");
 
+var _traffic_ctrl = __webpack_require__(/*! ./traffic_ctrl */ "./dataControllers/traffic_ctrl.ts");
+
 var ContainerCtrl =
 /** @class */
 function () {
@@ -38002,6 +38004,44 @@ function () {
       nodes.push({
         id: container['hash'],
         name: container['names'],
+        parent: container['host'] + '-' + container['image']
+      });
+    }
+
+    hostSet.forEach(function (host) {
+      nodes.push({
+        id: host,
+        name: host
+      });
+    });
+    imageSet.forEach(function (image) {
+      nodes.push({
+        id: image,
+        name: image.substr(image.indexOf('-') + 1),
+        parent: image.substr(0, image.indexOf('-'))
+      });
+    });
+    return nodes.map(function (item) {
+      return {
+        data: item
+      };
+    });
+  };
+
+  ContainerCtrl.prototype.getNodesWithTraffic = function (trafficCtrl) {
+    var nodes = [];
+    var hostSet = new Set();
+    var imageSet = new Set();
+
+    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
+      var container = _a[_i];
+      hostSet.add(container['host']);
+      imageSet.add(container['host'] + '-' + container['image']);
+      var received = (0, _util.bytesToSize)(trafficCtrl.getValue(container['hash'], _traffic_ctrl.TRAFFIC_TYPE.RECEIVED));
+      var transmitted = (0, _util.bytesToSize)(trafficCtrl.getValue(container['hash'], _traffic_ctrl.TRAFFIC_TYPE.TRANSMITTED));
+      nodes.push({
+        id: container['hash'],
+        name: container['names'] + '\nin: ' + received + ', out: ' + transmitted,
         parent: container['host'] + '-' + container['image']
       });
     }
@@ -38670,27 +38710,62 @@ Object.defineProperty(exports, "__esModule", {
 /**
  * Class for storing the total cost of a container.
  */
+var TRAFFIC_TYPE = exports.TRAFFIC_TYPE = undefined;
+
+(function (TRAFFIC_TYPE) {
+  TRAFFIC_TYPE[TRAFFIC_TYPE["RECEIVED"] = 0] = "RECEIVED";
+  TRAFFIC_TYPE[TRAFFIC_TYPE["TRANSMITTED"] = 1] = "TRANSMITTED";
+})(TRAFFIC_TYPE || (exports.TRAFFIC_TYPE = TRAFFIC_TYPE = {}));
+
 var TrafficCtrl =
 /** @class */
 function () {
   function TrafficCtrl() {
-    this.data = {};
+    this.dataReceived = {};
+    this.dataTransmitted = {};
   }
 
-  TrafficCtrl.prototype.addOrUpdate = function (id, value) {
-    this.data[id] = value;
+  TrafficCtrl.prototype.addOrUpdate = function (id, value, type) {
+    switch (type) {
+      case TRAFFIC_TYPE.RECEIVED:
+        this.dataReceived[id] = value;
+        return;
+
+      case TRAFFIC_TYPE.TRANSMITTED:
+        this.dataTransmitted[id] = value;
+        return;
+
+      default:
+        console.log('Unknown type: ' + type);
+    }
   };
 
-  TrafficCtrl.prototype.getValue = function (id) {
-    if (this.data[id] !== undefined) {
-      return this.data[id];
+  TrafficCtrl.prototype.getValue = function (id, type) {
+    switch (type) {
+      case TRAFFIC_TYPE.RECEIVED:
+        if (this.dataReceived[id] !== undefined) {
+          return this.dataReceived[id];
+        }
+
+        return 0;
+
+      case TRAFFIC_TYPE.TRANSMITTED:
+        if (this.dataTransmitted[id] !== undefined) {
+          return this.dataTransmitted[id];
+        }
+
+        return 0;
+
+      default:
+        console.log('Unknown type: ' + type);
     }
 
     return 0;
   };
 
   TrafficCtrl.prototype.reset = function () {
-    this.data = {};
+    this.dataReceived = {};
+    this.dataTransmitted = {};
   };
 
   return TrafficCtrl;
@@ -39133,39 +39208,35 @@ function (_super) {
       var obj = (0, _util.decode)(dataObj.target);
 
       if (dataObj.target.startsWith("docker_container_info")) {
-        // Query A
         this.containerCtrl.addOrUpdate(obj['hash'], obj, this.mapping);
       } else if (dataObj.target.startsWith("bytes_send_total")) {
-        // Query B
         var newObj = {};
         newObj['source'] = obj['src'].substr('id_'.length);
         newObj['target'] = obj['dst'].substr('id_'.length);
         newObj['bytes'] = dataObj.datapoints[0][0];
         this.edgesCtrl.addOrUpdate(newObj);
       } else if (dataObj.target === 'container_utilization') {
-        // Query C
         var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
 
         this.utilizationCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
       } else if (dataObj.target.startsWith('default_host_price_info')) {
-        // Query D
         this.hostCtrl.addOrUpdate(obj);
       } else if (dataObj.target === 'container_total_util') {
-        // Query E
         var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
 
         this.costCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
       } else if (dataObj.target.startsWith('waste_container_total')) {
-        // Query G (needs to be before Query F)
         this.wasteTotalCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
       } else if (dataObj.target.startsWith('waste_container')) {
-        // Query F
         this.wasteCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
-      } else if (dataObj.target === 'container_network_receive_bytes_total') {
-        // Query H
+      } else if (dataObj.target.startsWith('container_network_receive_bytes_total')) {
         var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
 
-        this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
+        this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0], _traffic_ctrl.TRAFFIC_TYPE.RECEIVED);
+      } else if (dataObj.target.startsWith('container_network_transmit_bytes_total')) {
+        var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
+
+        this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0], _traffic_ctrl.TRAFFIC_TYPE.TRANSMITTED);
       } else {
         console.log('Can not parse dataObj: ');
         console.log(dataObj);
@@ -39303,6 +39374,12 @@ function (_super) {
           nodes: this.containerCtrl.getNodes()
         };
 
+      case _util.Modes.CONTAINERS_TRAFFIC:
+        return {
+          edges: this.edgesCtrl.getList(),
+          nodes: this.containerCtrl.getNodesWithTraffic(this.trafficCtrl)
+        };
+
       case _util.Modes.GROUPED:
         return {
           edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
@@ -39383,6 +39460,9 @@ function (_super) {
     switch (this.panel.mode) {
       case _util.Modes.CONTAINERS:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP), and based on the docker images that are used ' + 'inside this host. The edges represent the total amount of data that has been send from a ' + 'certain container to another container.';
+
+      case _util.Modes.CONTAINERS_TRAFFIC:
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP), and based on the docker images that are used ' + 'inside this host. The edges represent the total amount of data that has been send from a ' + 'certain container to another container. Each node also shows the total amount of data that ' + 'this container has received within the time frame set above.';
 
       case _util.Modes.GROUPED:
         return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, you ' + 'can find out which groups are interacting with each other. This provides a higher hierarchy of ' + 'the deployed system.';
@@ -39473,6 +39553,7 @@ var Modes = exports.Modes = undefined;
 
 (function (Modes) {
   Modes["CONTAINERS"] = "Containers";
+  Modes["CONTAINERS_TRAFFIC"] = "Containers with traffic";
   Modes["GROUPED"] = "Grouped";
   Modes["UTILIZATION"] = "Utilization (last hour average)";
   Modes["RELATIVE_UTILIZATION"] = "Relative Utilization (last hour average)";
@@ -39489,7 +39570,8 @@ var Modes = exports.Modes = undefined;
 var TIME_WINDOW = exports.TIME_WINDOW = undefined;
 
 (function (TIME_WINDOW) {
-  TIME_WINDOW["TEN_M"] = "10m";
+  TIME_WINDOW["MIN"] = "1m";
+  TIME_WINDOW["TEN_MIN"] = "10m";
   TIME_WINDOW["HOUR"] = "1h";
   TIME_WINDOW["DAY"] = "1d";
   TIME_WINDOW["YEAR"] = "1y";

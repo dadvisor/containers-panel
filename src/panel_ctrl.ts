@@ -2,9 +2,10 @@ import {MetricsPanelCtrl} from 'grafana/app/plugins/sdk';
 import './css/main.css';
 import cytoscape from 'cytoscape';
 import cola from 'cytoscape-cola';
+import dagre from 'cytoscape-dagre';
 import _ from "lodash";
 import Mapping from "./mapping";
-import {decode, getStyle, Modes, NameImage, TIME_WINDOW} from "./util";
+import {getStyle, Modes, NameImage, TIME_WINDOW} from "./util";
 import {EdgesCtrl} from "./dataControllers/edges_ctrl";
 import {ContainerCtrl} from "./dataControllers/container_ctrl";
 import {UtilizationCtrl} from "./dataControllers/utilization_ctrl";
@@ -15,6 +16,7 @@ import {WasteTotalCtrl} from "./dataControllers/waste_total_ctrl";
 import {TRAFFIC_TYPE, TrafficCtrl} from "./dataControllers/traffic_ctrl";
 
 cytoscape.use(cola);
+cytoscape.use(dagre);
 
 export class PanelCtrl extends MetricsPanelCtrl {
     static templateUrl = './partials/module.html';
@@ -28,7 +30,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
     public costCtrl = new CostCtrl();
     public trafficCtrl = new TrafficCtrl();
     private cy;
-    private firstRendering = 0;
 
     public mapping: Mapping;
     public graph_height = this.height;
@@ -148,10 +149,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
         this.computeTotalCostAndWaste();
 
         this.setDashboardVar('TIME_WINDOW', this.panel.timeWindow);
-
-        if (this.firstRendering == 0) {
-            this.render();
-        }
     }
 
     private setDashboardVar(varName: string, value: string) {
@@ -188,39 +185,30 @@ export class PanelCtrl extends MetricsPanelCtrl {
         let data = this.getData();
         PanelCtrl.validateData(data);
 
+        let layout = {
+            name: this.panel.layoutType,
+            padding: 30,
+            animate: false,
+            nodeSpacing: function (node) {
+                return 40;
+            },
+            avoidOverlap: true,
+            fit: true
+        };
+
         if (this.cy !== undefined) {
             this.cy.elements().remove();
             this.cy.add(data);
             this.cy.resize();
-            this.cy.layout({
-                name: this.panel.layoutType,
-                padding: 30,
-                animate: false,
-                nodeSpacing: function (node) {
-                    return 40;
-                },
-                avoidOverlap: true,
-                fit: true
-            }).run();
-
+            this.cy.layout(layout).run();
             this.cy.style(getStyle(this.panel));
         } else {
             this.cy = cytoscape({
                 container: panel,
                 style: getStyle(this.panel),
                 elements: data,
-                layout: {
-                    name: this.panel.layoutType,
-                    padding: 30,
-                    animate: false,
-                    nodeSpacing: function (node) {
-                        return 40;
-                    },
-                    avoidOverlap: true,
-                    fit: true
-                }
+                layout: layout
             });
-            this.firstRendering = 1;
         }
     };
 
@@ -328,7 +316,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     /**
      * Returns a graph description, based on the current visualization mode.
      */
-    public description() {
+    public description(): string {
         switch (this.panel.mode) {
             case Modes.CONTAINERS:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +

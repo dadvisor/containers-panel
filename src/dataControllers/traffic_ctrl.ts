@@ -41,9 +41,4 @@ export class TrafficCtrl {
         }
         return 0;
     }
-
-    public reset() {
-        this.dataReceived = {};
-        this.dataTransmitted = {};
-    }
 }

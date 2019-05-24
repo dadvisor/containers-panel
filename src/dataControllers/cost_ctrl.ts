@@ -15,8 +15,4 @@ export class CostCtrl {
         }
         return 0;
     }
-
-    public reset() {
-        this.data = {};
-    }
 }

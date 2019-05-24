@@ -16,8 +16,4 @@ export class UtilizationCtrl {
         }
         return 0;
     }
-
-    public reset() {
-        this.data = {};
-    }
 }

@@ -15,8 +15,4 @@ export class WasteCtrl {
         }
         return 0;
     }
-
-    public reset() {
-        this.data = {};
-    }
 }

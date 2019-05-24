@@ -36,25 +36,6 @@ export function add_width(edges: Object[]) {
     return edges;
 }
 
-/**
- * @param str: example string: id_1234{src="dkdkd", dst="dkdkd} (and possible more key-values)
- * @return An object with properties src and dst (including all key-values)
- */
-export function decode(str: string) {
-    str = str.substr(str.indexOf('{') + 1);
-    str = str.substr(0, str.length - 1);
-
-    let obj = {};
-
-    for (let keyValue of str.split(",")) {
-        let key = keyValue.substr(0, keyValue.indexOf('='));
-        let value = keyValue.substr(keyValue.indexOf('=') + 1);
-        value = value.substr(1, value.length - 2);
-        obj[key] = value;
-    }
-    return obj;
-}
-
 export function bytesToSize(bytes: number) {
     let sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     if (bytes === 0) return '0 Byte';

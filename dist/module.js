@@ -39089,6 +39089,7 @@ function (_super) {
       layoutType: 'grid',
       timeWindow: _util.TIME_WINDOW.HOUR
     };
+    console.log(panelDefaults.targets);
     _this.mapping = new _mapping2.default(_this);
 
     _this.events.on('init-edit-mode', _this.onInitEditMode.bind(_this));
@@ -39173,9 +39174,21 @@ function (_super) {
 
     this.containerCtrl.stopUpdate();
     this.computeTotalCostAndWaste();
+    this.setDashboardVar('TIME_WINDOW', this.panel.timeWindow);
 
     if (this.firstRendering == 0) {
       this.render();
+    }
+  };
+
+  PanelCtrl.prototype.setDashboardVar = function (varName, value) {
+    var dashboardVar = this.templateSrv.variables.find(function (v) {
+      return v.name === varName;
+    });
+
+    if (dashboardVar) {
+      dashboardVar.current.text = value;
+      dashboardVar.current.value = value;
     }
   };
 
@@ -39189,23 +39202,8 @@ function (_super) {
       totalCost += this.costCtrl.getValue(container['hash']) * this.hostCtrl.getPrice(container['host']);
     }
 
-    var variableCost = this.templateSrv.variables.find(function (v) {
-      return v.name === 'TOTAL_COST';
-    });
-
-    if (variableCost) {
-      variableCost.current.text = totalCost.toFixed(2);
-      variableCost.current.value = totalCost.toFixed(2);
-    }
-
-    var variableWaste = this.templateSrv.variables.find(function (v) {
-      return v.name === 'TOTAL_WASTE';
-    });
-
-    if (variableWaste) {
-      variableWaste.current.text = totalWaste.toFixed(2);
-      variableWaste.current.value = totalWaste.toFixed(2);
-    }
+    this.setDashboardVar('TOTAL_COST', totalCost.toFixed(2));
+    this.setDashboardVar('TOTAL_WASTE', totalWaste.toFixed(2));
   };
   /**
    * Main method for the panel controller. This updates the graph with the new data.

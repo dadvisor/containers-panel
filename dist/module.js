@@ -39135,21 +39135,26 @@ function (_super) {
       targets: _this.getTargets([{
         expr: "docker_container_info{stopped=\"\"}"
       }, {
-        expr: "delta(bytes_send_total[$TIME_WINDOW])"
+        expr: "delta(bytes_send_total[$TIME_WINDOW])",
+        legendFormat: 'bytes_send'
       }, {
         expr: "avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h])",
-        "legendFormat": "container_utilization"
+        legendFormat: "container_utilization"
       }, {
         expr: "default_host_price_info"
       }, {
         expr: "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h]) [1y:1h])",
         "legendFormat": "container_total_util"
       }, {
-        expr: "{__name__=~\"waste_container(_total|)\"}"
+        expr: "waste_container"
       }, {
-        expr: "delta(container_network_transmit_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])"
+        expr: "waste_container_total"
       }, {
-        expr: "delta(container_network_receive_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])"
+        expr: "delta(container_network_transmit_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])",
+        legendFormat: 'container_transmit'
+      }, {
+        expr: "delta(container_network_receive_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])",
+        legendFormat: 'container_receive'
       }]),
       ruleMappings: [],
       cpuPriceHour: 0.021925,
@@ -39164,7 +39169,6 @@ function (_super) {
       layoutType: 'grid',
       timeWindow: _util.TIME_WINDOW.HOUR
     };
-    console.log(panelDefaults.targets);
     _this.mapping = new _mapping2.default(_this);
 
     _this.events.on('init-edit-mode', _this.onInitEditMode.bind(_this));
@@ -39209,7 +39213,7 @@ function (_super) {
 
       if (dataObj.target.startsWith("docker_container_info")) {
         this.containerCtrl.addOrUpdate(obj['hash'], obj, this.mapping);
-      } else if (dataObj.target.startsWith("bytes_send_total")) {
+      } else if (dataObj.target.startsWith("bytes_send")) {
         var newObj = {};
         newObj['source'] = obj['src'].substr('id_'.length);
         newObj['target'] = obj['dst'].substr('id_'.length);
@@ -39229,11 +39233,11 @@ function (_super) {
         this.wasteTotalCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
       } else if (dataObj.target.startsWith('waste_container')) {
         this.wasteCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
-      } else if (dataObj.target.startsWith('container_network_receive_bytes_total')) {
+      } else if (dataObj.target.startsWith('container_receive')) {
         var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
 
         this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0], _traffic_ctrl.TRAFFIC_TYPE.RECEIVED);
-      } else if (dataObj.target.startsWith('container_network_transmit_bytes_total')) {
+      } else if (dataObj.target.startsWith('container_transmit')) {
         var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
 
         this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0], _traffic_ctrl.TRAFFIC_TYPE.TRANSMITTED);
@@ -39337,7 +39341,6 @@ function (_super) {
     if (header !== undefined && header.height() !== undefined) {
       // @ts-ignore
       this.graph_height = this.height - header.height();
-      console.log('Updated graph_height to: ' + this.graph_height);
     }
   };
 

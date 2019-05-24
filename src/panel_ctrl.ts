@@ -42,19 +42,26 @@ export class PanelCtrl extends MetricsPanelCtrl {
             datasource: 'Prometheus',
             targets: this.getTargets([
                 {expr: "docker_container_info{stopped=\"\"}"},
-                {expr: "delta(bytes_send_total[$TIME_WINDOW])"},
+                {expr: "delta(bytes_send_total[$TIME_WINDOW])", legendFormat: 'bytes_send'},
                 {
                     expr: "avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h])",
-                    "legendFormat": "container_utilization"
+                    legendFormat: "container_utilization"
                 },
                 {expr: "default_host_price_info"},
                 {
                     expr: "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h]) [1y:1h])",
                     "legendFormat": "container_total_util"
                 },
-                {expr: "{__name__=~\"waste_container(_total|)\"}"},
-                {expr: "delta(container_network_transmit_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])"},
-                {expr: "delta(container_network_receive_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])"},
+                {expr: "waste_container"},
+                {expr: "waste_container_total"},
+                {
+                    expr: "delta(container_network_transmit_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])",
+                    legendFormat: 'container_transmit'
+                },
+                {
+                    expr: "delta(container_network_receive_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])",
+                    legendFormat: 'container_receive'
+                },
             ]),
             ruleMappings: [],
             cpuPriceHour: 0.021925,
@@ -69,8 +76,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
             layoutType: 'grid',
             timeWindow: TIME_WINDOW.HOUR,
         };
-        console.log(panelDefaults.targets);
-
         this.mapping = new Mapping(this);
 
         this.events.on('init-edit-mode', this.onInitEditMode.bind(this));
@@ -107,7 +112,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             let obj = decode(dataObj.target);
             if (dataObj.target.startsWith("docker_container_info")) {
                 this.containerCtrl.addOrUpdate(obj['hash'], obj, this.mapping);
-            } else if (dataObj.target.startsWith("bytes_send_total")) {
+            } else if (dataObj.target.startsWith("bytes_send")) {
                 let newObj = {};
                 newObj['source'] = obj['src'].substr('id_'.length);
                 newObj['target'] = obj['dst'].substr('id_'.length);
@@ -125,10 +130,10 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 this.wasteTotalCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
             } else if (dataObj.target.startsWith('waste_container')) {
                 this.wasteCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
-            } else if (dataObj.target.startsWith('container_network_receive_bytes_total')) {
+            } else if (dataObj.target.startsWith('container_receive')) {
                 let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
                 this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0], TRAFFIC_TYPE.RECEIVED);
-            } else if (dataObj.target.startsWith('container_network_transmit_bytes_total')) {
+            } else if (dataObj.target.startsWith('container_transmit')) {
                 let id = dataObj.labels.id.substr('/docker/'.length);  // filter /docker/
                 this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0], TRAFFIC_TYPE.TRANSMITTED);
             } else {
@@ -147,7 +152,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
         }
     }
 
-    private setDashboardVar(varName: string, value: string){
+    private setDashboardVar(varName: string, value: string) {
         const dashboardVar = this.templateSrv.variables.find(v => v.name === varName);
         if (dashboardVar) {
             dashboardVar.current.text = value;
@@ -223,7 +228,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
         if (header !== undefined && header.height() !== undefined) {
             // @ts-ignore
             this.graph_height = this.height - header.height();
-            console.log('Updated graph_height to: ' + this.graph_height);
         }
     }
 

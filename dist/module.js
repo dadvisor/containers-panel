@@ -39057,57 +39057,25 @@ function (_super) {
     _this.graph_height = _this.height;
     var panelDefaults = {
       datasource: 'Prometheus',
-      targets: [{
-        "expr": "docker_container_info{stopped=\"\"}",
-        "format": "time_series",
-        "instant": true,
-        "intervalFactor": 1,
-        "refId": "A"
+      targets: _this.getTargets([{
+        expr: "docker_container_info{stopped=\"\"}"
       }, {
-        "expr": "bytes_send_total",
-        "format": "time_series",
-        "instant": true,
-        "intervalFactor": 1,
-        "refId": "B"
+        expr: "delta(bytes_send_total[$TIME_WINDOW])"
       }, {
-        "expr": "avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h])",
-        "format": "time_series",
-        "instant": true,
-        "intervalFactor": 1,
-        "legendFormat": "container_utilization",
-        "refId": "C"
+        expr: "avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h])",
+        "legendFormat": "container_utilization"
       }, {
-        "expr": "default_host_price_info",
-        "format": "time_series",
-        "instant": true,
-        "intervalFactor": 1,
-        "refId": "D"
+        expr: "default_host_price_info"
       }, {
-        "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h]) [1y:1h])",
-        "format": "time_series",
-        "instant": true,
-        "intervalFactor": 1,
-        "legendFormat": "container_total_util",
-        "refId": "E"
+        expr: "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h]) [1y:1h])",
+        "legendFormat": "container_total_util"
       }, {
-        "expr": "waste_container",
-        "format": "time_series",
-        "instant": true,
-        "intervalFactor": 1,
-        "refId": "F"
+        expr: "{__name__=~\"waste_container(_total|)\"}"
       }, {
-        "expr": "waste_container_total",
-        "format": "time_series",
-        "instant": true,
-        "intervalFactor": 1,
-        "refId": "G"
+        expr: "delta(container_network_transmit_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])"
       }, {
-        "expr": "container_network_receive_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}",
-        "format": "time_series",
-        "instant": true,
-        "intervalFactor": 1,
-        "refId": "H"
-      }],
+        expr: "delta(container_network_receive_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])"
+      }]),
       ruleMappings: [],
       cpuPriceHour: 0.021925,
       gbPriceHour: 0.002938,
@@ -39118,7 +39086,8 @@ function (_super) {
       colorEdge: '#9fbfdf',
       colorText: '#d9d9d9',
       colorNodeBorder: '#808080',
-      layoutType: 'grid'
+      layoutType: 'grid',
+      timeWindow: _util.TIME_WINDOW.HOUR
     };
     _this.mapping = new _mapping2.default(_this);
 
@@ -39254,7 +39223,6 @@ function (_super) {
 
     var data = this.getData();
     PanelCtrl.validateData(data);
-    console.log(data);
 
     if (this.cy !== undefined) {
       this.cy.elements().remove();
@@ -39455,6 +39423,20 @@ function (_super) {
         console.log('Something went wrong');
         return '';
     }
+  };
+
+  PanelCtrl.prototype.getTargets = function (queries) {
+    var alphabet = new Array(queries.length).fill(1).map(function (_, i) {
+      return String.fromCharCode(i + 'A'.charCodeAt(0));
+    });
+    return queries.map(function (obj, i) {
+      return _lodash2.default.defaults(obj, {
+        "format": "time_series",
+        "instant": true,
+        "intervalFactor": 1,
+        "refId": alphabet[i]
+      });
+    });
   };
 
   PanelCtrl.templateUrl = './partials/module.html';

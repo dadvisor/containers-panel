@@ -37,68 +37,25 @@ export class PanelCtrl extends MetricsPanelCtrl {
     constructor($scope, $injector) {
         super($scope, $injector);
 
+
         let panelDefaults = {
             datasource: 'Prometheus',
-            targets: [
+            targets: this.getTargets([
+                {expr: "docker_container_info{stopped=\"\"}"},
+                {expr: "delta(bytes_send_total[$TIME_WINDOW])"},
                 {
-                    "expr": "docker_container_info{stopped=\"\"}",
-                    "format": "time_series",
-                    "instant": true,
-                    "intervalFactor": 1,
-                    "refId": "A"
+                    expr: "avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h])",
+                    "legendFormat": "container_utilization"
                 },
+                {expr: "default_host_price_info"},
                 {
-                    "expr": "bytes_send_total",
-                    "format": "time_series",
-                    "instant": true,
-                    "intervalFactor": 1,
-                    "refId": "B"
+                    expr: "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h]) [1y:1h])",
+                    "legendFormat": "container_total_util"
                 },
-                {
-                    "expr": "avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h])",
-                    "format": "time_series",
-                    "instant": true,
-                    "intervalFactor": 1,
-                    "legendFormat": "container_utilization",
-                    "refId": "C"
-                },
-                {
-                    "expr": "default_host_price_info",
-                    "format": "time_series",
-                    "instant": true,
-                    "intervalFactor": 1,
-                    "refId": "D"
-                },
-                {
-                    "expr": "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h]) [1y:1h])",
-                    "format": "time_series",
-                    "instant": true,
-                    "intervalFactor": 1,
-                    "legendFormat": "container_total_util",
-                    "refId": "E"
-                },
-                {
-                    "expr": "waste_container",
-                    "format": "time_series",
-                    "instant": true,
-                    "intervalFactor": 1,
-                    "refId": "F"
-                },
-                {
-                    "expr": "waste_container_total",
-                    "format": "time_series",
-                    "instant": true,
-                    "intervalFactor": 1,
-                    "refId": "G"
-                },
-                {
-                    "expr": "container_network_receive_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}",
-                    "format": "time_series",
-                    "instant": true,
-                    "intervalFactor": 1,
-                    "refId": "H"
-                },
-            ],
+                {expr: "{__name__=~\"waste_container(_total|)\"}"},
+                {expr: "delta(container_network_transmit_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])"},
+                {expr: "delta(container_network_receive_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])"},
+            ]),
             ruleMappings: [],
             cpuPriceHour: 0.021925,
             gbPriceHour: 0.002938,
@@ -110,6 +67,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             colorText: '#d9d9d9',
             colorNodeBorder: '#808080',
             layoutType: 'grid',
+            timeWindow: TIME_WINDOW.HOUR,
         };
 
         this.mapping = new Mapping(this);
@@ -131,7 +89,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
         return NameImage;
     }
 
-    public getTimes(){
+    public getTimes() {
         return TIME_WINDOW;
     }
 
@@ -192,13 +150,13 @@ export class PanelCtrl extends MetricsPanelCtrl {
         }
 
         const variableCost = this.templateSrv.variables.find(v => v.name === 'TOTAL_COST');
-        if (variableCost){
+        if (variableCost) {
             variableCost.current.text = totalCost.toFixed(2);
             variableCost.current.value = totalCost.toFixed(2);
         }
 
         const variableWaste = this.templateSrv.variables.find(v => v.name === 'TOTAL_WASTE');
-        if (variableWaste){
+        if (variableWaste) {
             variableWaste.current.text = totalWaste.toFixed(2);
             variableWaste.current.value = totalWaste.toFixed(2);
         }
@@ -217,9 +175,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
         }
 
         let data = this.getData();
-
         PanelCtrl.validateData(data);
-        console.log(data);
 
         if (this.cy !== undefined) {
             this.cy.elements().remove();
@@ -416,5 +372,19 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 console.log('Something went wrong');
                 return '';
         }
+    }
+
+    private getTargets(queries: Object[]) {
+        let alphabet = new Array(queries.length).fill(1).map(
+            (_, i) => String.fromCharCode(i + 'A'.charCodeAt(0)));
+
+        return queries.map((obj, i) => {
+            return _.defaults(obj, {
+                "format": "time_series",
+                "instant": true,
+                "intervalFactor": 1,
+                "refId": alphabet[i]
+            })
+        });
     }
 }

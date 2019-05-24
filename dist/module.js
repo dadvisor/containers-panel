@@ -39211,6 +39211,7 @@ function (_super) {
 
     for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
       var dataObj = dataList_1[_i];
+      console.log(dataObj);
       var obj = (0, _util.decode)(dataObj.target);
 
       if (dataObj.target.startsWith("docker_container_info")) {

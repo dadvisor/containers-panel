@@ -39137,12 +39137,16 @@ function (_super) {
     return _this;
   }
 
-  PanelCtrl.prototype.get_modes = function () {
+  PanelCtrl.prototype.getModes = function () {
     return _util.Modes;
   };
 
   PanelCtrl.prototype.getNameImage = function () {
     return _util.NameImage;
+  };
+
+  PanelCtrl.prototype.getTimes = function () {
+    return _util.TIME_WINDOW;
   };
 
   PanelCtrl.prototype.onInitEditMode = function () {
@@ -39501,6 +39505,15 @@ var Modes = exports.Modes = undefined;
   Modes["WASTE_PREDICTION_GROUPED"] = "Waste prediction grouped (based on last hour average)";
   Modes["WASTE_TOTAL_GROUPED"] = "Total waste grouped";
 })(Modes || (exports.Modes = Modes = {}));
+
+var TIME_WINDOW = exports.TIME_WINDOW = undefined;
+
+(function (TIME_WINDOW) {
+  TIME_WINDOW["TEN_M"] = "10m";
+  TIME_WINDOW["HOUR"] = "1h";
+  TIME_WINDOW["DAY"] = "1d";
+  TIME_WINDOW["YEAR"] = "1y";
+})(TIME_WINDOW || (exports.TIME_WINDOW = TIME_WINDOW = {}));
 
 function add_width(edges) {
   var max_width = Math.max.apply(Math, edges.map(function (r) {

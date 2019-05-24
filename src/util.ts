@@ -18,6 +18,12 @@ export enum Modes {
     WASTE_TOTAL_GROUPED = 'Total waste grouped',
 }
 
+export enum TIME_WINDOW {
+    TEN_M = '10m',
+    HOUR = '1h',
+    DAY = '1d',
+    YEAR = '1y',
+}
 
 export function add_width(edges: Object[]) {
     const max_width = Math.max(...edges.map(r => r['bytes']));

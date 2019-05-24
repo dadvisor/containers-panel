@@ -4,7 +4,12 @@
             <label class="gf-form-label width-10">Visualization mode</label>
             <div class="gf-form-select-wrapper max-width-30">
                 <select class="input-medium gf-form-input" ng-model="ctrl.panel.mode"
-                        ng-options="t for t in ctrl.get_modes()" ng-change="ctrl.render()"></select>
+                        ng-options="t for t in ctrl.getModes()" ng-change="ctrl.render()"></select>
+            </div>
+            <label class="gf-form-label width-10">Time window</label>
+            <div class="gf-form-select-wrapper max-width-10">
+                <select class="input-medium gf-form-input" ng-model="ctrl.panel.timeWindow"
+                        ng-options="t for t in ctrl.getTimes()" ng-change="ctrl.render()"></select>
             </div>
             <button class="gf-form-label" ng-click="ctrl.render()"><i class="fa fa-refresh"></i>
             </button>

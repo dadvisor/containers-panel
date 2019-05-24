@@ -4,7 +4,7 @@ import cytoscape from 'cytoscape';
 import cola from 'cytoscape-cola';
 import _ from "lodash";
 import Mapping from "./mapping";
-import {decode, getStyle, Modes, NameImage} from "./util";
+import {decode, getStyle, Modes, NameImage, TIME_WINDOW} from "./util";
 import {EdgesCtrl} from "./dataControllers/edges_ctrl";
 import {ContainerCtrl} from "./dataControllers/container_ctrl";
 import {UtilizationCtrl} from "./dataControllers/utilization_ctrl";
@@ -123,12 +123,16 @@ export class PanelCtrl extends MetricsPanelCtrl {
         this.updateGraph();
     }
 
-    public get_modes() {
+    public getModes() {
         return Modes;
     }
 
     public getNameImage() {
         return NameImage;
+    }
+
+    public getTimes(){
+        return TIME_WINDOW;
     }
 
     onInitEditMode() {

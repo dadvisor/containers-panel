@@ -67,7 +67,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             ruleMappings: [],
             cpuPriceHour: 0.021925,
             gbPriceHour: 0.002938,
-            interval: 'null',
+            interval: '1m',
             valueName: 'current',
             mode: Modes.CONTAINERS,
             colorNodeBackground: '#ffffff',

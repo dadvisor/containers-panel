@@ -110,8 +110,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
         this.containerCtrl.startUpdate();
 
         for (let dataObj of dataList) {
-            console.log(dataObj);
-            let obj = decode(dataObj.target);
+            // console.log(dataObj);
+            let obj = dataObj.labels;
             if (dataObj.target.startsWith("docker_container_info")) {
                 this.containerCtrl.addOrUpdate(obj['hash'], obj, this.mapping);
             } else if (dataObj.target.startsWith("bytes_send")) {

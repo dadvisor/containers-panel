@@ -39210,9 +39210,9 @@ function (_super) {
     this.containerCtrl.startUpdate();
 
     for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
-      var dataObj = dataList_1[_i];
-      console.log(dataObj);
-      var obj = (0, _util.decode)(dataObj.target);
+      var dataObj = dataList_1[_i]; // console.log(dataObj);
+
+      var obj = dataObj.labels;
 
       if (dataObj.target.startsWith("docker_container_info")) {
         this.containerCtrl.addOrUpdate(obj['hash'], obj, this.mapping);

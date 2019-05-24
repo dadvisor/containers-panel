@@ -39179,6 +39179,8 @@ function (_super) {
 
     _this.events.on('render', _this.updateGraph.bind(_this));
 
+    console.log(panelDefaults.targets);
+
     _lodash2.default.defaults(_this.panel, panelDefaults);
 
     _this.updateGraph();

@@ -83,6 +83,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
         this.events.on('data-received', this.onDataReceived.bind(this));
         this.events.on('render', this.updateGraph.bind(this));
 
+        console.log(panelDefaults.targets);
         _.defaults(this.panel, panelDefaults);
         this.updateGraph();
     }

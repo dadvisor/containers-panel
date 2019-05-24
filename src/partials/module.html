@@ -11,7 +11,7 @@
                 <select class="input-medium gf-form-input" ng-model="ctrl.panel.timeWindow"
                         ng-options="t for t in ctrl.getTimes()" ng-change="ctrl.render()"></select>
             </div>
-            <button class="gf-form-label" ng-click="ctrl.render()"><i class="fa fa-refresh"></i>
+            <button class="gf-form-label" ng-click="ctrl.refresh()"><i class="fa fa-refresh"></i>
             </button>
         </div>
         <div class="gf-form">

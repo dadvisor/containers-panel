@@ -60394,6 +60394,7 @@ function (_super) {
 
     var data = this.getData();
     PanelCtrl.validateData(data);
+    console.log(data);
     var layout = {
       name: this.panel.layoutType,
       padding: 30,

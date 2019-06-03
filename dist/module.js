@@ -60453,6 +60453,7 @@ function (_super) {
       }
 
       if (edge['data']['bytes'] === 0 || !sourceIncluded || !targetIncluded) {
+        console.log(edge['data']);
         data.edges.splice(data.edges.indexOf(edge), 1);
       }
     }

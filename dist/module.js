@@ -59684,12 +59684,9 @@ function () {
     var edges = (0, _util.add_width)(Object.keys(this.data).map(function (key) {
       return _this.data[key];
     }));
-    console.log(edges);
-    console.log('* * * ');
     edges = edges.filter(function (obj) {
       return obj['bytes'] >= 1;
     });
-    console.log(edges);
     return edges.map(function (item) {
       return {
         data: item
@@ -60399,10 +60396,7 @@ function (_super) {
     }
 
     var data = this.getData();
-    console.log(data);
     PanelCtrl.validateData(data);
-    console.log(data);
-    console.log('- - - - - - - - ');
     var layout = {
       name: this.panel.layoutType,
       padding: 30,

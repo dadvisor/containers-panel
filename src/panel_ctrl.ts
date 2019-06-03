@@ -183,10 +183,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
         }
 
         let data = this.getData();
-        console.log(data);
         PanelCtrl.validateData(data);
-        console.log(data);
-        console.log('- - - - - - - - ');
 
         let layout = {
             name: this.panel.layoutType,

@@ -60393,8 +60393,10 @@ function (_super) {
     }
 
     var data = this.getData();
+    console.log(data);
     PanelCtrl.validateData(data);
     console.log(data);
+    console.log('- - - - - - - - ');
     var layout = {
       name: this.panel.layoutType,
       padding: 30,

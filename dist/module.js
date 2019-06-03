@@ -59686,8 +59686,8 @@ function () {
     }));
     console.log(edges);
     console.log('* * * ');
-    edges = edges.filter(function (key) {
-      return _this.data[key]['bytes'] === 0;
+    edges = edges.filter(function (obj) {
+      return obj['bytes'] === 0;
     });
     return edges.map(function (item) {
       return {

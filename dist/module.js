@@ -59684,6 +59684,9 @@ function () {
     var edges = (0, _util.add_width)(Object.keys(this.data).map(function (key) {
       return _this.data[key];
     }));
+    edges = edges.filter(function (obj) {
+      return obj['bytes'] === 0;
+    });
     return edges.map(function (item) {
       return {
         data: item
@@ -60456,7 +60459,6 @@ function (_super) {
       }
 
       if (edge['data']['bytes'] === 0 || !sourceIncluded || !targetIncluded) {
-        console.log(edge['data']);
         data.edges.splice(data.edges.indexOf(edge), 1);
       }
     }

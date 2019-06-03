@@ -60452,7 +60452,7 @@ function (_super) {
         }
       }
 
-      if (!sourceIncluded || !targetIncluded) {
+      if (edge['data']['bytes'] < 0.5 || !sourceIncluded || !targetIncluded) {
         data.edges.splice(data.edges.indexOf(edge), 1);
       }
     }

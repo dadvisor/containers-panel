@@ -234,7 +234,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     targetIncluded = true;
                 }
             }
-            if (!sourceIncluded || !targetIncluded) {
+            if (edge['data']['bytes'] < 0.5 || !sourceIncluded || !targetIncluded) {
                 data.edges.splice(data.edges.indexOf(edge), 1);
             }
         }

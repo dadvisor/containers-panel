@@ -10,7 +10,9 @@ export class EdgesCtrl {
 
     public getList(){
         let edges = add_width(Object.keys(this.data).map(key => this.data[key]));
-        edges = edges.filter(obj => obj['bytes'] === 0);
+        console.log(edges);
+        console.log('* * * ');
+        edges = edges.filter(key => this.data[key]['bytes'] === 0);
         return edges.map(item => {
             return {data: item}
         });

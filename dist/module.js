@@ -60452,6 +60452,8 @@ function (_super) {
         }
       }
 
+      console.log(edge['data']);
+
       if (edge['data']['bytes'] < 0.5 || !sourceIncluded || !targetIncluded) {
         data.edges.splice(data.edges.indexOf(edge), 1);
       }

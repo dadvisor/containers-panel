@@ -13,6 +13,7 @@ export class EdgesCtrl {
         console.log(edges);
         console.log('* * * ');
         edges = edges.filter(obj => obj['bytes'] === 0);
+        console.log(edges);
         return edges.map(item => {
             return {data: item}
         });

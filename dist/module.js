@@ -59689,6 +59689,7 @@ function () {
     edges = edges.filter(function (obj) {
       return obj['bytes'] === 0;
     });
+    console.log(edges);
     return edges.map(function (item) {
       return {
         data: item

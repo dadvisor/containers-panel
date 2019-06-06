@@ -117,8 +117,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 this.containerCtrl.addOrUpdate(obj['hash'], obj, this.mapping);
             } else if (dataObj.target.startsWith("bytes_send")) {
                 let newObj = {};
-                newObj['source'] = obj['src'].substr('id_'.length);
-                newObj['target'] = obj['dst'].substr('id_'.length);
+                newObj['source'] = obj['src'];
+                newObj['target'] = obj['dst'];
                 newObj['bytes'] = dataObj.datapoints[0][0];
                 this.edgesCtrl.addOrUpdate(newObj);
             } else if (dataObj.target === 'container_utilization') {

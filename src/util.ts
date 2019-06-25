@@ -1,46 +1,57 @@
-export enum NameImage {
-    NAME = 'Name',
-    IMAGE = 'Image'
-}
+import {GraphEdge} from "./model/graphEdge";
+import {GraphNode} from "./model/graphNode";
 
 export enum Modes {
+    NODES = 'Nodes',
     CONTAINERS = 'Containers',
     CONTAINERS_TRAFFIC = 'Containers with traffic',
     GROUPED = 'Grouped',
-    UTILIZATION = 'Utilization (last hour average)',
-    RELATIVE_UTILIZATION = 'Relative Utilization (last hour average)',
-    COST_PREDICTION = 'Cost prediction (based on last hour average)',
-    COST_PREDICTION_GROUPED = 'Cost prediction grouped (based on last hour average)',
-    COST_TOTAL_GROUPED = 'Total cost grouped',
-    WASTE = 'Waste distribution (last hour average)',
-    RELATIVE_WASTE = 'Relative Waste distribution',
-    WASTE_PREDICTION = 'Waste prediction (based on last hour average)',
-    WASTE_PREDICTION_GROUPED = 'Waste prediction grouped (based on last hour average)',
-    WASTE_TOTAL_GROUPED = 'Total waste grouped',
+    CPU_UTILIZATION = 'CPU Utilization',
+    MEM_UTILIZATION = 'Memory Utilization',
+    COST = 'Cost',
+    COST_GROUPED = 'Cost grouped',
+    CPU_WASTE = 'CPU Waste distribution',
+    MEM_WASTE = 'Memory Waste distribution',
+    WASTE_COST = 'Waste Cost',
+    WASTE_COST_GROUPED = 'Waste Cost grouped',
 }
 
 export enum TIME_WINDOW {
-    MIN = '1m',
     TEN_MIN = '10m',
     HOUR = '1h',
     DAY = '1d',
     YEAR = '1y',
 }
 
-export function add_width(edges: Object[]) {
-    const max_width = Math.max(...edges.map(r => r['bytes']));
+export function setWidth(edges: GraphEdge[]) {
+    const max_width = Math.max(...edges.map(r => r.bytes));
     for (let edge of edges) {
         let ratio = 10 * edge['bytes'] / max_width;
-        edge['width'] = Math.max(ratio, 1);
+        edge.setWidth(Math.max(ratio, 1));
     }
-    return edges;
+}
+
+/**
+ * Check that all edges have a correct source and target label.
+ */
+export function verifyEdges(edges: GraphEdge[], nodes: GraphNode[]) {
+    let labels = nodes.map(node => node.id);
+    return edges.filter(edge => labels.includes(edge.source) && labels.includes(edge.target) && edge.bytes > 0);
 }
 
 export function bytesToSize(bytes: number) {
-    let sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    if (bytes === 0) return '0 Byte';
+    let sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes === 0) return '0 B';
     let i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${Math.round(bytes / Math.pow(1024, i))} ${sizes[i]}`;
+}
+
+export function formatPrice(price: any) {
+    return '$' + price.toFixed(2);
+}
+
+export function formatPercentage(value: any) {
+    return (100 * value).toFixed(2) + '%';
 }
 
 export function getStyle(panel) {
@@ -87,9 +98,7 @@ export function getStyle(panel) {
                 'target-arrow-color': panel.colorEdge,
                 "text-background-shape": "rectangle",
                 "text-background-color": "#888",
-                'label': function (ele) {
-                    return bytesToSize(parseInt(ele.data('bytes')));
-                },
+                'label': 'data(label)',
             }
         },
         {

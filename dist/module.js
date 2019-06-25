@@ -59021,6 +59021,739 @@ module.exports = function(module) {
 
 /***/ }),
 
+/***/ "./controller/CostWasteCtrl.ts":
+/*!*************************************!*\
+  !*** ./controller/CostWasteCtrl.ts ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getCpuCost = getCpuCost;
+exports.getMemCost = getMemCost;
+exports.getTrafficCost = getTrafficCost;
+exports.getTotalCost = getTotalCost;
+exports.getTotalCostNode = getTotalCostNode;
+exports.getCpuWasteCost = getCpuWasteCost;
+exports.getMemWasteCost = getMemWasteCost;
+exports.getTotalWaste = getTotalWaste;
+exports.getTotalWasteNode = getTotalWasteNode;
+
+/*
+ * COST
+ */
+function getCpuCost(value, panelCtrl, node) {
+  return value * panelCtrl.getCpuPrice() * node.getNumCores();
+}
+
+function getMemCost(value, panelCtrl, node) {
+  return value * panelCtrl.getMemPriceByte() * node.getMemory();
+}
+
+function getTrafficCost(value, panelCtrl) {
+  return value * panelCtrl.getTrafficPriceByte();
+}
+
+function getTotalCost(container, panelCtrl) {
+  var node = panelCtrl.getDataCtrl().getNode(container.getHostIp());
+  return getCpuCost(container.getCpuUtil(), panelCtrl, node) + getMemCost(container.getMemUtil(), panelCtrl, node) + getTrafficCost(container.getNetworkTraffic(), panelCtrl);
+}
+
+function getTotalCostNode(node, panelCtrl) {
+  return getCpuCost(node.getSumCpuUtil(), panelCtrl, node) + getMemCost(node.getSumMemUtil(), panelCtrl, node) + getTrafficCost(node.getSumNetwork(), panelCtrl);
+}
+/*
+ * WASTE
+ */
+
+
+function getCpuWasteCost(value, panelCtrl, node) {
+  return value * panelCtrl.getCpuPrice() * node.getNumCores();
+}
+
+function getMemWasteCost(value, panelCtrl, node) {
+  return value * panelCtrl.getMemPriceByte() * node.getMemory();
+}
+
+function getTotalWaste(container, panelCtrl) {
+  var node = panelCtrl.getDataCtrl().getNode(container.getHostIp());
+  return getCpuWasteCost(container.getCpuWaste(), panelCtrl, node) + getMemWasteCost(container.getMemWaste(), panelCtrl, node);
+}
+
+function getTotalWasteNode(node, panelCtrl) {
+  return getCpuWasteCost(node.getSumCpuWaste(), panelCtrl, node) + getMemWasteCost(node.getSumMemWaste(), panelCtrl, node);
+}
+
+/***/ }),
+
+/***/ "./controller/dataCtrl.ts":
+/*!********************************!*\
+  !*** ./controller/dataCtrl.ts ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.DataCtrl = exports.LegendFormat = undefined;
+
+var _node = __webpack_require__(/*! ../model/node */ "./model/node.ts");
+
+var _lodash = __webpack_require__(/*! lodash */ "lodash");
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _util = __webpack_require__(/*! ../util */ "./util.ts");
+
+var _graphNode = __webpack_require__(/*! ../model/graphNode */ "./model/graphNode.ts");
+
+var _graphEdge = __webpack_require__(/*! ../model/graphEdge */ "./model/graphEdge.ts");
+
+var _globalVarCtrl = __webpack_require__(/*! ./globalVarCtrl */ "./controller/globalVarCtrl.ts");
+
+var _CostWasteCtrl = __webpack_require__(/*! ./CostWasteCtrl */ "./controller/CostWasteCtrl.ts");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var LegendFormat = exports.LegendFormat = undefined;
+
+(function (LegendFormat) {
+  LegendFormat["CONTAINER_INFO"] = "container_info";
+  LegendFormat["CPU_UTIL"] = "cpu_util";
+  LegendFormat["MEM_UTIL"] = "mem_util";
+  LegendFormat["CPU_WASTE"] = "cpu_waste";
+  LegendFormat["MEM_WASTE"] = "mem_waste";
+  LegendFormat["NODE_INFO"] = "node_info";
+  LegendFormat["NETWORK"] = "network";
+  LegendFormat["EDGES"] = "edges";
+  LegendFormat["SUM_CPU_UTIL"] = "sum_cpu_util";
+  LegendFormat["SUM_MEM_UTIL"] = "sum_mem_util";
+  LegendFormat["SUM_CPU_WASTE"] = "sum_cpu_waste";
+  LegendFormat["SUM_MEM_WASTE"] = "sum_mem_waste";
+  LegendFormat["SUM_NETWORK"] = "sum_network";
+})(LegendFormat || (exports.LegendFormat = LegendFormat = {}));
+
+var DataCtrl =
+/** @class */
+function () {
+  function DataCtrl(panelCtrl) {
+    this.nodes = {};
+    this.edges = {};
+    this.containers = {};
+    this.panelCtrl = panelCtrl;
+    this.globalVarCtrl = new _globalVarCtrl.GlobalVarCtrl(this.panelCtrl, this);
+  }
+
+  DataCtrl.prototype.onDataReceived = function (dataList) {
+    var _this = this; // Clear the containers
+
+
+    Object.keys(this.nodes).forEach(function (ip) {
+      return _this.nodes[ip].clearContainers();
+    });
+    this.containers = {};
+
+    for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
+      var dataObj = dataList_1[_i];
+      var labels = dataObj.labels;
+      var node = void 0;
+      var value = dataObj.datapoints[0][0];
+      var container = void 0;
+
+      switch (dataObj.target) {
+        case LegendFormat.CONTAINER_INFO:
+          node = this.getNode(labels.host);
+          container = node.getContainer(labels.hash, this);
+          container.setImage(labels.image);
+          container.setName(labels.names);
+          break;
+
+        case LegendFormat.NODE_INFO:
+          node = this.getNode(labels.host);
+          node.setSuperNode(labels.is_super_node === "True");
+          node.setMemory(labels.memory);
+          node.setNumCores(labels.num_cores);
+          break;
+
+        case LegendFormat.NETWORK:
+          container = this.getContainer(labels.src);
+
+          if (container) {
+            container.setNetworkTraffic(value);
+          }
+
+          break;
+
+        case LegendFormat.CPU_UTIL:
+          container = this.getContainer(labels.src);
+
+          if (container) {
+            container.setCpuUtil(value);
+          }
+
+          break;
+
+        case LegendFormat.MEM_UTIL:
+          container = this.getContainer(labels.src);
+
+          if (container) {
+            container.setMemUtil(value);
+          }
+
+          break;
+
+        case LegendFormat.CPU_WASTE:
+          container = this.getContainer(labels.src);
+
+          if (container) {
+            container.setCpuWaste(value);
+          }
+
+          break;
+
+        case LegendFormat.MEM_WASTE:
+          container = this.getContainer(labels.src);
+
+          if (container) {
+            container.setMemWaste(value);
+          }
+
+          break;
+
+        case LegendFormat.EDGES:
+          this.setEdge(labels.src, labels.dst, value);
+          break;
+
+        case LegendFormat.SUM_CPU_UTIL:
+          node = this.getNode(labels.src_host);
+          node.setSumCpuUtil(value);
+          break;
+
+        case LegendFormat.SUM_MEM_UTIL:
+          node = this.getNode(labels.src_host);
+          node.setSumMemUtil(value);
+          break;
+
+        case LegendFormat.SUM_CPU_WASTE:
+          node = this.getNode(labels.src_host);
+          node.setSumCpuWaste(value);
+          break;
+
+        case LegendFormat.SUM_MEM_WASTE:
+          node = this.getNode(labels.src_host);
+          node.setSumMemWaste(value);
+          break;
+
+        case LegendFormat.SUM_NETWORK:
+          node = this.getNode(labels.src_host);
+          node.setSumNetwork(value);
+          break;
+
+        default:
+          console.log(dataObj);
+      }
+    }
+
+    this.globalVarCtrl.computeVars();
+  };
+
+  DataCtrl.prototype.getData = function (mode) {
+    var _this = this;
+
+    var nodes = [];
+    var edges = [];
+
+    switch (mode) {
+      case _util.Modes.NODES:
+        // show the VM's
+        nodes = this.nodesToGraph();
+        edges = this.getHostEdges();
+        break;
+
+      case _util.Modes.CONTAINERS:
+        // show the containers
+        edges = this.getGraphEdges();
+        nodes = this.getGraphNodes(function (container) {
+          return container.getName();
+        });
+        break;
+
+      case _util.Modes.CONTAINERS_TRAFFIC:
+        // show the containers with traffic
+        edges = this.getGraphEdges();
+        nodes = this.getGraphNodes(function (container) {
+          return container.getName() + '\nOut: ' + (0, _util.bytesToSize)(container.getNetworkTraffic());
+        });
+        break;
+
+      case _util.Modes.GROUPED:
+        // show the containers grouped
+        nodes = this.getGroupedContainers(function (containers, group) {
+          return group;
+        });
+        edges = this.getGroupedEdges();
+        break;
+
+      case _util.Modes.CPU_UTILIZATION:
+        // show the cpu utilization
+        edges = this.getGraphEdges();
+        nodes = this.getGraphNodes(function (container) {
+          return container.getName() + '\n' + (0, _util.formatPercentage)(container.getCpuUtil());
+        });
+        break;
+
+      case _util.Modes.MEM_UTILIZATION:
+        // show the memory utilization
+        edges = this.getGraphEdges();
+        nodes = this.getGraphNodes(function (container) {
+          return container.getName() + '\n' + (0, _util.formatPercentage)(container.getMemUtil());
+        });
+        break;
+
+      case _util.Modes.COST:
+        // show the cost
+        edges = this.getGraphEdges();
+        nodes = this.getGraphNodes(function (container) {
+          return container.getName() + '\n' + (0, _util.formatPrice)(container.getCost(_this.panelCtrl, _this.getNode(container.getHostIp())));
+        });
+        break;
+
+      case _util.Modes.COST_GROUPED:
+        // show the cost grouped
+        nodes = this.getGroupedContainers(function (containers, group) {
+          var price = containers.map(function (c) {
+            return (0, _CostWasteCtrl.getTotalCost)(c, _this.panelCtrl);
+          }).reduce(function (a, b) {
+            return a + b;
+          }, 0);
+          return group + '\n' + (0, _util.formatPrice)(price);
+        });
+        edges = this.getGroupedEdges();
+        break;
+
+      case _util.Modes.CPU_WASTE:
+        // show the CPU waste
+        edges = this.getGraphEdges();
+        nodes = this.getGraphNodes(function (container) {
+          return container.getName() + '\n' + (0, _util.formatPercentage)(container.getCpuWaste());
+        });
+        break;
+
+      case _util.Modes.MEM_WASTE:
+        // show the memory waste
+        edges = this.getGraphEdges();
+        nodes = this.getGraphNodes(function (container) {
+          return container.getName() + '\n' + (0, _util.formatPercentage)(container.getMemWaste());
+        });
+        break;
+
+      case _util.Modes.WASTE_COST:
+        edges = this.getGraphEdges();
+        nodes = this.getGraphNodes(function (container) {
+          return container.getName() + '\n' + (0, _util.formatPrice)(container.getWaste(_this.panelCtrl, _this.getNode(container.getHostIp())));
+        });
+        break;
+
+      case _util.Modes.WASTE_COST_GROUPED:
+        nodes = this.getGroupedContainers(function (containers, group) {
+          var price = containers.map(function (c) {
+            return c.getWaste(_this.panelCtrl, _this.getNode(c.getHostIp()));
+          }).reduce(function (a, b) {
+            return a + b;
+          }, 0);
+          return group + '\n' + (0, _util.formatPrice)(price);
+        });
+        edges = this.getGroupedEdges();
+    }
+
+    edges = (0, _util.verifyEdges)(edges, nodes);
+    (0, _util.setWidth)(edges);
+    return {
+      nodes: nodes.map(function (item) {
+        return {
+          data: item
+        };
+      }),
+      edges: edges.map(function (item) {
+        return {
+          data: item
+        };
+      })
+    };
+  };
+
+  DataCtrl.prototype.getContainers = function () {
+    var _this = this;
+
+    return Object.keys(this.containers).map(function (hash) {
+      return _this.containers[hash];
+    });
+  };
+  /*
+   * * * * * * * * * * GROUPED * * * * * * * * * *
+   */
+
+
+  DataCtrl.prototype.getGroupedContainers = function (getName) {
+    var _this = this;
+
+    return this.getGroups().map(function (group) {
+      var containers = _this.getContainers().filter(function (c) {
+        return c.getGroup() === group;
+      });
+
+      return new _graphNode.GraphNode(group, getName(containers, group));
+    });
+  };
+
+  DataCtrl.prototype.getGroupedEdges = function () {
+    var _this = this;
+
+    var edges = {};
+    this.getGraphEdges().forEach(function (edge) {
+      var source = _this.getContainer(edge.source);
+
+      var target = _this.getContainer(edge.target);
+
+      var sourceGroup;
+      var targetGroup;
+
+      if (source) {
+        sourceGroup = source.getGroup();
+      }
+
+      if (target) {
+        targetGroup = target.getGroup();
+      }
+
+      if (sourceGroup && targetGroup) {
+        if (!edges[sourceGroup]) {
+          edges[sourceGroup] = {};
+        }
+
+        if (!edges[sourceGroup][targetGroup]) {
+          edges[sourceGroup][targetGroup] = 0;
+        }
+
+        edges[sourceGroup][targetGroup] += edge.bytes;
+      }
+    });
+    return _lodash2.default.flatten(Object.keys(edges).map(function (src) {
+      return Object.keys(edges[src]).map(function (dst) {
+        return new _graphEdge.GraphEdge(src, dst, edges[src][dst]);
+      });
+    }));
+  };
+
+  DataCtrl.prototype.getGroups = function () {
+    var _this = this;
+
+    var groups = Object.keys(this.containers).map(function (hash) {
+      return _this.containers[hash].getGroup();
+    });
+    return groups.filter(function (item, i, ar) {
+      return ar.indexOf(item) === i;
+    });
+  };
+  /*
+   * * * * * * * * * * NODES AND EDGES * * * * * * * * * *
+   */
+
+
+  DataCtrl.prototype.getGraphNodes = function (getName) {
+    var nodes = this.getContainers().map(function (container) {
+      return new _graphNode.GraphNode(container.getHash(), getName(container), container.getHostIp());
+    });
+    return nodes.concat.apply(nodes, this.nodesToGraph());
+  };
+
+  DataCtrl.prototype.getGraphEdges = function () {
+    var _this = this;
+
+    return _lodash2.default.flatten(Object.keys(this.edges).map(function (src) {
+      return Object.keys(_this.edges[src]).map(function (dst) {
+        return new _graphEdge.GraphEdge(src, dst, _this.edges[src][dst]);
+      });
+    }));
+  };
+
+  DataCtrl.prototype.getHostEdges = function () {
+    var _this = this;
+
+    var edges = {};
+    this.getGraphEdges().forEach(function (edge) {
+      var source = _this.getContainer(edge.source);
+
+      var target = _this.getContainer(edge.target);
+
+      var sourceHost;
+      var targetHost;
+
+      if (source) {
+        sourceHost = source.getHostIp();
+      }
+
+      if (target) {
+        targetHost = target.getHostIp();
+      }
+
+      if (sourceHost && targetHost) {
+        if (!edges[sourceHost]) {
+          edges[sourceHost] = {};
+        }
+
+        if (!edges[sourceHost][targetHost]) {
+          edges[sourceHost][targetHost] = 0;
+        }
+
+        edges[sourceHost][targetHost] += edge.bytes;
+      }
+    });
+    return _lodash2.default.flatten(Object.keys(edges).map(function (src) {
+      return Object.keys(edges[src]).map(function (dst) {
+        return new _graphEdge.GraphEdge(src, dst, edges[src][dst]);
+      });
+    }));
+  };
+
+  DataCtrl.prototype.nodesToGraph = function () {
+    var _this = this;
+
+    return Object.keys(this.nodes).map(function (hostIp) {
+      return _this.nodes[hostIp];
+    }).map(function (node) {
+      return new _graphNode.GraphNode(node.getIp(), node.getIp());
+    });
+  };
+  /*
+   * * * * * * * * * * ADD AND UPDATE * * * * * * * * * *
+   */
+
+
+  DataCtrl.prototype.getContainer = function (hash) {
+    return this.containers[hash] || undefined;
+  };
+
+  DataCtrl.prototype.setContainer = function (hash, container) {
+    this.containers[hash] = container;
+  };
+
+  DataCtrl.prototype.getNode = function (host) {
+    if (!this.nodes[host]) {
+      this.nodes[host] = new _node.Node(host);
+    }
+
+    return this.nodes[host];
+  };
+
+  DataCtrl.prototype.setEdge = function (src, dst, value) {
+    if (!this.edges[src]) {
+      this.edges[src] = {};
+    }
+
+    this.edges[src][dst] = value;
+  };
+
+  DataCtrl.prototype.getNodes = function () {
+    var _this = this;
+
+    return Object.keys(this.nodes).map(function (ip) {
+      return _this.nodes[ip];
+    });
+  };
+
+  DataCtrl.prototype.getGlobalVarCtrl = function () {
+    return this.globalVarCtrl;
+  };
+
+  return DataCtrl;
+}();
+
+exports.DataCtrl = DataCtrl;
+
+/***/ }),
+
+/***/ "./controller/globalVarCtrl.ts":
+/*!*************************************!*\
+  !*** ./controller/globalVarCtrl.ts ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.GlobalVarCtrl = exports.GlobalVar = undefined;
+
+var _CostWasteCtrl = __webpack_require__(/*! ./CostWasteCtrl */ "./controller/CostWasteCtrl.ts");
+
+var GlobalVar = exports.GlobalVar = undefined;
+
+(function (GlobalVar) {
+  GlobalVar["TIME_WINDOW"] = "TIME_WINDOW";
+  GlobalVar["TOTAL_CPU_COST"] = "TOTAL_CPU_COST";
+  GlobalVar["TOTAL_MEM_COST"] = "TOTAL_MEM_COST";
+  GlobalVar["TOTAL_TRAFFIC_COST"] = "TOTAL_TRAFFIC_COST";
+  GlobalVar["TOTAL_CPU_WASTE"] = "TOTAL_CPU_WASTE";
+  GlobalVar["TOTAL_MEM_WASTE"] = "TOTAL_MEM_WASTE";
+})(GlobalVar || (exports.GlobalVar = GlobalVar = {}));
+
+var GlobalVarCtrl =
+/** @class */
+function () {
+  function GlobalVarCtrl(panelCtrl, dataCtrl) {
+    this.panelCtrl = panelCtrl;
+    this.dataCtrl = dataCtrl;
+  }
+
+  GlobalVarCtrl.prototype.computeVars = function () {
+    var _this = this;
+
+    var nodes = this.dataCtrl.getNodes();
+    var cpuCost = this.getPrice(nodes, function (n) {
+      return (0, _CostWasteCtrl.getCpuCost)(n.getSumCpuUtil(), _this.panelCtrl, n);
+    });
+    var memCost = this.getPrice(nodes, function (n) {
+      return (0, _CostWasteCtrl.getMemCost)(n.getSumMemUtil(), _this.panelCtrl, n);
+    });
+    var trafficCost = this.getPrice(nodes, function (n) {
+      return (0, _CostWasteCtrl.getTrafficCost)(n.getSumNetwork(), _this.panelCtrl);
+    });
+    var cpuWaste = this.getPrice(nodes, function (n) {
+      return (0, _CostWasteCtrl.getCpuWasteCost)(n.getSumCpuWaste(), _this.panelCtrl, n);
+    });
+    var memWaste = this.getPrice(nodes, function (n) {
+      return (0, _CostWasteCtrl.getMemWasteCost)(n.getSumMemWaste(), _this.panelCtrl, n);
+    });
+    this.set(GlobalVar.TOTAL_CPU_COST, cpuCost);
+    this.set(GlobalVar.TOTAL_MEM_COST, memCost);
+    this.set(GlobalVar.TOTAL_TRAFFIC_COST, trafficCost);
+    this.set(GlobalVar.TOTAL_CPU_WASTE, cpuWaste);
+    this.set(GlobalVar.TOTAL_MEM_WASTE, memWaste);
+  };
+
+  GlobalVarCtrl.prototype.set = function (varName, value) {
+    var dashboardVar = this.panelCtrl.templateSrv.variables.find(function (v) {
+      return v.name === varName;
+    });
+
+    if (dashboardVar) {
+      dashboardVar.current.text = value.toString();
+      dashboardVar.current.value = value.toString();
+      console.log("Setting " + varName + " to: " + value);
+    }
+  };
+
+  GlobalVarCtrl.prototype.getPrice = function (nodes, computePrice) {
+    return nodes.map(function (n) {
+      return computePrice(n);
+    }).reduce(function (a, b) {
+      return a + b;
+    }, 0);
+  };
+
+  return GlobalVarCtrl;
+}();
+
+exports.GlobalVarCtrl = GlobalVarCtrl;
+
+/***/ }),
+
+/***/ "./controller/mappingCtrl.ts":
+/*!***********************************!*\
+  !*** ./controller/mappingCtrl.ts ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _mapping = __webpack_require__(/*! ../model/mapping */ "./model/mapping.ts");
+
+var MappingCtrl =
+/** @class */
+function () {
+  function MappingCtrl(panelCtrl) {
+    this.panelCtrl = panelCtrl;
+  }
+
+  MappingCtrl.prototype.getNameImage = function () {
+    return _mapping.NameImage;
+  };
+
+  MappingCtrl.prototype.addRow = function () {
+    this.panelCtrl.panel['ruleMappings'].push(new _mapping.Mapping());
+  };
+
+  MappingCtrl.prototype.apply = function () {
+    var _this = this;
+
+    this.panelCtrl.dataCtrl.getContainers().forEach(function (c) {
+      return _this.mapContainer(c);
+    });
+  };
+
+  MappingCtrl.prototype.mapContainer = function (container) {
+    this.panelCtrl.panel['ruleMappings'].forEach(function (mapping) {
+      if (mapping.regex === "") {
+        return;
+      }
+
+      var re = new RegExp(mapping.regex);
+
+      switch (mapping.match) {
+        case _mapping.NameImage.NAME:
+          if (re.test(container.getName())) {
+            container.setGroup(mapping.group);
+          }
+
+          break;
+
+        case _mapping.NameImage.IMAGE:
+          if (re.test(container.getImage())) {
+            container.setGroup(mapping.group);
+          }
+
+          break;
+
+        default:
+          console.log('Cannot end in this state: ' + mapping.match);
+      }
+    });
+  };
+
+  MappingCtrl.prototype.remove = function (row) {
+    this.panelCtrl.panel['ruleMappings'].splice(this.panelCtrl.panel['ruleMappings'].indexOf(row), 1);
+  };
+
+  MappingCtrl.prototype.getList = function () {
+    return this.panelCtrl.panel['ruleMappings'];
+  };
+
+  return MappingCtrl;
+}();
+
+exports.default = MappingCtrl;
+
+/***/ }),
+
 /***/ "./css/main.css":
 /*!**********************!*\
   !*** ./css/main.css ***!
@@ -59051,10 +59784,10 @@ if(false) {}
 
 /***/ }),
 
-/***/ "./dataControllers/container_ctrl.ts":
-/*!*******************************************!*\
-  !*** ./dataControllers/container_ctrl.ts ***!
-  \*******************************************/
+/***/ "./model/container.ts":
+/*!****************************!*\
+  !*** ./model/container.ts ***!
+  \****************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -59064,552 +59797,159 @@ if(false) {}
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.ContainerCtrl = undefined;
+exports.Container = undefined;
+
+var _CostWasteCtrl = __webpack_require__(/*! ../controller/CostWasteCtrl */ "./controller/CostWasteCtrl.ts");
+
+var Container =
+/** @class */
+function () {
+  function Container(hash, hostIp) {
+    this.name = '';
+    this.group = '';
+    this.image = '';
+    this.networkTraffic = 0;
+    this.hash = hash;
+    this.hostIp = hostIp;
+  }
+
+  Container.prototype.getHash = function () {
+    return this.hash;
+  };
+
+  Container.prototype.getName = function () {
+    return this.name;
+  };
+
+  Container.prototype.setName = function (name) {
+    this.name = name;
+
+    if (this.group === '') {
+      this.group = name;
+    }
+  };
+
+  Container.prototype.getHostIp = function () {
+    return this.hostIp;
+  };
+
+  Container.prototype.getImage = function () {
+    return this.image;
+  };
+
+  Container.prototype.setImage = function (image) {
+    this.image = image;
+  };
+
+  Container.prototype.getCpuUtil = function () {
+    return this.cpuUtil;
+  };
+
+  Container.prototype.setCpuUtil = function (cpuUtil) {
+    this.cpuUtil = cpuUtil;
+  };
+
+  Container.prototype.getMemUtil = function () {
+    return this.memUtil;
+  };
+
+  Container.prototype.setMemUtil = function (memUtil) {
+    this.memUtil = memUtil;
+  };
+
+  Container.prototype.getCpuWaste = function () {
+    return this.cpuWaste;
+  };
+
+  Container.prototype.setCpuWaste = function (cpuWaste) {
+    this.cpuWaste = cpuWaste;
+  };
+
+  Container.prototype.getMemWaste = function () {
+    return this.memWaste;
+  };
+
+  Container.prototype.getGroup = function () {
+    return this.group;
+  };
+
+  Container.prototype.setGroup = function (group) {
+    this.group = group;
+  };
+
+  Container.prototype.setMemWaste = function (memWaste) {
+    this.memWaste = memWaste;
+  };
+
+  Container.prototype.getNetworkTraffic = function () {
+    return this.networkTraffic;
+  };
+
+  Container.prototype.setNetworkTraffic = function (networkTraffic) {
+    this.networkTraffic = networkTraffic;
+  };
+
+  Container.prototype.getCost = function (panelCtrl, node) {
+    return (0, _CostWasteCtrl.getCpuCost)(this.cpuUtil, panelCtrl, node) + (0, _CostWasteCtrl.getMemCost)(this.memUtil, panelCtrl, node) + (0, _CostWasteCtrl.getTrafficCost)(this.networkTraffic, panelCtrl);
+  };
+
+  Container.prototype.getWaste = function (panelCtrl, node) {
+    return (0, _CostWasteCtrl.getCpuWasteCost)(this.cpuWaste, panelCtrl, node) + (0, _CostWasteCtrl.getMemWasteCost)(this.memWaste, panelCtrl, node);
+  };
+
+  return Container;
+}();
+
+exports.Container = Container;
+
+/***/ }),
+
+/***/ "./model/graphEdge.ts":
+/*!****************************!*\
+  !*** ./model/graphEdge.ts ***!
+  \****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.GraphEdge = undefined;
 
 var _util = __webpack_require__(/*! ../util */ "./util.ts");
 
-var _traffic_ctrl = __webpack_require__(/*! ./traffic_ctrl */ "./dataControllers/traffic_ctrl.ts");
-
-var ContainerCtrl =
+var GraphEdge =
 /** @class */
 function () {
-  function ContainerCtrl() {
-    this.data = {};
-    this.idsUpdate = []; // keep track of a list of all ids that have been updated.
+  function GraphEdge(source, target, bytes) {
+    this.source = source;
+    this.target = target;
+    this.bytes = bytes;
+    this.label = (0, _util.bytesToSize)(this.bytes);
+
+    if (source === target) {
+      this.type = 'loop';
+    }
   }
 
-  ContainerCtrl.prototype.addOrUpdate = function (id, obj, mapping) {
-    if (this.data[id] === undefined) {
-      obj['group'] = obj['names'];
-      mapping.mapContainer(obj);
-      this.data[id] = obj;
-    }
-
-    this.idsUpdate.push(id);
+  GraphEdge.prototype.setWidth = function (width) {
+    this.width = width;
   };
 
-  ContainerCtrl.prototype.startUpdate = function () {
-    this.idsUpdate = [];
-  };
-
-  ContainerCtrl.prototype.stopUpdate = function () {
-    var _this = this;
-
-    var items = Object.keys(this.data).filter(function (id) {
-      return !_this.idsUpdate.includes(id);
-    });
-    items.forEach(function (id) {
-      delete _this.data[id];
-    });
-  };
-
-  ContainerCtrl.prototype.getList = function () {
-    var _this = this;
-
-    return Object.keys(this.data).map(function (key) {
-      return _this.data[key];
-    });
-  };
-
-  ContainerCtrl.prototype.getNodes = function () {
-    var nodes = [];
-    var hostSet = new Set();
-    var imageSet = new Set();
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-      hostSet.add(container['host']);
-      imageSet.add(container['host'] + '-' + container['image']);
-      nodes.push({
-        id: container['hash'],
-        name: container['names'],
-        parent: container['host'] + '-' + container['image']
-      });
-    }
-
-    hostSet.forEach(function (host) {
-      nodes.push({
-        id: host,
-        name: host
-      });
-    });
-    imageSet.forEach(function (image) {
-      nodes.push({
-        id: image,
-        name: image.substr(image.indexOf('-') + 1),
-        parent: image.substr(0, image.indexOf('-'))
-      });
-    });
-    return nodes.map(function (item) {
-      return {
-        data: item
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getNodesWithTraffic = function (trafficCtrl) {
-    var nodes = [];
-    var hostSet = new Set();
-    var imageSet = new Set();
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-      hostSet.add(container['host']);
-      imageSet.add(container['host'] + '-' + container['image']);
-      var received = (0, _util.bytesToSize)(trafficCtrl.getValue(container['hash'], _traffic_ctrl.TRAFFIC_TYPE.RECEIVED));
-      var transmitted = (0, _util.bytesToSize)(trafficCtrl.getValue(container['hash'], _traffic_ctrl.TRAFFIC_TYPE.TRANSMITTED));
-      nodes.push({
-        id: container['hash'],
-        name: container['names'] + '\nin: ' + received + ', out: ' + transmitted,
-        parent: container['host'] + '-' + container['image']
-      });
-    }
-
-    hostSet.forEach(function (host) {
-      nodes.push({
-        id: host,
-        name: host
-      });
-    });
-    imageSet.forEach(function (image) {
-      nodes.push({
-        id: image,
-        name: image.substr(image.indexOf('-') + 1),
-        parent: image.substr(0, image.indexOf('-'))
-      });
-    });
-    return nodes.map(function (item) {
-      return {
-        data: item
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getNodesWithUtilization = function (utilCtrl) {
-    var nodes = [];
-    var hosts = {};
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-
-      if (hosts[container['host']] === undefined) {
-        hosts[container['host']] = 0;
-      }
-
-      hosts[container['host']] += utilCtrl.getValue(container['hash']);
-      var percentage = (utilCtrl.getValue(container['hash']) * 100).toFixed(2) + '%';
-      nodes.push({
-        id: container['hash'],
-        name: container['names'] + '\n' + percentage,
-        parent: container['host']
-      });
-    }
-
-    Object.keys(hosts).forEach(function (host) {
-      var percentage = (hosts[host] * 100).toFixed(2) + '%';
-      nodes.push({
-        id: host,
-        name: host + '\n' + percentage
-      });
-    });
-    return nodes.map(function (item) {
-      return {
-        data: item
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getNodesWithRelativeUtilization = function (utilCtrl) {
-    var nodes = [];
-    var hosts = {};
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-
-      if (hosts[container['host']] === undefined) {
-        hosts[container['host']] = 0;
-      }
-
-      hosts[container['host']] += utilCtrl.getValue(container['hash']);
-    }
-
-    for (var _b = 0, _c = this.getList(); _b < _c.length; _b++) {
-      var container = _c[_b];
-      var hostUtil = hosts[container['host']];
-      var percentage = '0%';
-
-      if (hostUtil > 0.01) {
-        // avoid division by zero
-        percentage = (utilCtrl.getValue(container['hash']) / hostUtil * 100).toFixed(2) + '%';
-      }
-
-      nodes.push({
-        id: container['hash'],
-        name: container['names'] + '\n' + percentage,
-        parent: container['host']
-      });
-    }
-
-    Object.keys(hosts).forEach(function (host) {
-      var percentage = (hosts[host] * 100).toFixed(2) + '%';
-      nodes.push({
-        id: host,
-        name: host + '\n' + percentage
-      });
-    });
-    return nodes.map(function (item) {
-      return {
-        data: item
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getNodesWithWastePrediction = function (wasteCtrl, hostCtrl) {
-    var nodes = [];
-    var hosts = {};
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-
-      if (hosts[container['host']] === undefined) {
-        hosts[container['host']] = 0;
-      }
-
-      var wastePercentage = wasteCtrl.getValue(container['hash']);
-      hosts[container['host']] += wastePercentage;
-      var waste = wastePercentage * hostCtrl.getPrice(container['host']);
-      nodes.push({
-        id: container['hash'],
-        name: container['names'] + '\n$' + waste.toFixed(4),
-        parent: container['host']
-      });
-    }
-
-    Object.keys(hosts).forEach(function (host) {
-      var waste = (hosts[host] * hostCtrl.getPrice(host)).toFixed(4);
-      nodes.push({
-        id: host,
-        name: host + '\n$' + waste
-      });
-    });
-    return nodes.map(function (item) {
-      return {
-        data: item
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getNodesWithWaste = function (wasteCtrl) {
-    var nodes = [];
-    var hosts = {};
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-
-      if (hosts[container['host']] === undefined) {
-        hosts[container['host']] = 0;
-      }
-
-      hosts[container['host']] += wasteCtrl.getValue(container['hash']);
-    }
-
-    for (var _b = 0, _c = this.getList(); _b < _c.length; _b++) {
-      var container = _c[_b];
-      var waste = wasteCtrl.getValue(container['hash']) * 100;
-      var wastePercentage = waste.toFixed(2) + '%';
-      nodes.push({
-        id: container['hash'],
-        name: container['names'] + '\n' + wastePercentage,
-        parent: container['host']
-      });
-    }
-
-    Object.keys(hosts).forEach(function (host) {
-      var percentage = (hosts[host] * 100).toFixed(2) + '%';
-      nodes.push({
-        id: host,
-        name: host + '\n' + percentage
-      });
-    });
-    return nodes.map(function (item) {
-      return {
-        data: item
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getNodesWithRelativeWaste = function (wasteCtrl) {
-    var nodes = [];
-    var hosts = {};
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-
-      if (hosts[container['host']] === undefined) {
-        hosts[container['host']] = 0;
-      }
-
-      hosts[container['host']] += wasteCtrl.getValue(container['hash']);
-    }
-
-    for (var _b = 0, _c = this.getList(); _b < _c.length; _b++) {
-      var container = _c[_b];
-      var totalWaste = hosts[container['host']];
-      var waste = 0;
-
-      if (totalWaste > 0.01) {
-        waste = wasteCtrl.getValue(container['hash']) / totalWaste * 100;
-      }
-
-      var wastePercentage = waste.toFixed(2) + '%';
-      nodes.push({
-        id: container['hash'],
-        name: container['names'] + '\n' + wastePercentage,
-        parent: container['host']
-      });
-    }
-
-    Object.keys(hosts).forEach(function (host) {
-      var percentage = (hosts[host] * 100).toFixed(2) + '%';
-      nodes.push({
-        id: host,
-        name: host + '\n' + percentage
-      });
-    });
-    return nodes.map(function (item) {
-      return {
-        data: item
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getNodesWithCost = function (utilCtrl, hostCtrl) {
-    var nodes = [];
-    var hostSet = new Set();
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-      hostSet.add(container['host']);
-      var price = (utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host'])).toFixed(4);
-      nodes.push({
-        id: container['hash'],
-        name: container['names'] + '\n$' + price,
-        parent: container['host']
-      });
-    }
-
-    hostSet.forEach(function (host) {
-      nodes.push({
-        id: host,
-        name: host
-      });
-    });
-    return nodes.map(function (item) {
-      return {
-        data: item
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getGroupedNodes = function () {
-    var groups = {};
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-      var group = this.getGroupFromContainerHash(container['hash']);
-
-      if (groups[group] === undefined) {
-        groups[group] = {
-          id: group,
-          name: group
-        };
-      }
-    }
-
-    return Object.keys(groups).map(function (key) {
-      return {
-        data: groups[key]
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getGroupedNodesCost = function (utilCtrl, hostCtrl) {
-    var groups = {};
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-      var group = this.getGroupFromContainerHash(container['hash']);
-
-      if (groups[group] === undefined) {
-        groups[group] = 0;
-      }
-
-      groups[group] += utilCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
-    }
-
-    return Object.keys(groups).map(function (group) {
-      return {
-        data: {
-          id: group,
-          name: group + '\n$' + groups[group].toFixed(4)
-        }
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getGroupedNodesWastePrediction = function (wasteCtrl, hostCtrl) {
-    var groups = {};
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-      var group = this.getGroupFromContainerHash(container['hash']);
-
-      if (groups[group] === undefined) {
-        groups[group] = 0;
-      }
-
-      groups[group] += wasteCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
-    }
-
-    return Object.keys(groups).map(function (group) {
-      return {
-        data: {
-          id: group,
-          name: group + '\n$' + groups[group].toFixed(4)
-        }
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getGroupedNodesTotalCost = function (costCtrl, hostCtrl) {
-    var groups = {};
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-      var group = this.getGroupFromContainerHash(container['hash']);
-
-      if (groups[group] === undefined) {
-        groups[group] = 0;
-      }
-
-      groups[group] += costCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
-    }
-
-    return Object.keys(groups).map(function (key) {
-      return {
-        data: {
-          id: key,
-          name: key + '\n$' + groups[key].toFixed(4)
-        }
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getGroupedNodesTotalWaste = function (wasteTotalCtrl, hostCtrl) {
-    var groups = {};
-
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-      var group = this.getGroupFromContainerHash(container['hash']);
-
-      if (groups[group] === undefined) {
-        groups[group] = 0;
-      }
-
-      groups[group] += wasteTotalCtrl.getValue(container['hash']) * hostCtrl.getPrice(container['host']);
-    }
-
-    return Object.keys(groups).map(function (key) {
-      return {
-        data: {
-          id: key,
-          name: key + '\n$' + groups[key].toFixed(2)
-        }
-      };
-    });
-  };
-
-  ContainerCtrl.prototype.getGroupedEdges = function (edgesCtrl) {
-    var edges = [];
-
-    for (var _i = 0, _a = edgesCtrl.getList(); _i < _a.length; _i++) {
-      var edge = _a[_i];
-      var data_edge = edge['data'];
-      data_edge['source'] = this.getGroupFromContainerHash(data_edge['source']);
-      data_edge['target'] = this.getGroupFromContainerHash(data_edge['target']);
-
-      if (data_edge['source'] === data_edge['target']) {
-        data_edge['type'] = 'loop';
-      }
-
-      edges.push(edge);
-    }
-
-    return this.mergeItemsInList(edges);
-  };
-
-  ContainerCtrl.prototype.getGroupFromContainerHash = function (hash) {
-    for (var _i = 0, _a = this.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-
-      if (container['hash'] === hash) {
-        return container['group'];
-      }
-    }
-
-    return '';
-  };
-  /**
-   * sum up the bytes-value if both the target and destination from two nodes are the same.
-   * @param list a list with objects, encoded as: {data: {source: '', target: '', bytes: 0}}
-   */
-
-
-  ContainerCtrl.prototype.mergeItemsInList = function (list) {
-    var separator = '-';
-    var map = new Map();
-    var newList = [];
-
-    for (var _i = 0, list_1 = list; _i < list_1.length; _i++) {
-      var item = list_1[_i];
-      var data = item['data'];
-      var key = data['source'] + separator + data['target'];
-      var value = data['bytes'];
-
-      if (map.has(key)) {
-        value += map.get(key);
-      }
-
-      map.set(key, value);
-    }
-
-    map.forEach(function (value, key) {
-      var source_target = key.split(separator);
-      newList.push({
-        'source': source_target[0],
-        'target': source_target[1],
-        'bytes': value
-      });
-    });
-    newList = (0, _util.add_width)(newList);
-    return newList.map(function (item) {
-      return {
-        data: item
-      };
-    });
-  };
-
-  return ContainerCtrl;
+  return GraphEdge;
 }();
 
-exports.ContainerCtrl = ContainerCtrl;
+exports.GraphEdge = GraphEdge;
 
 /***/ }),
 
-/***/ "./dataControllers/cost_ctrl.ts":
-/*!**************************************!*\
-  !*** ./dataControllers/cost_ctrl.ts ***!
-  \**************************************/
+/***/ "./model/graphNode.ts":
+/*!****************************!*\
+  !*** ./model/graphNode.ts ***!
+  \****************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -59620,39 +59960,29 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-/**
- * Class for storing the total cost of a container.
- */
-var CostCtrl =
+var GraphNode =
 /** @class */
 function () {
-  function CostCtrl() {
-    this.data = {};
+  function GraphNode(id, name, parent) {
+    this.id = id;
+    this.name = name;
+
+    if (parent) {
+      this.parent = parent;
+    }
   }
 
-  CostCtrl.prototype.addOrUpdate = function (id, value) {
-    this.data[id] = value;
-  };
-
-  CostCtrl.prototype.getValue = function (id) {
-    if (this.data[id] !== undefined) {
-      return this.data[id];
-    }
-
-    return 0;
-  };
-
-  return CostCtrl;
+  return GraphNode;
 }();
 
-exports.CostCtrl = CostCtrl;
+exports.GraphNode = GraphNode;
 
 /***/ }),
 
-/***/ "./dataControllers/edges_ctrl.ts":
-/*!***************************************!*\
-  !*** ./dataControllers/edges_ctrl.ts ***!
-  \***************************************/
+/***/ "./model/mapping.ts":
+/*!**************************!*\
+  !*** ./model/mapping.ts ***!
+  \**************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -59662,444 +59992,161 @@ exports.CostCtrl = CostCtrl;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.EdgesCtrl = undefined;
-
-var _util = __webpack_require__(/*! ../util */ "./util.ts");
-
-var EdgesCtrl =
-/** @class */
-function () {
-  function EdgesCtrl() {
-    this.data = {};
-  }
-
-  EdgesCtrl.prototype.addOrUpdate = function (edge) {
-    var key = edge['source'] + edge['target'];
-    this.data[key] = edge;
-  };
-
-  EdgesCtrl.prototype.getList = function () {
-    var _this = this;
-
-    var edges = (0, _util.add_width)(Object.keys(this.data).map(function (key) {
-      return _this.data[key];
-    }));
-    edges = edges.filter(function (obj) {
-      return obj['bytes'] >= 1;
-    });
-    return edges.map(function (item) {
-      return {
-        data: item
-      };
-    });
-  };
-
-  return EdgesCtrl;
-}();
-
-exports.EdgesCtrl = EdgesCtrl;
-
-/***/ }),
-
-/***/ "./dataControllers/host_ctrl.ts":
-/*!**************************************!*\
-  !*** ./dataControllers/host_ctrl.ts ***!
-  \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.HostCtrl = undefined;
-
-var _lodash = __webpack_require__(/*! lodash */ "lodash");
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _util = __webpack_require__(/*! ../util */ "./util.ts");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Host =
-/** @class */
-function () {
-  function Host(ip, numCores, memory, hostCtrl) {
-    this.ip = ip;
-    this.numCores = numCores;
-    this.memory = memory;
-    this.setDefaultPrice(hostCtrl);
-  }
-
-  Host.prototype.setDefaultPrice = function (hostCtrl) {
-    this.price = this.numCores * hostCtrl.getCpuPriceHour() + this.memory / Math.pow(2, 30) * hostCtrl.getGbPriceHour();
-  };
-
-  Host.prototype.getMemory = function () {
-    return (0, _util.bytesToSize)(this.memory);
-  };
-
-  return Host;
-}();
-
-var HostCtrl =
-/** @class */
-function () {
-  function HostCtrl(panelCtrl) {
-    this.hosts = [];
-    this.panelCtrl = panelCtrl;
-  }
-
-  HostCtrl.prototype.addOrUpdate = function (obj) {
-    var host_obj = new Host(obj['host'], obj['num_cores'], obj['memory'], this);
-
-    for (var _i = 0, _a = this.hosts; _i < _a.length; _i++) {
-      var host = _a[_i];
-
-      if (host.ip == host_obj.ip) {
-        host = _lodash2.default.defaults(host_obj, host);
-        return;
-      }
-    }
-
-    this.hosts.push(host_obj);
-  };
-
-  HostCtrl.prototype.getCpuPriceHour = function () {
-    return this.panelCtrl.panel['cpuPriceHour'];
-  };
-
-  HostCtrl.prototype.getGbPriceHour = function () {
-    return this.panelCtrl.panel['gbPriceHour'];
-  };
-
-  HostCtrl.prototype.getList = function () {
-    return this.hosts;
-  };
-
-  HostCtrl.prototype.updatePrices = function () {
-    for (var _i = 0, _a = this.hosts; _i < _a.length; _i++) {
-      var host = _a[_i];
-      host.setDefaultPrice(this);
-    }
-  };
-
-  HostCtrl.prototype.getPrice = function (ip) {
-    for (var _i = 0, _a = this.hosts; _i < _a.length; _i++) {
-      var host = _a[_i];
-
-      if (host.ip === ip) {
-        return host.price;
-      }
-    }
-
-    console.log('Price not found for ip: ' + ip);
-    return 0;
-  };
-
-  return HostCtrl;
-}();
-
-exports.HostCtrl = HostCtrl;
-
-/***/ }),
-
-/***/ "./dataControllers/traffic_ctrl.ts":
-/*!*****************************************!*\
-  !*** ./dataControllers/traffic_ctrl.ts ***!
-  \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-/**
- * Class for storing the total cost of a container.
- */
-var TRAFFIC_TYPE = exports.TRAFFIC_TYPE = undefined;
-
-(function (TRAFFIC_TYPE) {
-  TRAFFIC_TYPE[TRAFFIC_TYPE["RECEIVED"] = 0] = "RECEIVED";
-  TRAFFIC_TYPE[TRAFFIC_TYPE["TRANSMITTED"] = 1] = "TRANSMITTED";
-})(TRAFFIC_TYPE || (exports.TRAFFIC_TYPE = TRAFFIC_TYPE = {}));
-
-var TrafficCtrl =
-/** @class */
-function () {
-  function TrafficCtrl() {
-    this.dataReceived = {};
-    this.dataTransmitted = {};
-  }
-
-  TrafficCtrl.prototype.addOrUpdate = function (id, value, type) {
-    switch (type) {
-      case TRAFFIC_TYPE.RECEIVED:
-        this.dataReceived[id] = value;
-        return;
-
-      case TRAFFIC_TYPE.TRANSMITTED:
-        this.dataTransmitted[id] = value;
-        return;
-
-      default:
-        console.log('Unknown type: ' + type);
-    }
-  };
-
-  TrafficCtrl.prototype.getValue = function (id, type) {
-    switch (type) {
-      case TRAFFIC_TYPE.RECEIVED:
-        if (this.dataReceived[id] !== undefined) {
-          return this.dataReceived[id];
-        }
-
-        return 0;
-
-      case TRAFFIC_TYPE.TRANSMITTED:
-        if (this.dataTransmitted[id] !== undefined) {
-          return this.dataTransmitted[id];
-        }
-
-        return 0;
-
-      default:
-        console.log('Unknown type: ' + type);
-    }
-
-    return 0;
-  };
-
-  return TrafficCtrl;
-}();
-
-exports.TrafficCtrl = TrafficCtrl;
-
-/***/ }),
-
-/***/ "./dataControllers/utilization_ctrl.ts":
-/*!*********************************************!*\
-  !*** ./dataControllers/utilization_ctrl.ts ***!
-  \*********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-/**
- * Class for storing the current utilization of a certain container.
- * Note that a prediction of the cost can be made with the following formula:
- * - prediction per hour = util over last hour * host price per hour.
- */
-var UtilizationCtrl =
-/** @class */
-function () {
-  function UtilizationCtrl() {
-    this.data = {};
-  }
-
-  UtilizationCtrl.prototype.addOrUpdate = function (id, value) {
-    this.data[id] = value;
-  };
-
-  UtilizationCtrl.prototype.getValue = function (id) {
-    if (this.data[id] !== undefined) {
-      return this.data[id];
-    }
-
-    return 0;
-  };
-
-  return UtilizationCtrl;
-}();
-
-exports.UtilizationCtrl = UtilizationCtrl;
-
-/***/ }),
-
-/***/ "./dataControllers/waste_ctrl.ts":
-/*!***************************************!*\
-  !*** ./dataControllers/waste_ctrl.ts ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-/**
- * Class for storing the total cost of a container.
- */
-var WasteCtrl =
-/** @class */
-function () {
-  function WasteCtrl() {
-    this.data = {};
-  }
-
-  WasteCtrl.prototype.addOrUpdate = function (id, value) {
-    this.data[id] = value;
-  };
-
-  WasteCtrl.prototype.getValue = function (id) {
-    if (this.data[id] !== undefined) {
-      return this.data[id];
-    }
-
-    return 0;
-  };
-
-  return WasteCtrl;
-}();
-
-exports.WasteCtrl = WasteCtrl;
-
-/***/ }),
-
-/***/ "./dataControllers/waste_total_ctrl.ts":
-/*!*********************************************!*\
-  !*** ./dataControllers/waste_total_ctrl.ts ***!
-  \*********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-/**
- * Class for storing the total cost of a container.
- */
-var WasteTotalCtrl =
-/** @class */
-function () {
-  function WasteTotalCtrl() {
-    this.data = {};
-  }
-
-  WasteTotalCtrl.prototype.addOrUpdate = function (id, value) {
-    this.data[id] = value;
-  };
-
-  WasteTotalCtrl.prototype.getValue = function (id) {
-    if (this.data[id] !== undefined) {
-      return this.data[id];
-    }
-
-    return 0;
-  };
-
-  return WasteTotalCtrl;
-}();
-
-exports.WasteTotalCtrl = WasteTotalCtrl;
-
-/***/ }),
-
-/***/ "./mapping.ts":
-/*!********************!*\
-  !*** ./mapping.ts ***!
-  \********************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _util = __webpack_require__(/*! ./util */ "./util.ts");
+var NameImage = exports.NameImage = undefined;
+
+(function (NameImage) {
+  NameImage["NAME"] = "Name";
+  NameImage["IMAGE"] = "Image";
+})(NameImage || (exports.NameImage = NameImage = {}));
 
 var Mapping =
 /** @class */
 function () {
-  function Mapping(panelCtrl) {
-    this.panelCtrl = panelCtrl;
+  function Mapping() {
+    this.regex = '';
+    this.group = '';
   }
-
-  Mapping.prototype.addRow = function () {
-    this.panelCtrl.panel['ruleMappings'].push({
-      regex: '',
-      group: '',
-      match: _util.NameImage.NAME
-    });
-  };
-
-  Mapping.prototype.apply = function () {
-    for (var _i = 0, _a = this.panelCtrl.containerCtrl.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-      this.mapContainer(container);
-    }
-
-    this.panelCtrl.updateGraph();
-  };
-
-  Mapping.prototype.mapContainer = function (container) {
-    for (var _i = 0, _a = this.panelCtrl.panel['ruleMappings']; _i < _a.length; _i++) {
-      var mapping = _a[_i];
-
-      if (mapping.regex === "") {
-        continue;
-      }
-
-      var re = new RegExp(mapping.regex);
-
-      switch (mapping.match) {
-        case _util.NameImage.NAME:
-          if (re.test(container['names'])) {
-            container['group'] = mapping.group;
-          }
-
-          break;
-
-        case _util.NameImage.IMAGE:
-          if (re.test(container['image'])) {
-            container['group'] = mapping.group;
-          }
-
-          break;
-
-        default:
-          console.log('Cannot end in this state: ' + mapping.match);
-      }
-
-      container['group'].replace(re, container['group']);
-    }
-  };
-
-  Mapping.prototype.remove = function (row) {
-    this.panelCtrl.panel['ruleMappings'].splice(this.panelCtrl.panel['ruleMappings'].indexOf(row), 1);
-  };
-
-  Mapping.prototype.getList = function () {
-    return this.panelCtrl.panel['ruleMappings'];
-  };
 
   return Mapping;
 }();
 
-exports.default = Mapping;
+exports.Mapping = Mapping;
+
+/***/ }),
+
+/***/ "./model/node.ts":
+/*!***********************!*\
+  !*** ./model/node.ts ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Node = undefined;
+
+var _container = __webpack_require__(/*! ./container */ "./model/container.ts");
+
+var _util = __webpack_require__(/*! ../util */ "./util.ts");
+
+var Node =
+/** @class */
+function () {
+  function Node(ip) {
+    this.containers = {};
+    this.sumCpuUtil = 0;
+    this.sumMemUtil = 0;
+    this.sumCpuWaste = 0;
+    this.sumMemWaste = 0;
+    this.sumNetwork = 0;
+    this.ip = ip;
+  }
+
+  Node.prototype.getContainer = function (hash, dataCtrl) {
+    if (!this.containers[hash]) {
+      this.containers[hash] = new _container.Container(hash, this.ip);
+      dataCtrl.setContainer(hash, this.containers[hash]);
+    }
+
+    return this.containers[hash];
+  };
+
+  Node.prototype.clearContainers = function () {
+    this.containers = {};
+  };
+
+  Node.prototype.getPrice = function (cpuPrice, memPrice) {
+    return (this.numCores * cpuPrice + this.memory * memPrice / Math.pow(2, 30)).toFixed(4);
+  };
+
+  Node.prototype.getContainers = function () {
+    var _this = this;
+
+    return Object.keys(this.containers).map(function (hash) {
+      return _this.containers[hash];
+    });
+  };
+
+  Node.prototype.getIp = function () {
+    return this.ip;
+  };
+
+  Node.prototype.isSuperNode = function () {
+    return this.superNode;
+  };
+
+  Node.prototype.setSuperNode = function (superNode) {
+    this.superNode = superNode;
+  };
+
+  Node.prototype.getMemory = function () {
+    return this.memory;
+  };
+
+  Node.prototype.getMemoryString = function () {
+    return (0, _util.bytesToSize)(this.memory);
+  };
+
+  Node.prototype.setMemory = function (memory) {
+    this.memory = memory;
+  };
+
+  Node.prototype.getNumCores = function () {
+    return this.numCores;
+  };
+
+  Node.prototype.setNumCores = function (numCores) {
+    this.numCores = numCores;
+  };
+
+  Node.prototype.setSumCpuUtil = function (sumCpuUtil) {
+    this.sumCpuUtil = sumCpuUtil;
+  };
+
+  Node.prototype.getSumCpuUtil = function () {
+    return this.sumCpuUtil;
+  };
+
+  Node.prototype.setSumMemUtil = function (sumMemUtil) {
+    this.sumMemUtil = sumMemUtil;
+  };
+
+  Node.prototype.getSumMemUtil = function () {
+    return this.sumMemUtil;
+  };
+
+  Node.prototype.setSumCpuWaste = function (sumCpuWaste) {
+    this.sumCpuWaste = sumCpuWaste;
+  };
+
+  Node.prototype.getSumCpuWaste = function () {
+    return this.sumCpuWaste;
+  };
+
+  Node.prototype.setSumMemWaste = function (sumMemWaste) {
+    this.sumMemWaste = sumMemWaste;
+  };
+
+  Node.prototype.getSumMemWaste = function () {
+    return this.sumMemWaste;
+  };
+
+  Node.prototype.setSumNetwork = function (sumNetwork) {
+    this.sumNetwork = sumNetwork;
+  };
+
+  Node.prototype.getSumNetwork = function () {
+    return this.sumNetwork;
+  };
+
+  return Node;
+}();
+
+exports.Node = Node;
 
 /***/ }),
 
@@ -60118,16 +60165,16 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.PanelCtrl = undefined;
 
-var _panel_ctrl = __webpack_require__(/*! ./panel_ctrl */ "./panel_ctrl.ts");
+var _panelCtrl = __webpack_require__(/*! ./panelCtrl */ "./panelCtrl.ts");
 
-exports.PanelCtrl = _panel_ctrl.PanelCtrl;
+exports.PanelCtrl = _panelCtrl.PanelCtrl;
 
 /***/ }),
 
-/***/ "./panel_ctrl.ts":
-/*!***********************!*\
-  !*** ./panel_ctrl.ts ***!
-  \***********************/
+/***/ "./panelCtrl.ts":
+/*!**********************!*\
+  !*** ./panelCtrl.ts ***!
+  \**********************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -60159,27 +60206,15 @@ var _lodash = __webpack_require__(/*! lodash */ "lodash");
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _mapping = __webpack_require__(/*! ./mapping */ "./mapping.ts");
-
-var _mapping2 = _interopRequireDefault(_mapping);
-
 var _util = __webpack_require__(/*! ./util */ "./util.ts");
 
-var _edges_ctrl = __webpack_require__(/*! ./dataControllers/edges_ctrl */ "./dataControllers/edges_ctrl.ts");
+var _dataCtrl = __webpack_require__(/*! ./controller/dataCtrl */ "./controller/dataCtrl.ts");
 
-var _container_ctrl = __webpack_require__(/*! ./dataControllers/container_ctrl */ "./dataControllers/container_ctrl.ts");
+var _mappingCtrl = __webpack_require__(/*! ./controller/mappingCtrl */ "./controller/mappingCtrl.ts");
 
-var _utilization_ctrl = __webpack_require__(/*! ./dataControllers/utilization_ctrl */ "./dataControllers/utilization_ctrl.ts");
+var _mappingCtrl2 = _interopRequireDefault(_mappingCtrl);
 
-var _host_ctrl = __webpack_require__(/*! ./dataControllers/host_ctrl */ "./dataControllers/host_ctrl.ts");
-
-var _cost_ctrl = __webpack_require__(/*! ./dataControllers/cost_ctrl */ "./dataControllers/cost_ctrl.ts");
-
-var _waste_ctrl = __webpack_require__(/*! ./dataControllers/waste_ctrl */ "./dataControllers/waste_ctrl.ts");
-
-var _waste_total_ctrl = __webpack_require__(/*! ./dataControllers/waste_total_ctrl */ "./dataControllers/waste_total_ctrl.ts");
-
-var _traffic_ctrl = __webpack_require__(/*! ./dataControllers/traffic_ctrl */ "./dataControllers/traffic_ctrl.ts");
+var _globalVarCtrl = __webpack_require__(/*! ./controller/globalVarCtrl */ "./controller/globalVarCtrl.ts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -60223,44 +60258,57 @@ function (_super) {
   function PanelCtrl($scope, $injector) {
     var _this = _super.call(this, $scope, $injector) || this;
 
-    _this.edgesCtrl = new _edges_ctrl.EdgesCtrl();
-    _this.containerCtrl = new _container_ctrl.ContainerCtrl();
-    _this.utilizationCtrl = new _utilization_ctrl.UtilizationCtrl();
-    _this.wasteCtrl = new _waste_ctrl.WasteCtrl();
-    _this.wasteTotalCtrl = new _waste_total_ctrl.WasteTotalCtrl();
-    _this.hostCtrl = new _host_ctrl.HostCtrl(_this);
-    _this.costCtrl = new _cost_ctrl.CostCtrl();
-    _this.trafficCtrl = new _traffic_ctrl.TrafficCtrl();
     _this.graph_height = _this.height;
+    _this.dataCtrl = new _dataCtrl.DataCtrl(_this);
+    _this.mappingCtrl = new _mappingCtrl2.default(_this);
     var panelDefaults = {
       datasource: 'Prometheus',
       targets: _this.getTargets([{
-        expr: "docker_container_info{stopped=\"\"}"
+        expr: 'docker_container_info{stopped=""}',
+        legendFormat: _dataCtrl.LegendFormat.CONTAINER_INFO
       }, {
-        expr: "delta(bytes_send_total[$TIME_WINDOW])",
-        legendFormat: 'bytes_send'
+        expr: 'node_info{exported_instance=~"localhost:.*"}',
+        legendFormat: _dataCtrl.LegendFormat.NODE_INFO
+      }, // For utilization and waste
+      {
+        expr: 'delta(cpu_util_container_total[$TIME_WINDOW])',
+        legendFormat: _dataCtrl.LegendFormat.CPU_UTIL
       }, {
-        expr: "avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h])",
-        legendFormat: "container_utilization"
+        expr: 'delta(mem_util_container_total[$TIME_WINDOW])',
+        legendFormat: _dataCtrl.LegendFormat.MEM_UTIL
       }, {
-        expr: "default_host_price_info"
+        expr: 'delta(cpu_waste_container_total[$TIME_WINDOW])',
+        legendFormat: _dataCtrl.LegendFormat.CPU_WASTE
       }, {
-        expr: "sum_over_time(avg_over_time(rate(container_cpu_usage_seconds_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[1m])[1h:1h]) [1y:1h])",
-        "legendFormat": "container_total_util"
+        expr: 'delta(mem_waste_container_total[$TIME_WINDOW])',
+        legendFormat: _dataCtrl.LegendFormat.MEM_WASTE
       }, {
-        expr: "waste_container"
+        expr: 'clamp_min(sum(delta(network_container_total[$TIME_WINDOW])) by (src) - sum(delta(bytes_send_total[$TIME_WINDOW])) by (src), 0)',
+        legendFormat: _dataCtrl.LegendFormat.NETWORK
       }, {
-        expr: "waste_container_total"
+        expr: 'sum(delta(bytes_send_total[$TIME_WINDOW])) by (src, dst)',
+        legendFormat: _dataCtrl.LegendFormat.EDGES
+      }, // For computing totals
+      {
+        expr: 'sum(cpu_util_container_total) by (src_host)',
+        legendFormat: _dataCtrl.LegendFormat.SUM_CPU_UTIL
       }, {
-        expr: "delta(container_network_transmit_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])",
-        legendFormat: 'container_transmit'
+        expr: 'sum(mem_util_container_total) by (src_host)',
+        legendFormat: _dataCtrl.LegendFormat.SUM_MEM_UTIL
       }, {
-        expr: "delta(container_network_receive_bytes_total{id=~\"/docker/.*\", name!=\"dadvisor\"}[$TIME_WINDOW])",
-        legendFormat: 'container_receive'
+        expr: 'sum(cpu_waste_container_total) by (src_host)',
+        legendFormat: _dataCtrl.LegendFormat.SUM_CPU_WASTE
+      }, {
+        expr: 'sum(mem_waste_container_total) by (src_host)',
+        legendFormat: _dataCtrl.LegendFormat.SUM_MEM_WASTE
+      }, {
+        expr: 'sum(clamp_min(sum(network_container_total) by (src, src_host) - sum(bytes_send_total) by (src, src_host), 0)) by (src_host)',
+        legendFormat: _dataCtrl.LegendFormat.SUM_NETWORK
       }]),
       ruleMappings: [],
       cpuPriceHour: 0.021925,
-      gbPriceHour: 0.002938,
+      memPriceHour: 0.002938,
+      trafficPrice: 0.01,
       interval: '1m',
       valueName: 'current',
       mode: _util.Modes.CONTAINERS,
@@ -60271,7 +60319,6 @@ function (_super) {
       layoutType: 'grid',
       timeWindow: _util.TIME_WINDOW.HOUR
     };
-    _this.mapping = new _mapping2.default(_this);
 
     _this.events.on('init-edit-mode', _this.onInitEditMode.bind(_this));
 
@@ -60294,92 +60341,19 @@ function (_super) {
     return _util.Modes;
   };
 
-  PanelCtrl.prototype.getNameImage = function () {
-    return _util.NameImage;
-  };
-
   PanelCtrl.prototype.getTimes = function () {
     return _util.TIME_WINDOW;
   };
 
   PanelCtrl.prototype.onInitEditMode = function () {
-    this.addEditorTab('Container Mapping', 'public/plugins/grafana-container-panel/partials/mapping.html', 2);
-    this.addEditorTab('Cost prediction', 'public/plugins/grafana-container-panel/partials/cost.html', 2);
-    this.addEditorTab('Layout Options', 'public/plugins/grafana-container-panel/partials/layout.html', 2);
+    this.addEditorTab('Container MappingCtrl', 'public/plugins/grafana-container-panel/view/mapping.html', 2);
+    this.addEditorTab('Cost prediction', 'public/plugins/grafana-container-panel/view/cost.html', 2);
+    this.addEditorTab('Layout Options', 'public/plugins/grafana-container-panel/view/layout.html', 2);
   };
 
   PanelCtrl.prototype.onDataReceived = function (dataList) {
-    this.containerCtrl.startUpdate();
-
-    for (var _i = 0, dataList_1 = dataList; _i < dataList_1.length; _i++) {
-      var dataObj = dataList_1[_i]; // console.log(dataObj);
-
-      var obj = dataObj.labels;
-
-      if (dataObj.target.startsWith("docker_container_info")) {
-        this.containerCtrl.addOrUpdate(obj['hash'], obj, this.mapping);
-      } else if (dataObj.target.startsWith("bytes_send")) {
-        var newObj = {};
-        newObj['source'] = obj['src'];
-        newObj['target'] = obj['dst'];
-        newObj['bytes'] = dataObj.datapoints[0][0];
-        this.edgesCtrl.addOrUpdate(newObj);
-      } else if (dataObj.target === 'container_utilization') {
-        var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
-
-        this.utilizationCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
-      } else if (dataObj.target.startsWith('default_host_price_info')) {
-        this.hostCtrl.addOrUpdate(obj);
-      } else if (dataObj.target === 'container_total_util') {
-        var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
-
-        this.costCtrl.addOrUpdate(id, dataObj.datapoints[0][0]);
-      } else if (dataObj.target.startsWith('waste_container_total')) {
-        this.wasteTotalCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
-      } else if (dataObj.target.startsWith('waste_container')) {
-        this.wasteCtrl.addOrUpdate(obj['id'], dataObj.datapoints[0][0]);
-      } else if (dataObj.target.startsWith('container_receive')) {
-        var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
-
-        this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0], _traffic_ctrl.TRAFFIC_TYPE.RECEIVED);
-      } else if (dataObj.target.startsWith('container_transmit')) {
-        var id = dataObj.labels.id.substr('/docker/'.length); // filter /docker/
-
-        this.trafficCtrl.addOrUpdate(id, dataObj.datapoints[0][0], _traffic_ctrl.TRAFFIC_TYPE.TRANSMITTED);
-      } else {
-        console.log('Can not parse dataObj: ');
-        console.log(dataObj);
-      }
-    }
-
-    this.containerCtrl.stopUpdate();
-    this.computeTotalCostAndWaste();
-    this.setDashboardVar('TIME_WINDOW', this.panel.timeWindow);
-  };
-
-  PanelCtrl.prototype.setDashboardVar = function (varName, value) {
-    var dashboardVar = this.templateSrv.variables.find(function (v) {
-      return v.name === varName;
-    });
-
-    if (dashboardVar) {
-      dashboardVar.current.text = value;
-      dashboardVar.current.value = value;
-    }
-  };
-
-  PanelCtrl.prototype.computeTotalCostAndWaste = function () {
-    var totalWaste = 0;
-    var totalCost = 0;
-
-    for (var _i = 0, _a = this.containerCtrl.getList(); _i < _a.length; _i++) {
-      var container = _a[_i];
-      totalWaste += this.wasteTotalCtrl.getValue(container['hash']) * this.hostCtrl.getPrice(container['host']);
-      totalCost += this.costCtrl.getValue(container['hash']) * this.hostCtrl.getPrice(container['host']);
-    }
-
-    this.setDashboardVar('TOTAL_COST', totalCost.toFixed(2));
-    this.setDashboardVar('TOTAL_WASTE', totalWaste.toFixed(2));
+    this.dataCtrl.onDataReceived(dataList);
+    this.dataCtrl.getGlobalVarCtrl().set(_globalVarCtrl.GlobalVar.TIME_WINDOW, this.panel.timeWindow);
   };
   /**
    * Main method for the panel controller. This updates the graph with the new data.
@@ -60389,14 +60363,15 @@ function (_super) {
   PanelCtrl.prototype.updateGraph = function () {
     // Adjust graph height
     this.adjustGraphHeight();
+    this.mappingCtrl.apply();
     var panel = document.getElementById('graph-panel');
 
     if (!panel) {
       return;
     }
 
-    var data = this.getData();
-    PanelCtrl.validateData(data);
+    var data = this.dataCtrl.getData(this.panel.mode);
+    console.log(data);
     var layout = {
       name: this.panel.layoutType,
       padding: 30,
@@ -60417,8 +60392,8 @@ function (_super) {
     } else {
       this.cy = (0, _cytoscape2.default)({
         container: panel,
-        style: (0, _util.getStyle)(this.panel),
         elements: data,
+        style: (0, _util.getStyle)(this.panel),
         layout: layout
       });
     }
@@ -60435,117 +60410,6 @@ function (_super) {
       this.graph_height = this.height - header.height();
     }
   };
-
-  PanelCtrl.validateData = function (data) {
-    // Remove an edge if the corresponding node is not found.
-    for (var _i = 0, _a = data.edges; _i < _a.length; _i++) {
-      var edge = _a[_i];
-      var sourceIncluded = false;
-      var targetIncluded = false;
-
-      for (var _b = 0, _c = data.nodes; _b < _c.length; _b++) {
-        var node = _c[_b];
-
-        if (edge['data']['source'] === node['data']['id']) {
-          sourceIncluded = true;
-        }
-
-        if (edge['data']['target'] === node['data']['id']) {
-          targetIncluded = true;
-        }
-      }
-
-      if (edge['data']['bytes'] === 0 || !sourceIncluded || !targetIncluded) {
-        data.edges.splice(data.edges.indexOf(edge), 1);
-      }
-    }
-  };
-
-  PanelCtrl.prototype.getData = function () {
-    switch (this.panel.mode) {
-      case _util.Modes.CONTAINERS:
-        return {
-          edges: this.edgesCtrl.getList(),
-          nodes: this.containerCtrl.getNodes()
-        };
-
-      case _util.Modes.CONTAINERS_TRAFFIC:
-        return {
-          edges: this.edgesCtrl.getList(),
-          nodes: this.containerCtrl.getNodesWithTraffic(this.trafficCtrl)
-        };
-
-      case _util.Modes.GROUPED:
-        return {
-          edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
-          nodes: this.containerCtrl.getGroupedNodes()
-        };
-
-      case _util.Modes.UTILIZATION:
-        return {
-          edges: this.edgesCtrl.getList(),
-          nodes: this.containerCtrl.getNodesWithUtilization(this.utilizationCtrl)
-        };
-
-      case _util.Modes.RELATIVE_UTILIZATION:
-        return {
-          edges: this.edgesCtrl.getList(),
-          nodes: this.containerCtrl.getNodesWithRelativeUtilization(this.utilizationCtrl)
-        };
-
-      case _util.Modes.COST_PREDICTION:
-        return {
-          edges: this.edgesCtrl.getList(),
-          nodes: this.containerCtrl.getNodesWithCost(this.utilizationCtrl, this.hostCtrl)
-        };
-
-      case _util.Modes.COST_PREDICTION_GROUPED:
-        return {
-          edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
-          nodes: this.containerCtrl.getGroupedNodesCost(this.utilizationCtrl, this.hostCtrl)
-        };
-
-      case _util.Modes.COST_TOTAL_GROUPED:
-        return {
-          edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
-          nodes: this.containerCtrl.getGroupedNodesTotalCost(this.costCtrl, this.hostCtrl)
-        };
-
-      case _util.Modes.WASTE:
-        return {
-          edges: this.edgesCtrl.getList(),
-          nodes: this.containerCtrl.getNodesWithWaste(this.wasteCtrl)
-        };
-
-      case _util.Modes.RELATIVE_WASTE:
-        return {
-          edges: this.edgesCtrl.getList(),
-          nodes: this.containerCtrl.getNodesWithRelativeWaste(this.wasteCtrl)
-        };
-
-      case _util.Modes.WASTE_PREDICTION:
-        return {
-          edges: this.edgesCtrl.getList(),
-          nodes: this.containerCtrl.getNodesWithWastePrediction(this.wasteCtrl, this.hostCtrl)
-        };
-
-      case _util.Modes.WASTE_PREDICTION_GROUPED:
-        return {
-          edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
-          nodes: this.containerCtrl.getGroupedNodesWastePrediction(this.wasteCtrl, this.hostCtrl)
-        };
-
-      case _util.Modes.WASTE_TOTAL_GROUPED:
-        return {
-          edges: this.containerCtrl.getGroupedEdges(this.edgesCtrl),
-          nodes: this.containerCtrl.getGroupedNodesTotalWaste(this.wasteTotalCtrl, this.hostCtrl)
-        };
-
-      default:
-        console.log('Something went wrong');
-        return {};
-    }
-  };
   /**
    * Returns a graph description, based on the current visualization mode.
    */
@@ -60553,6 +60417,9 @@ function (_super) {
 
   PanelCtrl.prototype.description = function () {
     switch (this.panel.mode) {
+      case _util.Modes.NODES:
+        return '';
+
       case _util.Modes.CONTAINERS:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP), and based on the docker images that are used ' + 'inside this host. The edges represent the total amount of data that has been send from a ' + 'certain container to another container.';
 
@@ -60562,35 +60429,29 @@ function (_super) {
       case _util.Modes.GROUPED:
         return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, you ' + 'can find out which groups are interacting with each other. This provides a higher hierarchy of ' + 'the deployed system.';
 
-      case _util.Modes.UTILIZATION:
+      case _util.Modes.CPU_UTILIZATION:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'utilization percentage, which is the average over the last hour.';
 
-      case _util.Modes.RELATIVE_UTILIZATION:
+      case _util.Modes.MEM_UTILIZATION:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'utilization percentage, which is relative to its host.';
 
-      case _util.Modes.COST_PREDICTION:
+      case _util.Modes.COST:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and a cost ' + 'prediction based on the utilization and the host price. The cost prediction is represented per ' + 'hour, and formatted in USD.';
 
-      case _util.Modes.COST_PREDICTION_GROUPED:
+      case _util.Modes.COST_GROUPED:
         return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' + 'estimation of the cost per group is presented. This graph is based on the previous graph (cost ' + 'prediction).';
 
-      case _util.Modes.COST_TOTAL_GROUPED:
-        return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' + 'the total amount of costs of running a specific group of containers.';
-
-      case _util.Modes.WASTE:
+      case _util.Modes.CPU_WASTE:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'waste percentage, which is the average over the last hour.';
 
-      case _util.Modes.RELATIVE_WASTE:
-        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'waste percentage, which is based on the utilization percentage.';
+      case _util.Modes.MEM_WASTE:
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'waste percentage, which is the average over the last hour.';
 
-      case _util.Modes.WASTE_PREDICTION:
+      case _util.Modes.WASTE_COST:
         return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and a ' + 'prediction of the amount of money that is wasted on the host (related to the container).';
 
-      case _util.Modes.WASTE_PREDICTION_GROUPED:
+      case _util.Modes.WASTE_COST_GROUPED:
         return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' + 'estimation of the waste per group is presented. This graph is based on the previous graph ' + '(waste prediction).';
-
-      case _util.Modes.WASTE_TOTAL_GROUPED:
-        return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. This graphs presents ' + 'the total amount of waste of running a specific group of containers.';
 
       default:
         console.log('Something went wrong');
@@ -60612,7 +60473,23 @@ function (_super) {
     });
   };
 
-  PanelCtrl.templateUrl = './partials/module.html';
+  PanelCtrl.prototype.getCpuPrice = function () {
+    return this.panel['cpuPriceHour'];
+  };
+
+  PanelCtrl.prototype.getMemPriceByte = function () {
+    return this.panel['memPriceHour'] / Math.pow(2, 30);
+  };
+
+  PanelCtrl.prototype.getTrafficPriceByte = function () {
+    return this.panel['trafficPrice'] / Math.pow(2, 30);
+  };
+
+  PanelCtrl.prototype.getDataCtrl = function () {
+    return this.dataCtrl;
+  };
+
+  PanelCtrl.templateUrl = './view/module.html';
   return PanelCtrl;
 }(_sdk.MetricsPanelCtrl);
 
@@ -60633,63 +60510,76 @@ exports.PanelCtrl = PanelCtrl;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.add_width = add_width;
+exports.setWidth = setWidth;
+exports.verifyEdges = verifyEdges;
 exports.bytesToSize = bytesToSize;
+exports.formatPrice = formatPrice;
+exports.formatPercentage = formatPercentage;
 exports.getStyle = getStyle;
-var NameImage = exports.NameImage = undefined;
-
-(function (NameImage) {
-  NameImage["NAME"] = "Name";
-  NameImage["IMAGE"] = "Image";
-})(NameImage || (exports.NameImage = NameImage = {}));
-
 var Modes = exports.Modes = undefined;
 
 (function (Modes) {
+  Modes["NODES"] = "Nodes";
   Modes["CONTAINERS"] = "Containers";
   Modes["CONTAINERS_TRAFFIC"] = "Containers with traffic";
   Modes["GROUPED"] = "Grouped";
-  Modes["UTILIZATION"] = "Utilization (last hour average)";
-  Modes["RELATIVE_UTILIZATION"] = "Relative Utilization (last hour average)";
-  Modes["COST_PREDICTION"] = "Cost prediction (based on last hour average)";
-  Modes["COST_PREDICTION_GROUPED"] = "Cost prediction grouped (based on last hour average)";
-  Modes["COST_TOTAL_GROUPED"] = "Total cost grouped";
-  Modes["WASTE"] = "Waste distribution (last hour average)";
-  Modes["RELATIVE_WASTE"] = "Relative Waste distribution";
-  Modes["WASTE_PREDICTION"] = "Waste prediction (based on last hour average)";
-  Modes["WASTE_PREDICTION_GROUPED"] = "Waste prediction grouped (based on last hour average)";
-  Modes["WASTE_TOTAL_GROUPED"] = "Total waste grouped";
+  Modes["CPU_UTILIZATION"] = "CPU Utilization";
+  Modes["MEM_UTILIZATION"] = "Memory Utilization";
+  Modes["COST"] = "Cost";
+  Modes["COST_GROUPED"] = "Cost grouped";
+  Modes["CPU_WASTE"] = "CPU Waste distribution";
+  Modes["MEM_WASTE"] = "Memory Waste distribution";
+  Modes["WASTE_COST"] = "Waste Cost";
+  Modes["WASTE_COST_GROUPED"] = "Waste Cost grouped";
 })(Modes || (exports.Modes = Modes = {}));
 
 var TIME_WINDOW = exports.TIME_WINDOW = undefined;
 
 (function (TIME_WINDOW) {
-  TIME_WINDOW["MIN"] = "1m";
   TIME_WINDOW["TEN_MIN"] = "10m";
   TIME_WINDOW["HOUR"] = "1h";
   TIME_WINDOW["DAY"] = "1d";
   TIME_WINDOW["YEAR"] = "1y";
 })(TIME_WINDOW || (exports.TIME_WINDOW = TIME_WINDOW = {}));
 
-function add_width(edges) {
+function setWidth(edges) {
   var max_width = Math.max.apply(Math, edges.map(function (r) {
-    return r['bytes'];
+    return r.bytes;
   }));
 
   for (var _i = 0, edges_1 = edges; _i < edges_1.length; _i++) {
     var edge = edges_1[_i];
     var ratio = 10 * edge['bytes'] / max_width;
-    edge['width'] = Math.max(ratio, 1);
+    edge.setWidth(Math.max(ratio, 1));
   }
+}
+/**
+ * Check that all edges have a correct source and target label.
+ */
 
-  return edges;
+
+function verifyEdges(edges, nodes) {
+  var labels = nodes.map(function (node) {
+    return node.id;
+  });
+  return edges.filter(function (edge) {
+    return labels.includes(edge.source) && labels.includes(edge.target) && edge.bytes > 0;
+  });
 }
 
 function bytesToSize(bytes) {
-  var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  if (bytes === 0) return '0 Byte';
+  var sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  if (bytes === 0) return '0 B';
   var i = Math.floor(Math.log(bytes) / Math.log(1024));
   return Math.round(bytes / Math.pow(1024, i)) + " " + sizes[i];
+}
+
+function formatPrice(price) {
+  return '$' + price.toFixed(2);
+}
+
+function formatPercentage(value) {
+  return (100 * value).toFixed(2) + '%';
 }
 
 function getStyle(panel) {
@@ -60733,9 +60623,7 @@ function getStyle(panel) {
       'target-arrow-color': panel.colorEdge,
       "text-background-shape": "rectangle",
       "text-background-color": "#888",
-      'label': function label(ele) {
-        return bytesToSize(parseInt(ele.data('bytes')));
-      }
+      'label': 'data(label)'
     }
   }, {
     selector: 'label',

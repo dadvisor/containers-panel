@@ -8,11 +8,10 @@
                     <th>Image</th>
                     <th>Group</th>
                 </tr>
-                <tr ng-repeat="cont in ctrl.containerCtrl.getList()">
-                    <td>{{cont.names}}</td>
-                    <td>{{cont.image}}</td>
-                    <td><input type="text" class="input-small gf-form-input width-9" ng-model="cont.group"
-                               ng-change="ctrl.render()"/></td>
+                <tr ng-repeat="cont in ctrl.dataCtrl.getContainers()">
+                    <td>{{cont.getName()}}</td>
+                    <td>{{cont.getImage()}}</td>
+                    <td>{{cont.getGroup()}}</td>
                 </tr>
             </table>
         </div>
@@ -38,16 +37,16 @@
                     <td>Name or image</td>
                     <td>Delete</td>
                 </tr>
-                <tr ng-repeat="row in ctrl.mapping.getList()">
+                <tr ng-repeat="row in ctrl.mappingCtrl.getList()">
                     <td><input type="text" class="input-small gf-form-input width-20" ng-model="row.regex"/></td>
                     <td><input type="text" class="input-small gf-form-input width-20" ng-model="row.group"/></td>
                     <td>
                         <select class="input-medium gf-form-input" ng-model="row.match"
-                                ng-options="t for t in ctrl.getNameImage()"></select>
+                                ng-options="t for t in ctrl.mappingCtrl.getNameImage()"></select>
                     </td>
                     <td>
                         <button class="btn gf-form-input"
-                                ng-click="ctrl.mapping.remove(row);"><i
+                                ng-click="ctrl.mappingCtrl.remove(row);"><i
                                 class="fa fa-trash"></i>
                         </button>
                     </td>
@@ -56,9 +55,9 @@
         </div>
     </div>
     <div class="gf-form">
-        <button class="input-small gf-form-input width-12" ng-click="ctrl.mapping.addRow()">Add row</button>
+        <button class="input-small gf-form-input width-12" ng-click="ctrl.mappingCtrl.addRow()">Add row</button>
     </div>
     <div class="gf-form">
-        <button class="input-small gf-form-input width-12" ng-click="ctrl.mapping.apply()">Apply mapping</button>
+        <button class="input-small gf-form-input width-12" ng-click="ctrl.mappingCtrl.apply()">Apply mapping</button>
     </div>
 </div>

@@ -1,7 +1,8 @@
-import {NameImage} from "./util";
-import {PanelCtrl} from "./panel_ctrl";
+import {PanelCtrl} from "../panelCtrl";
+import {Mapping, NameImage} from "../model/mapping";
+import {Container} from "../model/container";
 
-export default class Mapping {
+export default class MappingCtrl {
 
     /** Variables */
     private panelCtrl: PanelCtrl;
@@ -10,44 +11,40 @@ export default class Mapping {
         this.panelCtrl = panelCtrl;
     }
 
+    public getNameImage() {
+        return NameImage;
+    }
+
     public addRow() {
-        this.panelCtrl.panel['ruleMappings'].push({
-            regex: '',
-            group: '',
-            match: NameImage.NAME,
-        });
+        this.panelCtrl.panel['ruleMappings'].push(new Mapping());
     }
 
     public apply() {
-        for (let container of this.panelCtrl.containerCtrl.getList()) {
-            this.mapContainer(container)
-        }
-        this.panelCtrl.updateGraph();
+        this.panelCtrl.dataCtrl.getContainers().forEach(c => this.mapContainer(c));
     }
 
-    public mapContainer(container) {
-        for (let mapping of this.panelCtrl.panel['ruleMappings']) {
+    private mapContainer(container: Container) {
+        this.panelCtrl.panel['ruleMappings'].forEach(mapping => {
             if (mapping.regex === "") {
-                continue;
+                return;
             }
             let re = new RegExp(mapping.regex);
 
             switch (mapping.match) {
                 case NameImage.NAME:
-                    if (re.test(container['names'])) {
-                        container['group'] = mapping.group;
+                    if (re.test(container.getName())) {
+                        container.setGroup(mapping.group);
                     }
                     break;
                 case NameImage.IMAGE:
-                    if (re.test(container['image'])) {
-                        container['group'] = mapping.group;
+                    if (re.test(container.getImage())) {
+                        container.setGroup(mapping.group);
                     }
                     break;
                 default:
                     console.log('Cannot end in this state: ' + mapping.match);
             }
-            container['group'].replace(re, container['group']);
-        }
+        });
     }
 
     public remove(row) {

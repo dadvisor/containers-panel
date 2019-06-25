@@ -1,4 +1,4 @@
-import {PanelCtrl} from './panel_ctrl';
+import {PanelCtrl} from './panelCtrl';
 
 export {
   PanelCtrl

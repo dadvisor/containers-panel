@@ -4,16 +4,13 @@ import {GraphNode} from "./model/graphNode";
 export enum Modes {
     NODES = 'Nodes',
     CONTAINERS = 'Containers',
-    CONTAINERS_TRAFFIC = 'Containers with traffic',
-    GROUPED = 'Grouped',
+    TRAFFIC = 'Containers with traffic',
     CPU_UTILIZATION = 'CPU Utilization',
     MEM_UTILIZATION = 'Memory Utilization',
     COST = 'Cost',
-    COST_GROUPED = 'Cost grouped',
     CPU_WASTE = 'CPU Waste distribution',
     MEM_WASTE = 'Memory Waste distribution',
     WASTE_COST = 'Waste Cost',
-    WASTE_COST_GROUPED = 'Waste Cost grouped',
 }
 
 export enum TIME_WINDOW {
@@ -39,19 +36,26 @@ export function verifyEdges(edges: GraphEdge[], nodes: GraphNode[]) {
     return edges.filter(edge => labels.includes(edge.source) && labels.includes(edge.target) && edge.bytes > 0);
 }
 
-export function bytesToSize(bytes: number) {
+export function formatSize(bytes: number): string {
     let sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
     if (bytes === 0) return '0 B';
     let i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${Math.round(bytes / Math.pow(1024, i))} ${sizes[i]}`;
 }
 
-export function formatPrice(price: any) {
+export function formatPrice(price: any): string {
     return '$' + price.toFixed(2);
 }
 
-export function formatPercentage(value: any) {
-    return (100 * value).toFixed(2) + '%';
+export function formatPercentage(value: any): string {
+    value *= 100;
+    let precision = 0;
+    if (value < 1){
+        precision = 2;
+    } else if (value < 100){
+        precision = 1;
+    }
+    return value.toFixed(precision) + '%';
 }
 
 export function getStyle(panel) {

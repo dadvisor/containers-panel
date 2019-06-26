@@ -52,6 +52,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             valueName: 'current',
             mode: Modes.CONTAINERS,
             colorNodeBackground: '#ffffff',
+            grouped: true,
             colorEdge: '#9fbfdf',
             colorText: '#d9d9d9',
             colorNodeBorder: '#808080',
@@ -148,58 +149,42 @@ export class PanelCtrl extends MetricsPanelCtrl {
     public description(): string {
         switch (this.panel.mode) {
             case Modes.NODES:
-                return '';
+                return 'The graph presented below shows all the nodes in the system. Additional information is the ' +
+                    'cost of running this node for a period of one hour. This price is calculated based on the node ' +
+                    'data';
             case Modes.CONTAINERS:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
-                    'grouped per host (based on its external IP), and based on the docker images that are used ' +
-                    'inside this host. The edges represent the total amount of data that has been send from a ' +
-                    'certain container to another container.';
-            case Modes.CONTAINERS_TRAFFIC:
+                    'grouped per node (based on its IP). The edges represent the total amount of data that ' +
+                    'has been send from a certain container (or group) to another container (or group).';
+            case Modes.TRAFFIC:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
-                    'grouped per host (based on its external IP), and based on the docker images that are used ' +
-                    'inside this host. The edges represent the total amount of data that has been send from a ' +
-                    'certain container to another container. Each node also shows the total amount of data that ' +
-                    'this container has received within the time frame set above.';
-            case Modes.GROUPED:
-                return 'The graph presented below groups related containers together. The groups are defined in the ' +
-                    'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, you ' +
-                    'can find out which groups are interacting with each other. This provides a higher hierarchy of ' +
-                    'the deployed system.';
+                    'grouped per node (based on its IP). Each graph-node shows the amount of network traffic that ' +
+                    'is going out of the system. The unit of these values are bytes.';
             case Modes.CPU_UTILIZATION:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
-                    'grouped per host (based on its external IP). Each node shows the container name, and the ' +
-                    'utilization percentage, which is the average over the last hour.';
+                    'grouped per node (based on its IP). Each graph-node shows the CPU utilization. The unit of ' +
+                    'these values are "core hour".';
             case Modes.MEM_UTILIZATION:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
-                    'grouped per host (based on its external IP). Each node shows the container name, and the ' +
-                    'utilization percentage, which is relative to its host.';
+                    'grouped per node (based on its IP). Each graph-node shows the memory utilization. The unit of ' +
+                    'these values are bytes.';
             case Modes.COST:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
-                    'grouped per host (based on its external IP). Each node shows the container name, and a cost ' +
-                    'prediction based on the utilization and the host price. The cost prediction is represented per ' +
-                    'hour, and formatted in USD.';
-            case Modes.COST_GROUPED:
-                return 'The graph presented below groups related containers together. The groups are defined in the ' +
-                    'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' +
-                    'estimation of the cost per group is presented. This graph is based on the previous graph (cost ' +
-                    'prediction).';
+                    'grouped per node (based on its IP). Each graph-node shows the cost based on the CPU and memory ' +
+                    'utilization and the external network traffic. The cost prediction is for the given time window. ' +
+                    'The unit of these values are USD.';
             case Modes.CPU_WASTE:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
-                    'grouped per host (based on its external IP). Each node shows the container name, and the ' +
-                    'waste percentage, which is the average over the last hour.';
+                    'grouped per node (based on its IP). Each graph-node shows the CPU waste. The unit of ' +
+                    'these values are "core hour".';
             case Modes.MEM_WASTE:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
-                    'grouped per host (based on its external IP). Each node shows the container name, and the ' +
-                    'waste percentage, which is the average over the last hour.';
+                    'grouped per node (based on its IP). Each graph-node shows the memory waste. The unit of ' +
+                    'these values are bytes.';
             case Modes.WASTE_COST:
                 return 'The graph presented below shows all the containers that are deployed. The containers are ' +
-                    'grouped per host (based on its external IP). Each node shows the container name, and a ' +
-                    'prediction of the amount of money that is wasted on the host (related to the container).';
-            case Modes.WASTE_COST_GROUPED:
-                return 'The graph presented below groups related containers together. The groups are defined in the ' +
-                    'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' +
-                    'estimation of the waste per group is presented. This graph is based on the previous graph ' +
-                    '(waste prediction).';
+                    'grouped per node (based on its IP). Each graph-node shows the waste based on the CPU and memory ' +
+                    'utilization. The waste prediction is for the given time window. The unit of these values are USD.';
             default:
                 console.log('Something went wrong');
                 return '';

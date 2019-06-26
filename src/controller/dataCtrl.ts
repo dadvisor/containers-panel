@@ -2,11 +2,11 @@ import {Container} from "../model/container";
 import {Node} from "../model/node";
 import _ from "lodash";
 import {PanelCtrl} from "../panelCtrl";
-import {bytesToSize, formatPercentage, formatPrice, Modes, setWidth, verifyEdges} from "../util";
+import {formatSize, formatPrice, Modes, setWidth, verifyEdges, formatPercentage} from "../util";
 import {GraphNode} from "../model/graphNode";
 import {GraphEdge} from "../model/graphEdge";
 import {GlobalVar, GlobalVarCtrl} from "./globalVarCtrl";
-import {getNodePrice, getTotalCost} from "./CostWasteCtrl";
+import {getNodePrice} from "./CostWasteCtrl";
 
 interface NodeMap {
     [ip: string]: Node;
@@ -144,75 +144,57 @@ export class DataCtrl {
     public getData(mode: Modes) {
         let nodes: GraphNode[] = [];
         let edges: GraphEdge[] = [];
+        let grouped: boolean = this.panelCtrl.panel['grouped'];
+
+        if (grouped){
+            edges = this.getGroupedEdges();
+        } else {
+            edges = this.getGraphEdges();
+        }
 
         switch (mode) {
             case Modes.NODES: // show the VM's
                 nodes = this.nodesToGraph(node =>
-                    node.getIp() + '\n' + formatPrice(getNodePrice(node, this)) + ' per hour');
+                    node.getIp() + '\n'
+                    + node.getNumCores() + ' cores, ' + formatSize(node.getMemory()) + '\n'
+                    + formatPrice(getNodePrice(node, this)) + ' per hour');
                 edges = this.getHostEdges();
                 break;
             case Modes.CONTAINERS: // show the containers
-                edges = this.getGraphEdges();
-                nodes = this.getGraphNodes(container => container.getName());
+                if (grouped){
+                    nodes = this.getGroupedContainers((containers, group) =>
+                        group + '\n' + containers.length + ' containers');
+                } else {
+                    nodes = this.getGraphNodes(container => container.getName());
+                }
                 break;
-            case Modes.CONTAINERS_TRAFFIC: // show the containers with traffic
-                edges = this.getGraphEdges();
-                nodes = this.getGraphNodes(container =>
-                    container.getName() + '\nOut: ' + bytesToSize(container.getNetworkTraffic()));
-                break;
-            case Modes.GROUPED: // show the containers grouped
-                nodes = this.getGroupedContainers((containers, group) =>
-                    group + '\n' + containers.length + ' containers');
-                edges = this.getGroupedEdges();
+            case Modes.TRAFFIC: // show the containers with traffic
+                nodes = this.getNodesForGraph(grouped, formatSize, c => c.getNetworkTraffic());
                 break;
             case Modes.CPU_UTILIZATION: // show the cpu utilization
-                edges = this.getGraphEdges();
-                nodes = this.getGraphNodes(container =>
-                    container.getName() + '\n' + formatPercentage(container.getCpuUtil()));
+                nodes = this.getNodesForGraph(grouped, formatPercentage,
+                        c => c.getCpuUtil() * this.getNode(c.getHostIp()).getNumCores());
                 break;
             case Modes.MEM_UTILIZATION: // show the memory utilization
-                edges = this.getGraphEdges();
-                nodes = this.getGraphNodes(container =>
-                    container.getName() + '\n' + formatPercentage(container.getMemUtil()));
+                nodes = this.getNodesForGraph(grouped, formatSize,
+                        c => c.getMemUtil() * this.getNode(c.getHostIp()).getMemory());
                 break;
             case Modes.COST: // show the cost
-                edges = this.getGraphEdges();
-                nodes = this.getGraphNodes(container => container.getName() + '\n' +
-                    formatPrice(container.getCost(this, this.getNode(container.getHostIp())))
-                );
-                break;
-            case Modes.COST_GROUPED: // show the cost grouped
-                nodes = this.getGroupedContainers((containers, group) => {
-                    let price = containers.map(c => getTotalCost(c, this))
-                        .reduce((a, b) => a + b, 0);
-                    return group + '\n' + formatPrice(price);
-                });
-                edges = this.getGroupedEdges();
+                nodes = this.getNodesForGraph(grouped, formatPrice,
+                        c => c.getCost(this, this.getNode(c.getHostIp())));
                 break;
             case Modes.CPU_WASTE: // show the CPU waste
-                edges = this.getGraphEdges();
-                nodes = this.getGraphNodes(container =>
-                    container.getName() + '\n' + formatPercentage(container.getCpuWaste()));
+                nodes = this.getNodesForGraph(grouped, formatPercentage,
+                        c => c.getCpuWaste() * this.getNode(c.getHostIp()).getNumCores());
                 break;
             case Modes.MEM_WASTE: // show the memory waste
-                edges = this.getGraphEdges();
-                nodes = this.getGraphNodes(container =>
-                    container.getName() + '\n' + formatPercentage(container.getMemWaste()));
+                nodes = this.getNodesForGraph(grouped, formatSize,
+                        c => c.getMemWaste() * this.getNode(c.getHostIp()).getMemory());
                 break;
             case Modes.WASTE_COST:
-                edges = this.getGraphEdges();
-                nodes = this.getGraphNodes(container => container.getName() + '\n' +
-                    formatPrice(container.getWaste(this, this.getNode(container.getHostIp())))
-                );
+                nodes = this.getNodesForGraph(grouped, formatPrice,
+                        c => c.getWaste(this, this.getNode(c.getHostIp())));
                 break;
-            case Modes.WASTE_COST_GROUPED:
-                nodes = this.getGroupedContainers((containers, group) => {
-                    let price = containers.map(c =>
-                        c.getWaste(this, this.getNode(c.getHostIp())))
-                        .reduce((a, b) => a + b, 0);
-                    return group + '\n' + formatPrice(price);
-                });
-                edges = this.getGroupedEdges();
         }
         edges = verifyEdges(edges, nodes);
         setWidth(edges);
@@ -223,6 +205,18 @@ export class DataCtrl {
             edges: edges.map(item => {
                 return {data: item}
             }),
+        }
+    }
+
+    private getNodesForGraph(grouped: boolean, formatF: (value: number) => string, getStatF: (c: Container) => number){
+        if (grouped){
+            return this.getGroupedContainers((containers, group) => {
+                let size = containers.map(c => getStatF(c)).reduce((a, b) => a+b, 0);
+                return group + '\n' + formatF(size);
+            });
+        } else {
+            return this.getGraphNodes(container =>
+                container.getName() + '\n' + formatF(getStatF(container)));
         }
     }
 

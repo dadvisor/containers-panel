@@ -1,6 +1,6 @@
 import {Container} from "./container";
 import {ContainerMap, DataCtrl} from "../controller/dataCtrl";
-import {bytesToSize} from "../util";
+import {formatSize} from "../util";
 
 export class Node {
     private readonly ip: string;
@@ -52,7 +52,7 @@ export class Node {
     }
 
     public getMemoryString(): string {
-        return bytesToSize(this.memory);
+        return formatSize(this.memory);
     }
 
     public setMemory(memory: number) {

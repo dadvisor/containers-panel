@@ -1,4 +1,4 @@
-import {bytesToSize} from "../util";
+import {formatSize} from "../util";
 
 export class GraphEdge {
     public readonly source: string;
@@ -12,7 +12,7 @@ export class GraphEdge {
         this.source = source;
         this.target = target;
         this.bytes = bytes;
-        this.label = bytesToSize(this.bytes);
+        this.label = formatSize(this.bytes);
         if (source === target){
             this.type = 'loop';
         }

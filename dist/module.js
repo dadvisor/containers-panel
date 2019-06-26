@@ -59037,13 +59037,9 @@ Object.defineProperty(exports, "__esModule", {
 exports.getCpuCost = getCpuCost;
 exports.getMemCost = getMemCost;
 exports.getTrafficCost = getTrafficCost;
-exports.getTotalCost = getTotalCost;
-exports.getTotalCostNode = getTotalCostNode;
 exports.getNodePrice = getNodePrice;
 exports.getCpuWasteCost = getCpuWasteCost;
 exports.getMemWasteCost = getMemWasteCost;
-exports.getTotalWaste = getTotalWaste;
-exports.getTotalWasteNode = getTotalWasteNode;
 
 /*
  * COST
@@ -59060,15 +59056,6 @@ function getTrafficCost(value, dataCtrl) {
   return value * dataCtrl.getTrafficPriceByte();
 }
 
-function getTotalCost(container, dataCtrl) {
-  var node = dataCtrl.getNode(container.getHostIp());
-  return getCpuCost(container.getCpuUtil(), dataCtrl, node) + getMemCost(container.getMemUtil(), dataCtrl, node) + getTrafficCost(container.getNetworkTraffic(), dataCtrl);
-}
-
-function getTotalCostNode(node, dataCtrl) {
-  return getCpuCost(node.getSumCpuUtil(), dataCtrl, node) + getMemCost(node.getSumMemUtil(), dataCtrl, node) + getTrafficCost(node.getSumNetwork(), dataCtrl);
-}
-
 function getNodePrice(node, dataCtrl) {
   return getCpuCost(1, dataCtrl, node) + getMemCost(1, dataCtrl, node);
 }
@@ -59083,15 +59070,6 @@ function getCpuWasteCost(value, dataCtrl, node) {
 
 function getMemWasteCost(value, dataCtrl, node) {
   return value * dataCtrl.getMemPriceByte() * node.getMemory();
-}
-
-function getTotalWaste(container, dataCtrl) {
-  var node = dataCtrl.getNode(container.getHostIp());
-  return getCpuWasteCost(container.getCpuWaste(), dataCtrl, node) + getMemWasteCost(container.getMemWaste(), dataCtrl, node);
-}
-
-function getTotalWasteNode(node, dataCtrl) {
-  return getCpuWasteCost(node.getSumCpuWaste(), dataCtrl, node) + getMemWasteCost(node.getSumMemWaste(), dataCtrl, node);
 }
 
 /***/ }),
@@ -59279,110 +59257,84 @@ function () {
 
     var nodes = [];
     var edges = [];
+    var grouped = this.panelCtrl.panel['grouped'];
+
+    if (grouped) {
+      edges = this.getGroupedEdges();
+    } else {
+      edges = this.getGraphEdges();
+    }
 
     switch (mode) {
       case _util.Modes.NODES:
         // show the VM's
         nodes = this.nodesToGraph(function (node) {
-          return node.getIp() + '\n' + (0, _util.formatPrice)((0, _CostWasteCtrl.getNodePrice)(node, _this)) + ' per hour';
+          return node.getIp() + '\n' + node.getNumCores() + ' cores, ' + (0, _util.formatSize)(node.getMemory()) + '\n' + (0, _util.formatPrice)((0, _CostWasteCtrl.getNodePrice)(node, _this)) + ' per hour';
         });
         edges = this.getHostEdges();
         break;
 
       case _util.Modes.CONTAINERS:
         // show the containers
-        edges = this.getGraphEdges();
-        nodes = this.getGraphNodes(function (container) {
-          return container.getName();
-        });
+        if (grouped) {
+          nodes = this.getGroupedContainers(function (containers, group) {
+            return group + '\n' + containers.length + ' containers';
+          });
+        } else {
+          nodes = this.getGraphNodes(function (container) {
+            return container.getName();
+          });
+        }
+
         break;
 
-      case _util.Modes.CONTAINERS_TRAFFIC:
+      case _util.Modes.TRAFFIC:
         // show the containers with traffic
-        edges = this.getGraphEdges();
-        nodes = this.getGraphNodes(function (container) {
-          return container.getName() + '\nOut: ' + (0, _util.bytesToSize)(container.getNetworkTraffic());
+        nodes = this.getNodesForGraph(grouped, _util.formatSize, function (c) {
+          return c.getNetworkTraffic();
         });
-        break;
-
-      case _util.Modes.GROUPED:
-        // show the containers grouped
-        nodes = this.getGroupedContainers(function (containers, group) {
-          return group + '\n' + containers.length + ' containers';
-        });
-        edges = this.getGroupedEdges();
         break;
 
       case _util.Modes.CPU_UTILIZATION:
         // show the cpu utilization
-        edges = this.getGraphEdges();
-        nodes = this.getGraphNodes(function (container) {
-          return container.getName() + '\n' + (0, _util.formatPercentage)(container.getCpuUtil());
+        nodes = this.getNodesForGraph(grouped, _util.formatPercentage, function (c) {
+          return c.getCpuUtil() * _this.getNode(c.getHostIp()).getNumCores();
         });
         break;
 
       case _util.Modes.MEM_UTILIZATION:
         // show the memory utilization
-        edges = this.getGraphEdges();
-        nodes = this.getGraphNodes(function (container) {
-          return container.getName() + '\n' + (0, _util.formatPercentage)(container.getMemUtil());
+        nodes = this.getNodesForGraph(grouped, _util.formatSize, function (c) {
+          return c.getMemUtil() * _this.getNode(c.getHostIp()).getMemory();
         });
         break;
 
       case _util.Modes.COST:
         // show the cost
-        edges = this.getGraphEdges();
-        nodes = this.getGraphNodes(function (container) {
-          return container.getName() + '\n' + (0, _util.formatPrice)(container.getCost(_this, _this.getNode(container.getHostIp())));
+        nodes = this.getNodesForGraph(grouped, _util.formatPrice, function (c) {
+          return c.getCost(_this, _this.getNode(c.getHostIp()));
         });
-        break;
-
-      case _util.Modes.COST_GROUPED:
-        // show the cost grouped
-        nodes = this.getGroupedContainers(function (containers, group) {
-          var price = containers.map(function (c) {
-            return (0, _CostWasteCtrl.getTotalCost)(c, _this);
-          }).reduce(function (a, b) {
-            return a + b;
-          }, 0);
-          return group + '\n' + (0, _util.formatPrice)(price);
-        });
-        edges = this.getGroupedEdges();
         break;
 
       case _util.Modes.CPU_WASTE:
         // show the CPU waste
-        edges = this.getGraphEdges();
-        nodes = this.getGraphNodes(function (container) {
-          return container.getName() + '\n' + (0, _util.formatPercentage)(container.getCpuWaste());
+        nodes = this.getNodesForGraph(grouped, _util.formatPercentage, function (c) {
+          return c.getCpuWaste() * _this.getNode(c.getHostIp()).getNumCores();
         });
         break;
 
       case _util.Modes.MEM_WASTE:
         // show the memory waste
-        edges = this.getGraphEdges();
-        nodes = this.getGraphNodes(function (container) {
-          return container.getName() + '\n' + (0, _util.formatPercentage)(container.getMemWaste());
+        nodes = this.getNodesForGraph(grouped, _util.formatSize, function (c) {
+          return c.getMemWaste() * _this.getNode(c.getHostIp()).getMemory();
         });
         break;
 
       case _util.Modes.WASTE_COST:
-        edges = this.getGraphEdges();
-        nodes = this.getGraphNodes(function (container) {
-          return container.getName() + '\n' + (0, _util.formatPrice)(container.getWaste(_this, _this.getNode(container.getHostIp())));
+        nodes = this.getNodesForGraph(grouped, _util.formatPrice, function (c) {
+          return c.getWaste(_this, _this.getNode(c.getHostIp()));
         });
         break;
-
-      case _util.Modes.WASTE_COST_GROUPED:
-        nodes = this.getGroupedContainers(function (containers, group) {
-          var price = containers.map(function (c) {
-            return c.getWaste(_this, _this.getNode(c.getHostIp()));
-          }).reduce(function (a, b) {
-            return a + b;
-          }, 0);
-          return group + '\n' + (0, _util.formatPrice)(price);
-        });
-        edges = this.getGroupedEdges();
     }
 
     edges = (0, _util.verifyEdges)(edges, nodes);
@@ -59399,6 +59351,23 @@ function () {
         };
       })
     };
+  };
+
+  DataCtrl.prototype.getNodesForGraph = function (grouped, formatF, getStatF) {
+    if (grouped) {
+      return this.getGroupedContainers(function (containers, group) {
+        var size = containers.map(function (c) {
+          return getStatF(c);
+        }).reduce(function (a, b) {
+          return a + b;
+        }, 0);
+        return group + '\n' + formatF(size);
+      });
+    } else {
+      return this.getGraphNodes(function (container) {
+        return container.getName() + '\n' + formatF(getStatF(container));
+      });
+    }
   };
 
   DataCtrl.prototype.getContainers = function () {
@@ -59974,7 +59943,7 @@ function () {
     this.source = source;
     this.target = target;
     this.bytes = bytes;
-    this.label = (0, _util.bytesToSize)(this.bytes);
+    this.label = (0, _util.formatSize)(this.bytes);
 
     if (source === target) {
       this.type = 'loop';
@@ -60130,7 +60099,7 @@ function () {
   };
 
   Node.prototype.getMemoryString = function () {
-    return (0, _util.bytesToSize)(this.memory);
+    return (0, _util.formatSize)(this.memory);
   };
 
   Node.prototype.setMemory = function (memory) {
@@ -60353,6 +60322,7 @@ function (_super) {
       valueName: 'current',
       mode: _util.Modes.CONTAINERS,
       colorNodeBackground: '#ffffff',
+      grouped: true,
       colorEdge: '#9fbfdf',
       colorText: '#d9d9d9',
       colorNodeBorder: '#808080',
@@ -60458,40 +60428,31 @@ function (_super) {
   PanelCtrl.prototype.description = function () {
     switch (this.panel.mode) {
       case _util.Modes.NODES:
-        return '';
+        return 'The graph presented below shows all the nodes in the system. Additional information is the ' + 'cost of running this node for a period of one hour. This price is calculated based on the node ' + 'data';
 
       case _util.Modes.CONTAINERS:
-        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP), and based on the docker images that are used ' + 'inside this host. The edges represent the total amount of data that has been send from a ' + 'certain container to another container.';
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per node (based on its IP). The edges represent the total amount of data that ' + 'has been send from a certain container (or group) to another container (or group).';
 
-      case _util.Modes.CONTAINERS_TRAFFIC:
-        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP), and based on the docker images that are used ' + 'inside this host. The edges represent the total amount of data that has been send from a ' + 'certain container to another container. Each node also shows the total amount of data that ' + 'this container has received within the time frame set above.';
-
-      case _util.Modes.GROUPED:
-        return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, you ' + 'can find out which groups are interacting with each other. This provides a higher hierarchy of ' + 'the deployed system.';
+      case _util.Modes.TRAFFIC:
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per node (based on its IP). Each graph-node shows the amount of network traffic that ' + 'is going out of the system. The unit of these values are bytes.';
 
       case _util.Modes.CPU_UTILIZATION:
-        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'utilization percentage, which is the average over the last hour.';
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per node (based on its IP). Each graph-node shows the CPU utilization. The unit of ' + 'these values are "core hour".';
 
       case _util.Modes.MEM_UTILIZATION:
-        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'utilization percentage, which is relative to its host.';
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per node (based on its IP). Each graph-node shows the memory utilization. The unit of ' + 'these values are bytes.';
 
       case _util.Modes.COST:
-        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and a cost ' + 'prediction based on the utilization and the host price. The cost prediction is represented per ' + 'hour, and formatted in USD.';
-
-      case _util.Modes.COST_GROUPED:
-        return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' + 'estimation of the cost per group is presented. This graph is based on the previous graph (cost ' + 'prediction).';
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per node (based on its IP). Each graph-node shows the cost based on the CPU and memory ' + 'utilization and the external network traffic. The cost prediction is for the given time window. ' + 'The unit of these values are USD.';
 
       case _util.Modes.CPU_WASTE:
-        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'waste percentage, which is the average over the last hour.';
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per node (based on its IP). Each graph-node shows the CPU waste. The unit of ' + 'these values are "core hour".';
 
       case _util.Modes.MEM_WASTE:
-        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and the ' + 'waste percentage, which is the average over the last hour.';
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per node (based on its IP). Each graph-node shows the memory waste. The unit of ' + 'these values are bytes.';
 
       case _util.Modes.WASTE_COST:
-        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per host (based on its external IP). Each node shows the container name, and a ' + 'prediction of the amount of money that is wasted on the host (related to the container).';
-
-      case _util.Modes.WASTE_COST_GROUPED:
-        return 'The graph presented below groups related containers together. The groups are defined in the ' + 'Edit-panel, and can thus be updated to make them more (or less) specific. Using this graph, an ' + 'estimation of the waste per group is presented. This graph is based on the previous graph ' + '(waste prediction).';
+        return 'The graph presented below shows all the containers that are deployed. The containers are ' + 'grouped per node (based on its IP). Each graph-node shows the waste based on the CPU and memory ' + 'utilization. The waste prediction is for the given time window. The unit of these values are USD.';
 
       default:
         console.log('Something went wrong');
@@ -60540,7 +60501,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.setWidth = setWidth;
 exports.verifyEdges = verifyEdges;
-exports.bytesToSize = bytesToSize;
+exports.formatSize = formatSize;
 exports.formatPrice = formatPrice;
 exports.formatPercentage = formatPercentage;
 exports.getStyle = getStyle;
@@ -60549,16 +60510,13 @@ var Modes = exports.Modes = undefined;
 (function (Modes) {
   Modes["NODES"] = "Nodes";
   Modes["CONTAINERS"] = "Containers";
-  Modes["CONTAINERS_TRAFFIC"] = "Containers with traffic";
-  Modes["GROUPED"] = "Grouped";
+  Modes["TRAFFIC"] = "Containers with traffic";
   Modes["CPU_UTILIZATION"] = "CPU Utilization";
   Modes["MEM_UTILIZATION"] = "Memory Utilization";
   Modes["COST"] = "Cost";
-  Modes["COST_GROUPED"] = "Cost grouped";
   Modes["CPU_WASTE"] = "CPU Waste distribution";
   Modes["MEM_WASTE"] = "Memory Waste distribution";
   Modes["WASTE_COST"] = "Waste Cost";
-  Modes["WASTE_COST_GROUPED"] = "Waste Cost grouped";
 })(Modes || (exports.Modes = Modes = {}));
 
 var TIME_WINDOW = exports.TIME_WINDOW = undefined;
@@ -60595,7 +60553,7 @@ function verifyEdges(edges, nodes) {
   });
 }
 
-function bytesToSize(bytes) {
+function formatSize(bytes) {
   var sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   if (bytes === 0) return '0 B';
   var i = Math.floor(Math.log(bytes) / Math.log(1024));
@@ -60607,7 +60565,16 @@ function formatPrice(price) {
 }
 
 function formatPercentage(value) {
-  return (100 * value).toFixed(2) + '%';
+  value *= 100;
+  var precision = 0;
+
+  if (value < 1) {
+    precision = 2;
+  } else if (value < 100) {
+    precision = 1;
+  }
+
+  return value.toFixed(precision) + '%';
 }
 
 function getStyle(panel) {

@@ -15,11 +15,11 @@ export class Node {
     private sumMemWaste: number = 0;
     private sumNetwork: number = 0;
 
-    constructor(ip: string){
+    constructor(ip: string) {
         this.ip = ip;
     }
 
-    public getContainer(hash: string, dataCtrl: DataCtrl){
+    public getContainer(hash: string, dataCtrl: DataCtrl) {
         if (!this.containers[hash]) {
             this.containers[hash] = new Container(hash, this.ip);
             dataCtrl.setContainer(hash, this.containers[hash]);
@@ -27,16 +27,11 @@ export class Node {
         return this.containers[hash];
     }
 
-    public clearContainers(){
+    public clearContainers() {
         this.containers = {};
     }
 
-    public getPrice(cpuPrice: number, memPrice: number){ // used in the view
-        return (this.numCores *cpuPrice +
-            this.memory * memPrice / Math.pow(2, 30)).toFixed(4);
-    }
-
-    public getContainers(): Container[]{
+    public getContainers(): Container[] {
         return Object.keys(this.containers).map(hash => this.containers[hash]);
     }
 
@@ -48,7 +43,7 @@ export class Node {
         return this.superNode;
     }
 
-    public setSuperNode(superNode: boolean){
+    public setSuperNode(superNode: boolean) {
         this.superNode = superNode;
     }
 
@@ -60,7 +55,7 @@ export class Node {
         return bytesToSize(this.memory);
     }
 
-    public setMemory(memory: number){
+    public setMemory(memory: number) {
         this.memory = memory;
     }
 
@@ -68,19 +63,19 @@ export class Node {
         return this.numCores;
     }
 
-    public setNumCores(numCores: number){
+    public setNumCores(numCores: number) {
         this.numCores = numCores;
     }
 
-    public setSumCpuUtil(sumCpuUtil: number){
+    public setSumCpuUtil(sumCpuUtil: number) {
         this.sumCpuUtil = sumCpuUtil;
     }
 
-    public getSumCpuUtil(): number{
+    public getSumCpuUtil(): number {
         return this.sumCpuUtil;
     }
 
-    public setSumMemUtil(sumMemUtil: number){
+    public setSumMemUtil(sumMemUtil: number) {
         this.sumMemUtil = sumMemUtil;
     }
 
@@ -88,7 +83,7 @@ export class Node {
         return this.sumMemUtil;
     }
 
-    public setSumCpuWaste(sumCpuWaste: number){
+    public setSumCpuWaste(sumCpuWaste: number) {
         this.sumCpuWaste = sumCpuWaste;
     }
 
@@ -96,7 +91,7 @@ export class Node {
         return this.sumCpuWaste;
     }
 
-    public setSumMemWaste(sumMemWaste: number){
+    public setSumMemWaste(sumMemWaste: number) {
         this.sumMemWaste = sumMemWaste;
     }
 
@@ -104,7 +99,7 @@ export class Node {
         return this.sumMemWaste;
     }
 
-    public setSumNetwork(sumNetwork: number){
+    public setSumNetwork(sumNetwork: number) {
         this.sumNetwork = sumNetwork;
     }
 

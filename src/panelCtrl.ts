@@ -47,10 +47,8 @@ export class PanelCtrl extends MetricsPanelCtrl {
                     legendFormat: LegendFormat.SUM_NETWORK},
             ]),
             ruleMappings: [], // type: Mapping[]
-            cpuPriceHour: 0.021925,
-            memPriceHour: 0.002938,
-            trafficPrice: 0.01,
-            interval: '1m',
+            trafficPriceReduction: 0,
+            interval: '1h',
             valueName: 'current',
             mode: Modes.CONTAINERS,
             colorNodeBackground: '#ffffff',
@@ -220,18 +218,6 @@ export class PanelCtrl extends MetricsPanelCtrl {
                 "refId": alphabet[i]
             })
         });
-    }
-
-    public getCpuPrice() {
-        return this.panel['cpuPriceHour'];
-    }
-
-    public getMemPriceByte() {
-        return this.panel['memPriceHour'] / Math.pow(2, 30);
-    }
-
-    public getTrafficPriceByte() {
-        return this.panel['trafficPrice'] / Math.pow(2, 30);
     }
 
     public getDataCtrl(): DataCtrl {

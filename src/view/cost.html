@@ -1,21 +1,9 @@
 <div class="editor-row">
     <div class="section gf-form-group">
         <div class="gf-form">
-            <label class="gf-form-label width-20">CPU price (in USD) per core per hour</label>
+            <label class="gf-form-label width-20">Network price reduction</label>
             <span class="max-width-15">
-				<input type="text" class="input-small gf-form-input width-15" ng-model="ctrl.panel['cpuPriceHour']" />
-            </span>
-        </div>
-        <div class="gf-form">
-            <label class="gf-form-label width-20">Memory price (in USD) per GB per hour</label>
-            <span class="max-width-15">
-				<input type="text" class="input-small gf-form-input width-15" ng-model="ctrl.panel['memPriceHour']" />
-            </span>
-        </div>
-        <div class="gf-form">
-            <label class="gf-form-label width-20">Network price (in USD) per outgoing GB</label>
-            <span class="max-width-15">
-				<input type="text" class="input-small gf-form-input width-15" ng-model="ctrl.panel['trafficPrice']" />
+				<input type="text" class="input-small gf-form-input width-15" ng-model="ctrl.panel['trafficPriceReduction']" />
             </span>
         </div>
     </div>
@@ -27,13 +15,11 @@
                         <th>Host</th>
                         <th>CPU's</th>
                         <th>Memory</th>
-                        <th>Price (in USD) per hour</th>
                     </tr>
                     <tr ng-repeat="host in ctrl.dataCtrl.getNodes()">
                         <td>{{host.getIp()}}</td>
                         <td>{{host.getNumCores()}}</td>
                         <td>{{host.getMemoryString()}}</td>
-                        <td>{{host.getPrice(ctrl.panel['cpuPriceHour'], ctrl.panel['memPriceHour'])}}</td>
                     </tr>
                 </table>
             </div>

@@ -5,8 +5,8 @@ import {PanelCtrl} from "../panelCtrl";
 import {bytesToSize, formatPercentage, formatPrice, Modes, setWidth, verifyEdges} from "../util";
 import {GraphNode} from "../model/graphNode";
 import {GraphEdge} from "../model/graphEdge";
-import {GlobalVarCtrl} from "./globalVarCtrl";
-import {getTotalCost} from "./CostWasteCtrl";
+import {GlobalVar, GlobalVarCtrl} from "./globalVarCtrl";
+import {getNodePrice, getTotalCost} from "./CostWasteCtrl";
 
 interface NodeMap {
     [ip: string]: Node;
@@ -47,6 +47,10 @@ export class DataCtrl {
     private nodes: NodeMap = {};
     private edges: EdgeMap = {};
     private containers: ContainerMap = {};
+
+    private cpuPrice: number = 0;
+    private memPrice: number = 0;
+    private trafficPrice: number = 0;
 
     constructor(panelCtrl: PanelCtrl) {
         this.panelCtrl = panelCtrl;
@@ -143,7 +147,8 @@ export class DataCtrl {
 
         switch (mode) {
             case Modes.NODES: // show the VM's
-                nodes = this.nodesToGraph();
+                nodes = this.nodesToGraph(node =>
+                    node.getIp() + '\n' + formatPrice(getNodePrice(node, this)) + ' per hour');
                 edges = this.getHostEdges();
                 break;
             case Modes.CONTAINERS: // show the containers
@@ -156,7 +161,8 @@ export class DataCtrl {
                     container.getName() + '\nOut: ' + bytesToSize(container.getNetworkTraffic()));
                 break;
             case Modes.GROUPED: // show the containers grouped
-                nodes = this.getGroupedContainers((containers, group) => group);
+                nodes = this.getGroupedContainers((containers, group) =>
+                    group + '\n' + containers.length + ' containers');
                 edges = this.getGroupedEdges();
                 break;
             case Modes.CPU_UTILIZATION: // show the cpu utilization
@@ -172,12 +178,12 @@ export class DataCtrl {
             case Modes.COST: // show the cost
                 edges = this.getGraphEdges();
                 nodes = this.getGraphNodes(container => container.getName() + '\n' +
-                    formatPrice(container.getCost(this.panelCtrl, this.getNode(container.getHostIp())))
+                    formatPrice(container.getCost(this, this.getNode(container.getHostIp())))
                 );
                 break;
             case Modes.COST_GROUPED: // show the cost grouped
                 nodes = this.getGroupedContainers((containers, group) => {
-                    let price = containers.map(c => getTotalCost(c, this.panelCtrl))
+                    let price = containers.map(c => getTotalCost(c, this))
                         .reduce((a, b) => a + b, 0);
                     return group + '\n' + formatPrice(price);
                 });
@@ -196,13 +202,13 @@ export class DataCtrl {
             case Modes.WASTE_COST:
                 edges = this.getGraphEdges();
                 nodes = this.getGraphNodes(container => container.getName() + '\n' +
-                    formatPrice(container.getWaste(this.panelCtrl, this.getNode(container.getHostIp())))
+                    formatPrice(container.getWaste(this, this.getNode(container.getHostIp())))
                 );
                 break;
             case Modes.WASTE_COST_GROUPED:
                 nodes = this.getGroupedContainers((containers, group) => {
                     let price = containers.map(c =>
-                        c.getWaste(this.panelCtrl, this.getNode(c.getHostIp())))
+                        c.getWaste(this, this.getNode(c.getHostIp())))
                         .reduce((a, b) => a + b, 0);
                     return group + '\n' + formatPrice(price);
                 });
@@ -278,7 +284,7 @@ export class DataCtrl {
     public getGraphNodes(getName: (container: Container) => string): GraphNode[] {
         let nodes = this.getContainers().map(container =>
             new GraphNode(container.getHash(), getName(container), container.getHostIp()));
-        return nodes.concat(...this.nodesToGraph());
+        return nodes.concat(...this.nodesToGraph(node => node.getIp()));
     }
 
     public getGraphEdges(): GraphEdge[] {
@@ -319,10 +325,10 @@ export class DataCtrl {
                     .map(dst => new GraphEdge(src, dst, edges[src][dst]))));
     }
 
-    private nodesToGraph() {
+    private nodesToGraph(getName: (node: Node) => string) {
         return Object.keys(this.nodes)
             .map(hostIp => this.nodes[hostIp])
-            .map(node => new GraphNode(node.getIp(), node.getIp()));
+            .map(node => new GraphNode(node.getIp(), getName(node)));
     }
 
     /*
@@ -356,6 +362,24 @@ export class DataCtrl {
 
     public getGlobalVarCtrl(): GlobalVarCtrl {
         return this.globalVarCtrl;
+    }
+
+    public getCpuPrice(): number {
+        return this.cpuPrice
+    }
+
+    public getMemPriceByte(): number {
+        return this.memPrice
+    }
+
+    public getTrafficPriceByte(): number {
+        return this.trafficPrice
+    }
+
+    public computePrices() {
+        this.cpuPrice = this.globalVarCtrl.get(GlobalVar.CPU_PRICE);
+        this.memPrice = this.globalVarCtrl.get(GlobalVar.MEM_PRICE) / Math.pow(2, 30);
+        this.trafficPrice = this.globalVarCtrl.get(GlobalVar.TRAFFIC_PRICE) / Math.pow(2, 30);
     }
 }
 

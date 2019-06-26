@@ -1,6 +1,6 @@
-import {PanelCtrl} from "../panelCtrl";
 import {Node} from "./node";
 import {getCpuCost, getCpuWasteCost, getMemCost, getMemWasteCost, getTrafficCost} from "../controller/CostWasteCtrl";
+import {DataCtrl} from "../controller/dataCtrl";
 
 export class Container {
     private name: string = '';
@@ -95,15 +95,15 @@ export class Container {
         this.networkTraffic = networkTraffic;
     }
 
-    public getCost(panelCtrl: PanelCtrl, node: Node) {
-        return getCpuCost(this.cpuUtil, panelCtrl, node)
-            + getMemCost(this.memUtil, panelCtrl, node)
-            + getTrafficCost(this.networkTraffic, panelCtrl);
+    public getCost(dataCtrl: DataCtrl, node: Node) {
+        return getCpuCost(this.cpuUtil, dataCtrl, node)
+            + getMemCost(this.memUtil, dataCtrl, node)
+            + getTrafficCost(this.networkTraffic, dataCtrl);
     }
 
-    public getWaste(panelCtrl: PanelCtrl, node: Node) {
-        return getCpuWasteCost(this.cpuWaste, panelCtrl, node)
-            + getMemWasteCost(this.memWaste, panelCtrl, node);
+    public getWaste(dataCtrl: DataCtrl, node: Node) {
+        return getCpuWasteCost(this.cpuWaste, dataCtrl, node)
+            + getMemWasteCost(this.memWaste, dataCtrl, node);
     }
 
 }

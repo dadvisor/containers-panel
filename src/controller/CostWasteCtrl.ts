@@ -1,53 +1,58 @@
-import {PanelCtrl} from "../panelCtrl";
 import {Node} from "../model/node";
 import {Container} from "../model/container";
+import {DataCtrl} from "./dataCtrl";
 
 /*
  * COST
  */
-export function getCpuCost(value: number, panelCtrl: PanelCtrl, node: Node): number {
-    return value * panelCtrl.getCpuPrice() * node.getNumCores();
+export function getCpuCost(value: number, dataCtrl: DataCtrl, node: Node): number {
+    return value * dataCtrl.getCpuPrice() * node.getNumCores();
 }
 
-export function getMemCost(value: number, panelCtrl: PanelCtrl, node: Node): number {
-    return value * panelCtrl.getMemPriceByte() * node.getMemory();
+export function getMemCost(value: number, dataCtrl: DataCtrl, node: Node): number {
+    return value * dataCtrl.getMemPriceByte() * node.getMemory();
 }
 
-export function getTrafficCost(value: number, panelCtrl: PanelCtrl): number {
-    return value * panelCtrl.getTrafficPriceByte();
+export function getTrafficCost(value: number, dataCtrl: DataCtrl): number {
+    return value * dataCtrl.getTrafficPriceByte();
 }
 
-export function getTotalCost(container: Container, panelCtrl: PanelCtrl): number {
-    let node = panelCtrl.getDataCtrl().getNode(container.getHostIp());
-    return getCpuCost(container.getCpuUtil(), panelCtrl, node)
-        + getMemCost(container.getMemUtil(), panelCtrl, node)
-        + getTrafficCost(container.getNetworkTraffic(), panelCtrl);
+export function getTotalCost(container: Container, dataCtrl: DataCtrl): number {
+    let node = dataCtrl.getNode(container.getHostIp());
+    return getCpuCost(container.getCpuUtil(), dataCtrl, node)
+        + getMemCost(container.getMemUtil(), dataCtrl, node)
+        + getTrafficCost(container.getNetworkTraffic(), dataCtrl);
 }
 
-export function getTotalCostNode(node: Node, panelCtrl: PanelCtrl): number {
-    return getCpuCost(node.getSumCpuUtil(), panelCtrl, node)
-        + getMemCost(node.getSumMemUtil(), panelCtrl, node)
-        + getTrafficCost(node.getSumNetwork(), panelCtrl);
+export function getTotalCostNode(node: Node, dataCtrl: DataCtrl): number {
+    return getCpuCost(node.getSumCpuUtil(), dataCtrl, node)
+        + getMemCost(node.getSumMemUtil(), dataCtrl, node)
+        + getTrafficCost(node.getSumNetwork(), dataCtrl);
+}
+
+export function getNodePrice(node: Node, dataCtrl: DataCtrl): number {
+    return getCpuCost(1, dataCtrl, node)
+        + getMemCost(1, dataCtrl, node)
 }
 
 /*
  * WASTE
  */
-export function getCpuWasteCost(value: number, panelCtrl: PanelCtrl, node: Node) {
-    return value * panelCtrl.getCpuPrice() * node.getNumCores();
+export function getCpuWasteCost(value: number, dataCtrl: DataCtrl, node: Node) {
+    return value * dataCtrl.getCpuPrice() * node.getNumCores();
 }
 
-export function getMemWasteCost(value: number, panelCtrl: PanelCtrl, node: Node) {
-    return value * panelCtrl.getMemPriceByte() * node.getMemory();
+export function getMemWasteCost(value: number, dataCtrl: DataCtrl, node: Node) {
+    return value * dataCtrl.getMemPriceByte() * node.getMemory();
 }
 
-export function getTotalWaste(container: Container, panelCtrl: PanelCtrl): number {
-    let node = panelCtrl.getDataCtrl().getNode(container.getHostIp());
-    return getCpuWasteCost(container.getCpuWaste(), panelCtrl, node)
-        + getMemWasteCost(container.getMemWaste(), panelCtrl, node);
+export function getTotalWaste(container: Container, dataCtrl: DataCtrl): number {
+    let node = dataCtrl.getNode(container.getHostIp());
+    return getCpuWasteCost(container.getCpuWaste(), dataCtrl, node)
+        + getMemWasteCost(container.getMemWaste(), dataCtrl, node);
 }
 
-export function getTotalWasteNode(node: Node, panelCtrl: PanelCtrl): number {
-    return getCpuWasteCost(node.getSumCpuWaste(), panelCtrl, node)
-        + getMemWasteCost(node.getSumMemWaste(), panelCtrl, node);
+export function getTotalWasteNode(node: Node, dataCtrl: DataCtrl): number {
+    return getCpuWasteCost(node.getSumCpuWaste(), dataCtrl, node)
+        + getMemWasteCost(node.getSumMemWaste(), dataCtrl, node);
 }

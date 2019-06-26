@@ -59039,6 +59039,7 @@ exports.getMemCost = getMemCost;
 exports.getTrafficCost = getTrafficCost;
 exports.getTotalCost = getTotalCost;
 exports.getTotalCostNode = getTotalCostNode;
+exports.getNodePrice = getNodePrice;
 exports.getCpuWasteCost = getCpuWasteCost;
 exports.getMemWasteCost = getMemWasteCost;
 exports.getTotalWaste = getTotalWaste;
@@ -59047,46 +59048,50 @@ exports.getTotalWasteNode = getTotalWasteNode;
 /*
  * COST
  */
-function getCpuCost(value, panelCtrl, node) {
-  return value * panelCtrl.getCpuPrice() * node.getNumCores();
+function getCpuCost(value, dataCtrl, node) {
+  return value * dataCtrl.getCpuPrice() * node.getNumCores();
 }
 
-function getMemCost(value, panelCtrl, node) {
-  return value * panelCtrl.getMemPriceByte() * node.getMemory();
+function getMemCost(value, dataCtrl, node) {
+  return value * dataCtrl.getMemPriceByte() * node.getMemory();
 }
 
-function getTrafficCost(value, panelCtrl) {
-  return value * panelCtrl.getTrafficPriceByte();
+function getTrafficCost(value, dataCtrl) {
+  return value * dataCtrl.getTrafficPriceByte();
 }
 
-function getTotalCost(container, panelCtrl) {
-  var node = panelCtrl.getDataCtrl().getNode(container.getHostIp());
-  return getCpuCost(container.getCpuUtil(), panelCtrl, node) + getMemCost(container.getMemUtil(), panelCtrl, node) + getTrafficCost(container.getNetworkTraffic(), panelCtrl);
+function getTotalCost(container, dataCtrl) {
+  var node = dataCtrl.getNode(container.getHostIp());
+  return getCpuCost(container.getCpuUtil(), dataCtrl, node) + getMemCost(container.getMemUtil(), dataCtrl, node) + getTrafficCost(container.getNetworkTraffic(), dataCtrl);
 }
 
-function getTotalCostNode(node, panelCtrl) {
-  return getCpuCost(node.getSumCpuUtil(), panelCtrl, node) + getMemCost(node.getSumMemUtil(), panelCtrl, node) + getTrafficCost(node.getSumNetwork(), panelCtrl);
+function getTotalCostNode(node, dataCtrl) {
+  return getCpuCost(node.getSumCpuUtil(), dataCtrl, node) + getMemCost(node.getSumMemUtil(), dataCtrl, node) + getTrafficCost(node.getSumNetwork(), dataCtrl);
+}
+
+function getNodePrice(node, dataCtrl) {
+  return getCpuCost(1, dataCtrl, node) + getMemCost(1, dataCtrl, node);
 }
 /*
  * WASTE
  */
 
 
-function getCpuWasteCost(value, panelCtrl, node) {
-  return value * panelCtrl.getCpuPrice() * node.getNumCores();
+function getCpuWasteCost(value, dataCtrl, node) {
+  return value * dataCtrl.getCpuPrice() * node.getNumCores();
 }
 
-function getMemWasteCost(value, panelCtrl, node) {
-  return value * panelCtrl.getMemPriceByte() * node.getMemory();
+function getMemWasteCost(value, dataCtrl, node) {
+  return value * dataCtrl.getMemPriceByte() * node.getMemory();
 }
 
-function getTotalWaste(container, panelCtrl) {
-  var node = panelCtrl.getDataCtrl().getNode(container.getHostIp());
-  return getCpuWasteCost(container.getCpuWaste(), panelCtrl, node) + getMemWasteCost(container.getMemWaste(), panelCtrl, node);
+function getTotalWaste(container, dataCtrl) {
+  var node = dataCtrl.getNode(container.getHostIp());
+  return getCpuWasteCost(container.getCpuWaste(), dataCtrl, node) + getMemWasteCost(container.getMemWaste(), dataCtrl, node);
 }
 
-function getTotalWasteNode(node, panelCtrl) {
-  return getCpuWasteCost(node.getSumCpuWaste(), panelCtrl, node) + getMemWasteCost(node.getSumMemWaste(), panelCtrl, node);
+function getTotalWasteNode(node, dataCtrl) {
+  return getCpuWasteCost(node.getSumCpuWaste(), dataCtrl, node) + getMemWasteCost(node.getSumMemWaste(), dataCtrl, node);
 }
 
 /***/ }),
@@ -59149,6 +59154,9 @@ function () {
     this.nodes = {};
     this.edges = {};
     this.containers = {};
+    this.cpuPrice = 0;
+    this.memPrice = 0;
+    this.trafficPrice = 0;
     this.panelCtrl = panelCtrl;
     this.globalVarCtrl = new _globalVarCtrl.GlobalVarCtrl(this.panelCtrl, this);
   }
@@ -59275,7 +59283,9 @@ function () {
     switch (mode) {
       case _util.Modes.NODES:
         // show the VM's
-        nodes = this.nodesToGraph();
+        nodes = this.nodesToGraph(function (node) {
+          return node.getIp() + '\n' + (0, _util.formatPrice)((0, _CostWasteCtrl.getNodePrice)(node, _this)) + ' per hour';
+        });
         edges = this.getHostEdges();
         break;
 
@@ -59298,7 +59308,7 @@ function () {
       case _util.Modes.GROUPED:
         // show the containers grouped
         nodes = this.getGroupedContainers(function (containers, group) {
-          return group;
+          return group + '\n' + containers.length + ' containers';
         });
         edges = this.getGroupedEdges();
         break;
@@ -59323,7 +59333,7 @@ function () {
         // show the cost
         edges = this.getGraphEdges();
         nodes = this.getGraphNodes(function (container) {
-          return container.getName() + '\n' + (0, _util.formatPrice)(container.getCost(_this.panelCtrl, _this.getNode(container.getHostIp())));
+          return container.getName() + '\n' + (0, _util.formatPrice)(container.getCost(_this, _this.getNode(container.getHostIp())));
         });
         break;
 
@@ -59331,7 +59341,7 @@ function () {
         // show the cost grouped
         nodes = this.getGroupedContainers(function (containers, group) {
           var price = containers.map(function (c) {
-            return (0, _CostWasteCtrl.getTotalCost)(c, _this.panelCtrl);
+            return (0, _CostWasteCtrl.getTotalCost)(c, _this);
           }).reduce(function (a, b) {
             return a + b;
           }, 0);
@@ -59359,14 +59369,14 @@ function () {
       case _util.Modes.WASTE_COST:
         edges = this.getGraphEdges();
         nodes = this.getGraphNodes(function (container) {
-          return container.getName() + '\n' + (0, _util.formatPrice)(container.getWaste(_this.panelCtrl, _this.getNode(container.getHostIp())));
+          return container.getName() + '\n' + (0, _util.formatPrice)(container.getWaste(_this, _this.getNode(container.getHostIp())));
         });
         break;
 
       case _util.Modes.WASTE_COST_GROUPED:
         nodes = this.getGroupedContainers(function (containers, group) {
           var price = containers.map(function (c) {
-            return c.getWaste(_this.panelCtrl, _this.getNode(c.getHostIp()));
+            return c.getWaste(_this, _this.getNode(c.getHostIp()));
           }).reduce(function (a, b) {
             return a + b;
           }, 0);
@@ -59473,7 +59483,9 @@ function () {
     var nodes = this.getContainers().map(function (container) {
       return new _graphNode.GraphNode(container.getHash(), getName(container), container.getHostIp());
     });
-    return nodes.concat.apply(nodes, this.nodesToGraph());
+    return nodes.concat.apply(nodes, this.nodesToGraph(function (node) {
+      return node.getIp();
+    }));
   };
 
   DataCtrl.prototype.getGraphEdges = function () {
@@ -59525,13 +59537,13 @@ function () {
     }));
   };
 
-  DataCtrl.prototype.nodesToGraph = function () {
+  DataCtrl.prototype.nodesToGraph = function (getName) {
     var _this = this;
 
     return Object.keys(this.nodes).map(function (hostIp) {
       return _this.nodes[hostIp];
     }).map(function (node) {
-      return new _graphNode.GraphNode(node.getIp(), node.getIp());
+      return new _graphNode.GraphNode(node.getIp(), getName(node));
     });
   };
   /*
@@ -59575,6 +59587,24 @@ function () {
     return this.globalVarCtrl;
   };
 
+  DataCtrl.prototype.getCpuPrice = function () {
+    return this.cpuPrice;
+  };
+
+  DataCtrl.prototype.getMemPriceByte = function () {
+    return this.memPrice;
+  };
+
+  DataCtrl.prototype.getTrafficPriceByte = function () {
+    return this.trafficPrice;
+  };
+
+  DataCtrl.prototype.computePrices = function () {
+    this.cpuPrice = this.globalVarCtrl.get(_globalVarCtrl.GlobalVar.CPU_PRICE);
+    this.memPrice = this.globalVarCtrl.get(_globalVarCtrl.GlobalVar.MEM_PRICE) / Math.pow(2, 30);
+    this.trafficPrice = this.globalVarCtrl.get(_globalVarCtrl.GlobalVar.TRAFFIC_PRICE) / Math.pow(2, 30);
+  };
+
   return DataCtrl;
 }();
 
@@ -59608,6 +59638,9 @@ var GlobalVar = exports.GlobalVar = undefined;
   GlobalVar["TOTAL_TRAFFIC_COST"] = "TOTAL_TRAFFIC_COST";
   GlobalVar["TOTAL_CPU_WASTE"] = "TOTAL_CPU_WASTE";
   GlobalVar["TOTAL_MEM_WASTE"] = "TOTAL_MEM_WASTE";
+  GlobalVar["CPU_PRICE"] = "CPU_PRICE";
+  GlobalVar["MEM_PRICE"] = "MEM_PRICE";
+  GlobalVar["TRAFFIC_PRICE"] = "TRAFFIC_PRICE";
 })(GlobalVar || (exports.GlobalVar = GlobalVar = {}));
 
 var GlobalVarCtrl =
@@ -59623,25 +59656,27 @@ function () {
 
     var nodes = this.dataCtrl.getNodes();
     var cpuCost = this.getPrice(nodes, function (n) {
-      return (0, _CostWasteCtrl.getCpuCost)(n.getSumCpuUtil(), _this.panelCtrl, n);
+      return (0, _CostWasteCtrl.getCpuCost)(n.getSumCpuUtil(), _this.dataCtrl, n);
     });
     var memCost = this.getPrice(nodes, function (n) {
-      return (0, _CostWasteCtrl.getMemCost)(n.getSumMemUtil(), _this.panelCtrl, n);
+      return (0, _CostWasteCtrl.getMemCost)(n.getSumMemUtil(), _this.dataCtrl, n);
     });
     var trafficCost = this.getPrice(nodes, function (n) {
-      return (0, _CostWasteCtrl.getTrafficCost)(n.getSumNetwork(), _this.panelCtrl);
+      return (0, _CostWasteCtrl.getTrafficCost)(n.getSumNetwork(), _this.dataCtrl);
     });
     var cpuWaste = this.getPrice(nodes, function (n) {
-      return (0, _CostWasteCtrl.getCpuWasteCost)(n.getSumCpuWaste(), _this.panelCtrl, n);
+      return (0, _CostWasteCtrl.getCpuWasteCost)(n.getSumCpuWaste(), _this.dataCtrl, n);
     });
     var memWaste = this.getPrice(nodes, function (n) {
-      return (0, _CostWasteCtrl.getMemWasteCost)(n.getSumMemWaste(), _this.panelCtrl, n);
+      return (0, _CostWasteCtrl.getMemWasteCost)(n.getSumMemWaste(), _this.dataCtrl, n);
     });
+    trafficCost = Math.max(trafficCost - this.panelCtrl.panel['trafficPriceReduction'], 0);
     this.set(GlobalVar.TOTAL_CPU_COST, cpuCost);
     this.set(GlobalVar.TOTAL_MEM_COST, memCost);
     this.set(GlobalVar.TOTAL_TRAFFIC_COST, trafficCost);
     this.set(GlobalVar.TOTAL_CPU_WASTE, cpuWaste);
     this.set(GlobalVar.TOTAL_MEM_WASTE, memWaste);
+    this.dataCtrl.computePrices();
   };
 
   GlobalVarCtrl.prototype.set = function (varName, value) {
@@ -59652,8 +59687,19 @@ function () {
     if (dashboardVar) {
       dashboardVar.current.text = value.toString();
       dashboardVar.current.value = value.toString();
-      console.log("Setting " + varName + " to: " + value);
     }
+  };
+
+  GlobalVarCtrl.prototype.get = function (varName) {
+    var dashboardVar = this.panelCtrl.templateSrv.variables.find(function (v) {
+      return v.name === varName;
+    });
+
+    if (dashboardVar) {
+      return dashboardVar.current.value;
+    }
+
+    return '';
   };
 
   GlobalVarCtrl.prototype.getPrice = function (nodes, computePrice) {
@@ -59889,12 +59935,12 @@ function () {
     this.networkTraffic = networkTraffic;
   };
 
-  Container.prototype.getCost = function (panelCtrl, node) {
-    return (0, _CostWasteCtrl.getCpuCost)(this.cpuUtil, panelCtrl, node) + (0, _CostWasteCtrl.getMemCost)(this.memUtil, panelCtrl, node) + (0, _CostWasteCtrl.getTrafficCost)(this.networkTraffic, panelCtrl);
+  Container.prototype.getCost = function (dataCtrl, node) {
+    return (0, _CostWasteCtrl.getCpuCost)(this.cpuUtil, dataCtrl, node) + (0, _CostWasteCtrl.getMemCost)(this.memUtil, dataCtrl, node) + (0, _CostWasteCtrl.getTrafficCost)(this.networkTraffic, dataCtrl);
   };
 
-  Container.prototype.getWaste = function (panelCtrl, node) {
-    return (0, _CostWasteCtrl.getCpuWasteCost)(this.cpuWaste, panelCtrl, node) + (0, _CostWasteCtrl.getMemWasteCost)(this.memWaste, panelCtrl, node);
+  Container.prototype.getWaste = function (dataCtrl, node) {
+    return (0, _CostWasteCtrl.getCpuWasteCost)(this.cpuWaste, dataCtrl, node) + (0, _CostWasteCtrl.getMemWasteCost)(this.memWaste, dataCtrl, node);
   };
 
   return Container;
@@ -60057,10 +60103,6 @@ function () {
 
   Node.prototype.clearContainers = function () {
     this.containers = {};
-  };
-
-  Node.prototype.getPrice = function (cpuPrice, memPrice) {
-    return (this.numCores * cpuPrice + this.memory * memPrice / Math.pow(2, 30)).toFixed(4);
   };
 
   Node.prototype.getContainers = function () {
@@ -60306,10 +60348,8 @@ function (_super) {
         legendFormat: _dataCtrl.LegendFormat.SUM_NETWORK
       }]),
       ruleMappings: [],
-      cpuPriceHour: 0.021925,
-      memPriceHour: 0.002938,
-      trafficPrice: 0.01,
-      interval: '1m',
+      trafficPriceReduction: 0,
+      interval: '1h',
       valueName: 'current',
       mode: _util.Modes.CONTAINERS,
       colorNodeBackground: '#ffffff',
@@ -60471,18 +60511,6 @@ function (_super) {
         "refId": alphabet[i]
       });
     });
-  };
-
-  PanelCtrl.prototype.getCpuPrice = function () {
-    return this.panel['cpuPriceHour'];
-  };
-
-  PanelCtrl.prototype.getMemPriceByte = function () {
-    return this.panel['memPriceHour'] / Math.pow(2, 30);
-  };
-
-  PanelCtrl.prototype.getTrafficPriceByte = function () {
-    return this.panel['trafficPrice'] / Math.pow(2, 30);
   };
 
   PanelCtrl.prototype.getDataCtrl = function () {

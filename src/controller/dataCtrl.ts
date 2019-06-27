@@ -2,7 +2,7 @@ import {Container} from "../model/container";
 import {Node} from "../model/node";
 import _ from "lodash";
 import {PanelCtrl} from "../panelCtrl";
-import {formatSize, formatPrice, Modes, setWidth, verifyEdges, formatPercentage} from "../util";
+import {formatSize, formatPrice, Modes, setWidth, verifyEdges, formatCH, TIME_WINDOW} from "../util";
 import {GraphNode} from "../model/graphNode";
 import {GraphEdge} from "../model/graphEdge";
 import {GlobalVar, GlobalVarCtrl} from "./globalVarCtrl";
@@ -157,8 +157,7 @@ export class DataCtrl {
                 nodes = this.nodesToGraph(node =>
                     node.getIp() + '\n'
                     + node.getNumCores() + ' cores, ' + formatSize(node.getMemory()) + '\n'
-                    + formatPrice(getNodePrice(node, this)) + ' per hour');
-                edges = this.getHostEdges();
+                    + formatPrice(getNodePrice(node, this, this.panelCtrl.panel['timeWindow'])) + ' per hour');
                 break;
             case Modes.CONTAINERS: // show the containers
                 if (grouped){
@@ -172,7 +171,7 @@ export class DataCtrl {
                 nodes = this.getNodesForGraph(grouped, formatSize, c => c.getNetworkTraffic());
                 break;
             case Modes.CPU_UTILIZATION: // show the cpu utilization
-                nodes = this.getNodesForGraph(grouped, formatPercentage,
+                nodes = this.getNodesForGraph(grouped, formatCH,
                         c => c.getCpuUtil() * this.getNode(c.getHostIp()).getNumCores());
                 break;
             case Modes.MEM_UTILIZATION: // show the memory utilization
@@ -184,7 +183,7 @@ export class DataCtrl {
                         c => c.getCost(this, this.getNode(c.getHostIp())));
                 break;
             case Modes.CPU_WASTE: // show the CPU waste
-                nodes = this.getNodesForGraph(grouped, formatPercentage,
+                nodes = this.getNodesForGraph(grouped, formatCH,
                         c => c.getCpuWaste() * this.getNode(c.getHostIp()).getNumCores());
                 break;
             case Modes.MEM_WASTE: // show the memory waste
@@ -288,37 +287,6 @@ export class DataCtrl {
                     .map(dst => new GraphEdge(src, dst, this.edges[src][dst]))));
     }
 
-    public getHostEdges(): GraphEdge[] {
-        let edges: EdgeMap = {};
-
-        this.getGraphEdges().forEach(edge => {
-            let source = this.getContainer(edge.source);
-            let target = this.getContainer(edge.target);
-            let sourceHost;
-            let targetHost;
-            if (source) {
-                sourceHost = source.getHostIp();
-            }
-            if (target) {
-                targetHost = target.getHostIp();
-            }
-            if (sourceHost && targetHost) {
-                if (!edges[sourceHost]) {
-                    edges[sourceHost] = {}
-                }
-                if (!edges[sourceHost][targetHost]) {
-                    edges[sourceHost][targetHost] = 0;
-                }
-                edges[sourceHost][targetHost] += edge.bytes;
-            }
-        });
-
-        return _.flatten(Object.keys(edges)
-            .map(src =>
-                Object.keys(edges[src])
-                    .map(dst => new GraphEdge(src, dst, edges[src][dst]))));
-    }
-
     private nodesToGraph(getName: (node: Node) => string) {
         return Object.keys(this.nodes)
             .map(hostIp => this.nodes[hostIp])
@@ -354,10 +322,6 @@ export class DataCtrl {
         return Object.keys(this.nodes).map(ip => this.nodes[ip]);
     }
 
-    public getGlobalVarCtrl(): GlobalVarCtrl {
-        return this.globalVarCtrl;
-    }
-
     public getCpuPrice(): number {
         return this.cpuPrice
     }
@@ -374,6 +338,10 @@ export class DataCtrl {
         this.cpuPrice = this.globalVarCtrl.get(GlobalVar.CPU_PRICE);
         this.memPrice = this.globalVarCtrl.get(GlobalVar.MEM_PRICE) / Math.pow(2, 30);
         this.trafficPrice = this.globalVarCtrl.get(GlobalVar.TRAFFIC_PRICE) / Math.pow(2, 30);
+    }
+
+    setTimeWindow(timeWindow: TIME_WINDOW) {
+        this.globalVarCtrl.set(GlobalVar.TIME_WINDOW, timeWindow);
     }
 }
 

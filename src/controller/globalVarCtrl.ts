@@ -4,7 +4,6 @@ import {Node} from "../model/node";
 import {getCpuCost, getCpuWasteCost, getMemCost, getMemWasteCost, getTrafficCost} from "./CostWasteCtrl";
 
 export enum GlobalVar {
-    TIME_WINDOW = 'TIME_WINDOW',
     TOTAL_CPU_COST = 'TOTAL_CPU_COST',
     TOTAL_MEM_COST = 'TOTAL_MEM_COST',
     TOTAL_TRAFFIC_COST = 'TOTAL_TRAFFIC_COST',
@@ -13,6 +12,7 @@ export enum GlobalVar {
     CPU_PRICE = 'CPU_PRICE',
     MEM_PRICE = 'MEM_PRICE',
     TRAFFIC_PRICE = 'TRAFFIC_PRICE',
+    TIME_WINDOW = 'TIME_WINDOW',
 }
 
 export class GlobalVarCtrl {

@@ -7,7 +7,6 @@ import _ from "lodash";
 import {getStyle, Modes, TIME_WINDOW} from "./util";
 import {DataCtrl, LegendFormat} from "./controller/dataCtrl";
 import MappingCtrl from "./controller/mappingCtrl";
-import {GlobalVar} from "./controller/globalVarCtrl";
 
 cytoscape.use(cola);
 cytoscape.use(dagre);
@@ -86,7 +85,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
 
     onDataReceived(dataList) {
         this.dataCtrl.onDataReceived(dataList);
-        this.dataCtrl.getGlobalVarCtrl().set(GlobalVar.TIME_WINDOW, this.panel.timeWindow);
+        this.dataCtrl.setTimeWindow(this.panel.timeWindow);
     }
 
 
@@ -146,7 +145,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
     /**
      * Returns a graph description, based on the current visualization mode.
      */
-    public description(): string {
+    public description(): string { // used in the view
         switch (this.panel.mode) {
             case Modes.NODES:
                 return 'The graph presented below shows all the nodes in the system. Additional information is the ' +
@@ -205,7 +204,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
         });
     }
 
-    public getDataCtrl(): DataCtrl {
+    public getDataCtrl(): DataCtrl { // used in the view
         return this.dataCtrl;
     }
 }

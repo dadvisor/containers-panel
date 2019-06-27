@@ -59041,6 +59041,8 @@ exports.getNodePrice = getNodePrice;
 exports.getCpuWasteCost = getCpuWasteCost;
 exports.getMemWasteCost = getMemWasteCost;
 
+var _util = __webpack_require__(/*! ../util */ "./util.ts");
+
 /*
  * COST
  */
@@ -59056,8 +59058,27 @@ function getTrafficCost(value, dataCtrl) {
   return value * dataCtrl.getTrafficPriceByte();
 }
 
-function getNodePrice(node, dataCtrl) {
-  return getCpuCost(1, dataCtrl, node) + getMemCost(1, dataCtrl, node);
+function getNodePrice(node, dataCtrl, timeWindow) {
+  var time;
+
+  switch (timeWindow) {
+    case _util.TIME_WINDOW.DAY:
+      time = 24;
+      break;
+
+    case _util.TIME_WINDOW.HOUR:
+      time = 1;
+      break;
+
+    case _util.TIME_WINDOW.TEN_MIN:
+      time = 1 / 6;
+      break;
+
+    case _util.TIME_WINDOW.YEAR:
+      time = 24 * 365;
+  }
+
+  return getCpuCost(time, dataCtrl, node) + getMemCost(time, dataCtrl, node);
 }
 /*
  * WASTE
@@ -59269,9 +59290,8 @@ function () {
       case _util.Modes.NODES:
         // show the VM's
         nodes = this.nodesToGraph(function (node) {
-          return node.getIp() + '\n' + node.getNumCores() + ' cores, ' + (0, _util.formatSize)(node.getMemory()) + '\n' + (0, _util.formatPrice)((0, _CostWasteCtrl.getNodePrice)(node, _this)) + ' per hour';
+          return node.getIp() + '\n' + node.getNumCores() + ' cores, ' + (0, _util.formatSize)(node.getMemory()) + '\n' + (0, _util.formatPrice)((0, _CostWasteCtrl.getNodePrice)(node, _this, _this.panelCtrl.panel['timeWindow'])) + ' per hour';
         });
-        edges = this.getHostEdges();
         break;
 
       case _util.Modes.CONTAINERS:
@@ -59297,7 +59317,7 @@ function () {
 
       case _util.Modes.CPU_UTILIZATION:
         // show the cpu utilization
-        nodes = this.getNodesForGraph(grouped, _util.formatPercentage, function (c) {
+        nodes = this.getNodesForGraph(grouped, _util.formatCH, function (c) {
           return c.getCpuUtil() * _this.getNode(c.getHostIp()).getNumCores();
         });
         break;
@@ -59318,7 +59338,7 @@ function () {
 
       case _util.Modes.CPU_WASTE:
         // show the CPU waste
-        nodes = this.getNodesForGraph(grouped, _util.formatPercentage, function (c) {
+        nodes = this.getNodesForGraph(grouped, _util.formatCH, function (c) {
           return c.getCpuWaste() * _this.getNode(c.getHostIp()).getNumCores();
         });
         break;
@@ -59467,45 +59487,6 @@ function () {
     }));
   };
 
-  DataCtrl.prototype.getHostEdges = function () {
-    var _this = this;
-
-    var edges = {};
-    this.getGraphEdges().forEach(function (edge) {
-      var source = _this.getContainer(edge.source);
-
-      var target = _this.getContainer(edge.target);
-
-      var sourceHost;
-      var targetHost;
-
-      if (source) {
-        sourceHost = source.getHostIp();
-      }
-
-      if (target) {
-        targetHost = target.getHostIp();
-      }
-
-      if (sourceHost && targetHost) {
-        if (!edges[sourceHost]) {
-          edges[sourceHost] = {};
-        }
-
-        if (!edges[sourceHost][targetHost]) {
-          edges[sourceHost][targetHost] = 0;
-        }
-
-        edges[sourceHost][targetHost] += edge.bytes;
-      }
-    });
-    return _lodash2.default.flatten(Object.keys(edges).map(function (src) {
-      return Object.keys(edges[src]).map(function (dst) {
-        return new _graphEdge.GraphEdge(src, dst, edges[src][dst]);
-      });
-    }));
-  };
-
   DataCtrl.prototype.nodesToGraph = function (getName) {
     var _this = this;
 
@@ -59552,10 +59533,6 @@ function () {
     });
   };
 
-  DataCtrl.prototype.getGlobalVarCtrl = function () {
-    return this.globalVarCtrl;
-  };
-
   DataCtrl.prototype.getCpuPrice = function () {
     return this.cpuPrice;
   };
@@ -59572,6 +59549,10 @@ function () {
     this.cpuPrice = this.globalVarCtrl.get(_globalVarCtrl.GlobalVar.CPU_PRICE);
     this.memPrice = this.globalVarCtrl.get(_globalVarCtrl.GlobalVar.MEM_PRICE) / Math.pow(2, 30);
     this.trafficPrice = this.globalVarCtrl.get(_globalVarCtrl.GlobalVar.TRAFFIC_PRICE) / Math.pow(2, 30);
+  };
+
+  DataCtrl.prototype.setTimeWindow = function (timeWindow) {
+    this.globalVarCtrl.set(_globalVarCtrl.GlobalVar.TIME_WINDOW, timeWindow);
   };
 
   return DataCtrl;
@@ -59601,7 +59582,6 @@ var _CostWasteCtrl = __webpack_require__(/*! ./CostWasteCtrl */ "./controller/Co
 var GlobalVar = exports.GlobalVar = undefined;
 
 (function (GlobalVar) {
-  GlobalVar["TIME_WINDOW"] = "TIME_WINDOW";
   GlobalVar["TOTAL_CPU_COST"] = "TOTAL_CPU_COST";
   GlobalVar["TOTAL_MEM_COST"] = "TOTAL_MEM_COST";
   GlobalVar["TOTAL_TRAFFIC_COST"] = "TOTAL_TRAFFIC_COST";
@@ -59610,6 +59590,7 @@ var GlobalVar = exports.GlobalVar = undefined;
   GlobalVar["CPU_PRICE"] = "CPU_PRICE";
   GlobalVar["MEM_PRICE"] = "MEM_PRICE";
   GlobalVar["TRAFFIC_PRICE"] = "TRAFFIC_PRICE";
+  GlobalVar["TIME_WINDOW"] = "TIME_WINDOW";
 })(GlobalVar || (exports.GlobalVar = GlobalVar = {}));
 
 var GlobalVarCtrl =
@@ -60225,8 +60206,6 @@ var _mappingCtrl = __webpack_require__(/*! ./controller/mappingCtrl */ "./contro
 
 var _mappingCtrl2 = _interopRequireDefault(_mappingCtrl);
 
-var _globalVarCtrl = __webpack_require__(/*! ./controller/globalVarCtrl */ "./controller/globalVarCtrl.ts");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var __extends = undefined && undefined.__extends || function () {
@@ -60363,7 +60342,7 @@ function (_super) {
 
   PanelCtrl.prototype.onDataReceived = function (dataList) {
     this.dataCtrl.onDataReceived(dataList);
-    this.dataCtrl.getGlobalVarCtrl().set(_globalVarCtrl.GlobalVar.TIME_WINDOW, this.panel.timeWindow);
+    this.dataCtrl.setTimeWindow(this.panel.timeWindow);
   };
   /**
    * Main method for the panel controller. This updates the graph with the new data.
@@ -60503,7 +60482,7 @@ exports.setWidth = setWidth;
 exports.verifyEdges = verifyEdges;
 exports.formatSize = formatSize;
 exports.formatPrice = formatPrice;
-exports.formatPercentage = formatPercentage;
+exports.formatCH = formatCH;
 exports.getStyle = getStyle;
 var Modes = exports.Modes = undefined;
 
@@ -60564,8 +60543,7 @@ function formatPrice(price) {
   return '$' + price.toFixed(2);
 }
 
-function formatPercentage(value) {
-  value *= 100;
+function formatCH(value) {
   var precision = 0;
 
   if (value < 1) {
@@ -60574,7 +60552,7 @@ function formatPercentage(value) {
     precision = 1;
   }
 
-  return value.toFixed(precision) + '%';
+  return value.toFixed(precision) + ' CH';
 }
 
 function getStyle(panel) {

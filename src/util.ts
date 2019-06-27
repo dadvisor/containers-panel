@@ -47,15 +47,14 @@ export function formatPrice(price: any): string {
     return '$' + price.toFixed(2);
 }
 
-export function formatPercentage(value: any): string {
-    value *= 100;
+export function formatCH(value: any): string{
     let precision = 0;
     if (value < 1){
         precision = 2;
     } else if (value < 100){
         precision = 1;
     }
-    return value.toFixed(precision) + '%';
+    return value.toFixed(precision) + ' CH';
 }
 
 export function getStyle(panel) {

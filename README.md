@@ -9,6 +9,14 @@ sudo service grafana-server restart
 ```
 
 ## Developing
+When developing the source code, make sure that docker is installed and running.
+
+Then, open two terminals and the two commands individually:
+
+	make watch
+
+	make run
+
 Use the following commands for developing the source code (inside this folder):
 
 ```

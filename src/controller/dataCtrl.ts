@@ -2,7 +2,7 @@ import {Container} from "../model/container";
 import {Node} from "../model/node";
 import _ from "lodash";
 import {PanelCtrl} from "../panelCtrl";
-import {formatSize, formatPrice, Modes, setWidth, verifyEdges, formatCH, TIME_WINDOW} from "../util";
+import {formatCH, formatPrice, formatSize, Modes, setWidth, TIME_WINDOW, verifyEdges} from "../util";
 import {GraphNode} from "../model/graphNode";
 import {GraphEdge} from "../model/graphEdge";
 import {GlobalVar, GlobalVarCtrl} from "./globalVarCtrl";
@@ -146,7 +146,7 @@ export class DataCtrl {
         let edges: GraphEdge[] = [];
         let grouped: boolean = this.panelCtrl.panel['grouped'];
 
-        if (grouped){
+        if (grouped) {
             edges = this.getGroupedEdges();
         } else {
             edges = this.getGraphEdges();
@@ -157,10 +157,10 @@ export class DataCtrl {
                 nodes = this.nodesToGraph(node =>
                     node.getIp() + '\n'
                     + node.getNumCores() + ' cores, ' + formatSize(node.getMemory()) + '\n'
-                    + formatPrice(getNodePrice(node, this, this.panelCtrl.panel['timeWindow'])) + ' per hour');
+                    + formatPrice(getNodePrice(node, this, this.panelCtrl.panel['timeWindow'])));
                 break;
             case Modes.CONTAINERS: // show the containers
-                if (grouped){
+                if (grouped) {
                     nodes = this.getGroupedContainers((containers, group) =>
                         group + '\n' + containers.length + ' containers');
                 } else {
@@ -172,27 +172,27 @@ export class DataCtrl {
                 break;
             case Modes.CPU_UTILIZATION: // show the cpu utilization
                 nodes = this.getNodesForGraph(grouped, formatCH,
-                        c => c.getCpuUtil() * this.getNode(c.getHostIp()).getNumCores());
+                    c => c.getCpuUtil() * this.getNode(c.getHostIp()).getNumCores());
                 break;
             case Modes.MEM_UTILIZATION: // show the memory utilization
                 nodes = this.getNodesForGraph(grouped, formatSize,
-                        c => c.getMemUtil() * this.getNode(c.getHostIp()).getMemory());
+                    c => c.getMemUtil() * this.getNode(c.getHostIp()).getMemory());
                 break;
             case Modes.COST: // show the cost
                 nodes = this.getNodesForGraph(grouped, formatPrice,
-                        c => c.getCost(this, this.getNode(c.getHostIp())));
+                    c => c.getCost(this, this.getNode(c.getHostIp())));
                 break;
             case Modes.CPU_WASTE: // show the CPU waste
                 nodes = this.getNodesForGraph(grouped, formatCH,
-                        c => c.getCpuWaste() * this.getNode(c.getHostIp()).getNumCores());
+                    c => c.getCpuWaste() * this.getNode(c.getHostIp()).getNumCores());
                 break;
             case Modes.MEM_WASTE: // show the memory waste
                 nodes = this.getNodesForGraph(grouped, formatSize,
-                        c => c.getMemWaste() * this.getNode(c.getHostIp()).getMemory());
+                    c => c.getMemWaste() * this.getNode(c.getHostIp()).getMemory());
                 break;
             case Modes.WASTE_COST:
                 nodes = this.getNodesForGraph(grouped, formatPrice,
-                        c => c.getWaste(this, this.getNode(c.getHostIp())));
+                    c => c.getWaste(this, this.getNode(c.getHostIp())));
                 break;
         }
         edges = verifyEdges(edges, nodes);
@@ -207,10 +207,13 @@ export class DataCtrl {
         }
     }
 
-    private getNodesForGraph(grouped: boolean, formatF: (value: number) => string, getStatF: (c: Container) => number){
-        if (grouped){
+    private getNodesForGraph(grouped: boolean, formatF: (value: number) => string, getStatF: (c: Container) => number) {
+        if (grouped) {
             return this.getGroupedContainers((containers, group) => {
-                let size = containers.map(c => getStatF(c)).reduce((a, b) => a+b, 0);
+                let size = containers
+                    .map(c => getStatF(c))
+                    .map(value => isNaN(value) ? 0 : value)
+                    .reduce((a, b) => a + b, 0);
                 return group + '\n' + formatF(size);
             });
         } else {
@@ -296,8 +299,8 @@ export class DataCtrl {
     /*
      * * * * * * * * * * ADD AND UPDATE * * * * * * * * * *
      */
-    private getContainer(hash: string): Container | undefined {
-        return this.containers[hash] || undefined;
+    private getContainer(hash: string): Container{
+        return this.containers[hash];
     }
 
     public setContainer(hash: string, container: Container) {

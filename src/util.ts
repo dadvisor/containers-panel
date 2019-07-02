@@ -10,7 +10,7 @@ export enum Modes {
     COST = 'Cost',
     CPU_WASTE = 'CPU Waste distribution',
     MEM_WASTE = 'Memory Waste distribution',
-    WASTE_COST = 'Waste Cost',
+    WASTE_COST = 'Waste',
 }
 
 export enum TIME_WINDOW {
@@ -49,7 +49,13 @@ export function formatPrice(price: any): string {
 
 export function formatCH(value: any): string{
     let precision = 0;
-    if (value < 1){
+    if (value < 0.001){
+        precision = 5;
+    } else if (value < 0.01){
+        precision = 4;
+    } else if (value < 0.1){
+        precision = 3;
+    } else if (value < 1){
         precision = 2;
     } else if (value < 100){
         precision = 1;

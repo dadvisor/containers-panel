@@ -9,10 +9,10 @@ export class Container {
     private image: string = '';
     private readonly hostIp: string;
 
-    private cpuUtil: number;
-    private memUtil: number;
-    private cpuWaste: number;
-    private memWaste: number;
+    private cpuUtil: number = 0;
+    private memUtil: number = 0;
+    private cpuWaste: number = 0;
+    private memWaste: number = 0;
     private networkTraffic: number = 0;
 
     constructor(hash: string, hostIp: string) {
@@ -95,13 +95,13 @@ export class Container {
         this.networkTraffic = networkTraffic;
     }
 
-    public getCost(dataCtrl: DataCtrl, node: Node) {
+    public getCost(dataCtrl: DataCtrl, node: Node): number {
         return getCpuCost(this.cpuUtil, dataCtrl, node)
             + getMemCost(this.memUtil, dataCtrl, node)
             + getTrafficCost(this.networkTraffic, dataCtrl);
     }
 
-    public getWaste(dataCtrl: DataCtrl, node: Node) {
+    public getWaste(dataCtrl: DataCtrl, node: Node): number {
         return getCpuWasteCost(this.cpuWaste, dataCtrl, node)
             + getMemWasteCost(this.memWaste, dataCtrl, node);
     }

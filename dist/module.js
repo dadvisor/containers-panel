@@ -59071,7 +59071,7 @@ function getNodePrice(node, dataCtrl, timeWindow) {
       break;
 
     case _util.TIME_WINDOW.TEN_MIN:
-      time = 1 / 6;
+      time = 10 / 60;
       break;
 
     case _util.TIME_WINDOW.YEAR:
@@ -59086,10 +59086,20 @@ function getNodePrice(node, dataCtrl, timeWindow) {
 
 
 function getCpuWasteCost(value, dataCtrl, node) {
+  if (node === null) {
+    console.log('node is null');
+    return value * dataCtrl.getCpuPrice() * 8;
+  }
+
   return value * dataCtrl.getCpuPrice() * node.getNumCores();
 }
 
 function getMemWasteCost(value, dataCtrl, node) {
+  if (node === null) {
+    console.log('node is null');
+    return value * dataCtrl.getMemPriceByte() * 16 * Math.pow(2, 30);
+  }
+
   return value * dataCtrl.getMemPriceByte() * node.getMemory();
 }
 
@@ -59290,7 +59300,7 @@ function () {
       case _util.Modes.NODES:
         // show the VM's
         nodes = this.nodesToGraph(function (node) {
-          return node.getIp() + '\n' + node.getNumCores() + ' cores, ' + (0, _util.formatSize)(node.getMemory()) + '\n' + (0, _util.formatPrice)((0, _CostWasteCtrl.getNodePrice)(node, _this, _this.panelCtrl.panel['timeWindow'])) + ' per hour';
+          return node.getIp() + '\n' + node.getNumCores() + ' cores, ' + (0, _util.formatSize)(node.getMemory()) + '\n' + (0, _util.formatPrice)((0, _CostWasteCtrl.getNodePrice)(node, _this, _this.panelCtrl.panel['timeWindow']));
         });
         break;
 
@@ -59378,6 +59388,8 @@ function () {
       return this.getGroupedContainers(function (containers, group) {
         var size = containers.map(function (c) {
           return getStatF(c);
+        }).map(function (value) {
+          return isNaN(value) ? 0 : value;
         }).reduce(function (a, b) {
           return a + b;
         }, 0);
@@ -59502,7 +59514,7 @@ function () {
 
 
   DataCtrl.prototype.getContainer = function (hash) {
-    return this.containers[hash] || undefined;
+    return this.containers[hash];
   };
 
   DataCtrl.prototype.setContainer = function (hash, container) {
@@ -59804,6 +59816,10 @@ function () {
     this.name = '';
     this.group = '';
     this.image = '';
+    this.cpuUtil = 0;
+    this.memUtil = 0;
+    this.cpuWaste = 0;
+    this.memWaste = 0;
     this.networkTraffic = 0;
     this.hash = hash;
     this.hostIp = hostIp;
@@ -59921,6 +59937,8 @@ var GraphEdge =
 /** @class */
 function () {
   function GraphEdge(source, target, bytes) {
+    this.bytes = 0;
+    this.width = 0;
     this.source = source;
     this.target = target;
     this.bytes = bytes;
@@ -60033,6 +60051,10 @@ var Node =
 /** @class */
 function () {
   function Node(ip) {
+    this.ip = '';
+    this.superNode = false;
+    this.memory = 0;
+    this.numCores = 0;
     this.containers = {};
     this.sumCpuUtil = 0;
     this.sumMemUtil = 0;
@@ -60495,7 +60517,7 @@ var Modes = exports.Modes = undefined;
   Modes["COST"] = "Cost";
   Modes["CPU_WASTE"] = "CPU Waste distribution";
   Modes["MEM_WASTE"] = "Memory Waste distribution";
-  Modes["WASTE_COST"] = "Waste Cost";
+  Modes["WASTE_COST"] = "Waste";
 })(Modes || (exports.Modes = Modes = {}));
 
 var TIME_WINDOW = exports.TIME_WINDOW = undefined;
@@ -60546,7 +60568,13 @@ function formatPrice(price) {
 function formatCH(value) {
   var precision = 0;
 
-  if (value < 1) {
+  if (value < 0.001) {
+    precision = 5;
+  } else if (value < 0.01) {
+    precision = 4;
+  } else if (value < 0.1) {
+    precision = 3;
+  } else if (value < 1) {
     precision = 2;
   } else if (value < 100) {
     precision = 1;

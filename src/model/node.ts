@@ -3,10 +3,10 @@ import {ContainerMap, DataCtrl} from "../controller/dataCtrl";
 import {formatSize} from "../util";
 
 export class Node {
-    private readonly ip: string;
-    private superNode: boolean;
-    private memory: number;
-    private numCores: number;
+    private readonly ip: string = '';
+    private superNode: boolean = false;
+    private memory: number = 0;
+    private numCores: number = 0;
     private containers: ContainerMap = {};
 
     private sumCpuUtil: number = 0;

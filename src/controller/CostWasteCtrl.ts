@@ -27,7 +27,7 @@ export function getNodePrice(node: Node, dataCtrl: DataCtrl, timeWindow: TIME_WI
             time = 1;
             break;
         case TIME_WINDOW.TEN_MIN:
-            time = 1 / 6;
+            time = 10 / 60;
             break;
         case TIME_WINDOW.YEAR:
             time = 24 * 365;
@@ -39,9 +39,17 @@ export function getNodePrice(node: Node, dataCtrl: DataCtrl, timeWindow: TIME_WI
  * WASTE
  */
 export function getCpuWasteCost(value: number, dataCtrl: DataCtrl, node: Node) {
+    if (node === null){
+        console.log('node is null');
+        return value * dataCtrl.getCpuPrice() * 8;
+    }
     return value * dataCtrl.getCpuPrice() * node.getNumCores();
 }
 
 export function getMemWasteCost(value: number, dataCtrl: DataCtrl, node: Node) {
+    if (node === null){
+        console.log('node is null');
+        return value * dataCtrl.getMemPriceByte() * 16 * Math.pow(2, 30);
+    }
     return value * dataCtrl.getMemPriceByte() * node.getMemory();
 }

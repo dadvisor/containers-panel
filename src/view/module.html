@@ -1,17 +1,20 @@
 <section class="container">
     <div class="gf-form-group" id="graph-header">
         <div class="gf-form">
-            <label class="gf-form-label width-10">Visualization mode</label>
+            <label class="gf-form-label">Visualization mode</label>
             <div class="gf-form-select-wrapper max-width-20">
                 <select class="input-medium gf-form-input" ng-model="ctrl.panel.mode"
                         ng-options="t for t in ctrl.getModes()" ng-change="ctrl.render()"></select>
             </div>
-
-            <label class="gf-form-label width-10">Grouped</label>
+            <label class="gf-form-label" style="margin-left: 40px">Show edges:</label>
+            <div class="gf-form-switch-container-react">
+                <input class="gf-form-switch" type="checkbox" ng-model="ctrl.panel.showEdges" ng-change="ctrl.render()" />
+            </div>
+            <label class="gf-form-label" style="margin-left: 40px">Grouped</label>
             <div class="gf-form-switch-container-react">
                 <input class="gf-form-switch" type="checkbox" ng-model="ctrl.panel.grouped" ng-change="ctrl.render()" />
             </div>
-            <label class="gf-form-label width-10">Time window</label>
+            <label class="gf-form-label" style="margin-left: 40px">Time window</label>
             <div class="gf-form-select-wrapper max-width-10">
                 <select class="input-medium gf-form-input" ng-model="ctrl.panel.timeWindow"
                         ng-options="t for t in ctrl.getTimes()" ng-change="ctrl.render()"></select>

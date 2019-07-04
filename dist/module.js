@@ -59283,17 +59283,18 @@ function () {
     this.globalVarCtrl.computeVars();
   };
 
-  DataCtrl.prototype.getData = function (mode) {
+  DataCtrl.prototype.getData = function (mode, grouped, showEdges) {
     var _this = this;
 
     var nodes = [];
     var edges = [];
-    var grouped = this.panelCtrl.panel['grouped'];
 
-    if (grouped) {
-      edges = this.getGroupedEdges();
-    } else {
-      edges = this.getGraphEdges();
+    if (showEdges) {
+      if (grouped) {
+        edges = this.getGroupedEdges();
+      } else {
+        edges = this.getGraphEdges();
+      }
     }
 
     switch (mode) {
@@ -60324,6 +60325,7 @@ function (_super) {
       mode: _util.Modes.CONTAINERS,
       colorNodeBackground: '#ffffff',
       grouped: true,
+      showEdges: true,
       colorEdge: '#9fbfdf',
       colorText: '#d9d9d9',
       colorNodeBorder: '#808080',
@@ -60381,7 +60383,7 @@ function (_super) {
       return;
     }
 
-    var data = this.dataCtrl.getData(this.panel.mode);
+    var data = this.dataCtrl.getData(this.panel.mode, this.panel['grouped'], this.panel['showEdges']);
     console.log(data);
     var layout = {
       name: this.panel.layoutType,

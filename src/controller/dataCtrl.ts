@@ -141,15 +141,16 @@ export class DataCtrl {
         this.globalVarCtrl.computeVars();
     }
 
-    public getData(mode: Modes) {
+    public getData(mode: Modes, grouped: boolean, showEdges: boolean) {
         let nodes: GraphNode[] = [];
         let edges: GraphEdge[] = [];
-        let grouped: boolean = this.panelCtrl.panel['grouped'];
 
-        if (grouped) {
-            edges = this.getGroupedEdges();
-        } else {
-            edges = this.getGraphEdges();
+        if (showEdges) {
+            if (grouped) {
+                edges = this.getGroupedEdges();
+            } else {
+                edges = this.getGraphEdges();
+            }
         }
 
         switch (mode) {

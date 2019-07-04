@@ -52,6 +52,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             mode: Modes.CONTAINERS,
             colorNodeBackground: '#ffffff',
             grouped: true,
+            showEdges: true,
             colorEdge: '#9fbfdf',
             colorText: '#d9d9d9',
             colorNodeBorder: '#808080',
@@ -103,7 +104,7 @@ export class PanelCtrl extends MetricsPanelCtrl {
             return
         }
 
-        let data = this.dataCtrl.getData(this.panel.mode);
+        let data = this.dataCtrl.getData(this.panel.mode, this.panel['grouped'], this.panel['showEdges']);
         console.log(data);
 
         let layout = {

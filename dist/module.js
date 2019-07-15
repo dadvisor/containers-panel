@@ -59301,7 +59301,7 @@ function () {
       case _util.Modes.NODES:
         // show the VM's
         nodes = this.nodesToGraph(function (node) {
-          return node.getIp() + '\n' + node.getNumCores() + ' cores, ' + (0, _util.formatSize)(node.getMemory()) + '\n' + (0, _util.formatPrice)((0, _CostWasteCtrl.getNodePrice)(node, _this, _this.panelCtrl.panel['timeWindow']));
+          return node.getIp() + '\n' + node.getNumCoresString() + ', ' + (0, _util.formatSize)(node.getMemory()) + '\n' + (0, _util.formatPrice)((0, _CostWasteCtrl.getNodePrice)(node, _this, _this.panelCtrl.panel['timeWindow']));
         });
         break;
 
@@ -60112,6 +60112,14 @@ function () {
 
   Node.prototype.getNumCores = function () {
     return this.numCores;
+  };
+
+  Node.prototype.getNumCoresString = function () {
+    if (this.numCores === 1) {
+      return '1 core';
+    }
+
+    return this.numCores + " cores";
   };
 
   Node.prototype.setNumCores = function (numCores) {

@@ -157,7 +157,7 @@ export class DataCtrl {
             case Modes.NODES: // show the VM's
                 nodes = this.nodesToGraph(node =>
                     node.getIp() + '\n'
-                    + node.getNumCores() + ' cores, ' + formatSize(node.getMemory()) + '\n'
+                    + node.getNumCoresString() + ', ' + formatSize(node.getMemory()) + '\n'
                     + formatPrice(getNodePrice(node, this, this.panelCtrl.panel['timeWindow'])));
                 break;
             case Modes.CONTAINERS: // show the containers

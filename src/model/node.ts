@@ -63,6 +63,13 @@ export class Node {
         return this.numCores;
     }
 
+    public getNumCoresString(): string {
+        if(this.numCores === 1){
+            return '1 core';
+        }
+        return `${this.numCores} cores`;
+    }
+
     public setNumCores(numCores: number) {
         this.numCores = numCores;
     }

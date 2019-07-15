@@ -44,13 +44,16 @@ export function formatSize(bytes: number): string {
 }
 
 export function formatPrice(price: any): string {
-    return '$' + price.toFixed(2);
+    if (price < 0.001){
+        return '< $0.001'
+    }
+    return '$' + price.toFixed(3);
 }
 
 export function formatCH(value: any): string{
     let precision = 0;
     if (value < 0.001){
-        precision = 5;
+        return '< 0.0001 CH'
     } else if (value < 0.01){
         precision = 4;
     } else if (value < 0.1){

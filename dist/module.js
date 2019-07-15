@@ -60115,7 +60115,7 @@ function () {
   };
 
   Node.prototype.getNumCoresString = function () {
-    if (this.numCores === 1) {
+    if (this.numCores == 1) {
       return '1 core';
     }
 

@@ -64,7 +64,7 @@ export class Node {
     }
 
     public getNumCoresString(): string {
-        if(this.numCores === 1){
+        if(this.numCores == 1){
             return '1 core';
         }
         return `${this.numCores} cores`;
